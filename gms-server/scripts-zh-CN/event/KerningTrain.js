@@ -8,7 +8,7 @@ var map;
 var onRide;
 
 //Time Setting is in millisecond
-var rideTime = 10 * 1000;
+var rideTime = 3 * 60 * 1000;
 
 function init() {
     rideTime = em.getTransportationTime(rideTime);
