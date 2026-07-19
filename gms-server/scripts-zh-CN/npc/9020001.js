@@ -146,7 +146,7 @@ function action(mode, type, selection) {
                     return;
                 }
                 if (cm.isEventLeader()) {
-                    var numpasses = eim.getPlayerCount() - 1;     // minus leader
+                    var numpasses = Math.trunc(eim.getPlayerCount() - 1);     // minus leader
 
                     if (cm.hasItem(4001008, numpasses)) {
                         cm.sendNext("你收集了" + numpasses + "张通行证！恭喜你通过了这个关卡！我会制作一个传送你到下一个关卡的传送门。到那里有时间限制，所以请赶快。祝你们好运！");
