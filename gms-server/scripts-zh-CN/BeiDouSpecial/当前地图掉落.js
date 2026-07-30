@@ -33,6 +33,7 @@ var i = 0;
 
 
 function start() {
+    status = -1;
     action(1, 0, 0)
 }
 

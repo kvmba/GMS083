@@ -8,11 +8,11 @@
 
 var status = 0;
 var Eventid = "站街奖励";
-var OnlineLevel = [10, 30, 60, 120, 240, 360, 480];//, 600, 720
+var OnlineLevel = [10, 20, 40, 60, 80, 100, 120];//, 600, 720
 var textMsg = ["恭喜领取成功！", "您未达到领取条件", "您已经领取过了。"];
 var getStatus = 0;//"0000000"
 var msg;
-var giftContent = [5, 10, 15, 20, 25, 30, 35];
+var giftContent = [1, 2, 4, 8, 10, 15, 20];
 var index = [0x01,0x10,0x100,0x1000,0x10000,0x100000,0x1000000];
 //Start
 function start() 
@@ -58,12 +58,12 @@ function action(mode, type, selection)
 			}
 			//cm.saveOrUpdateAccountExtendValue("每日在线奖励领取状态", "0", true);
 			time += "#b#L0#领取【10】分钟在线奖励#l\r\n#k";
-			time += "#b#L1#领取【30】分钟在线奖励#l\r\n#k";
-			time += "#b#L2#领取【60】分钟在线奖励#l\r\n#k";
-			time += "#b#L3#领取【120】分钟在线奖励#l\r\n#k";
-			time += "#b#L4#领取【240】分钟在线奖励#l\r\n#k";
-			time += "#b#L5#领取【360】分钟在线奖励#l\r\n#k";
-			time += "#b#L6#领取【480】分钟在线奖励#l\r\n#k";
+			time += "#b#L1#领取【20】分钟在线奖励#l\r\n#k";
+			time += "#b#L2#领取【40】分钟在线奖励#l\r\n#k";
+			time += "#b#L3#领取【60】分钟在线奖励#l\r\n#k";
+			time += "#b#L4#领取【80】分钟在线奖励#l\r\n#k";
+			time += "#b#L5#领取【100】分钟在线奖励#l\r\n#k";
+			time += "#b#L6#领取【120】分钟在线奖励#l\r\n#k";
 			cm.sendSimple(time);
 	    }
 		else if (status == 1 )

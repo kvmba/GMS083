@@ -15,7 +15,7 @@ var List_Mob;						   //普通怪物列表
 var namelength = 0;
 
 function start(){
-    if(MapObj == null) {		//首次打开进行初始化。
+    //if(MapObj == null) {		//首次打开进行初始化。
         MonsterInformationProvider = Java.type('org.gms.server.life.MonsterInformationProvider');//导入 怪物信息 类
         ItemInformationProvider = Java.type('org.gms.server.ItemInformationProvider');//导入 物品信息 类
         QuestInfo = Java.type('org.gms.server.quest.Quest');//导入 任务 类
@@ -23,11 +23,12 @@ function start(){
         List_Mob_All = MapObj.getAllMonsters(); //获取当前地图存活的怪物数量，由于未找到获取当前地图固定怪物列表方法，故用此方法代替。
         //将怪物种类去重并按照Boss和普通怪物区分开
         [List_Mob, List_Mob_Boss] = Object.values(List_Mob_All.reduce((acc, mob) => (acc.ids.has(mob.getId()) || (acc.ids.add(mob.getId()), mob.isBoss() ? acc.bosses : acc.mobs).push(mob), acc), { ids: new Set(), mobs: [], bosses: [] })).slice(-2);
-    }
+    //}
     levelmain();
 }
 
 function leveldispose() {
+    MapObj = null;
     cm.dispose();
 }
 
@@ -35,6 +36,7 @@ function leveldispose() {
  * 当部分cm.sendLevel方法没有指定下一个跳转方法时会自动跳入null，也就是这里。
  */
 function levelnull() {
+    MapObj = null;
     cm.dispose();
 }
 
