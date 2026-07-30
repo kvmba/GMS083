@@ -254,6 +254,7 @@ public class NPCScriptManager extends AbstractScriptManager {
         String scriptFolder = (cm.isItemScript() ? "item" : "npc");
         if (cm.getScriptName() != null) {
             resetContext(scriptFolder + "/" + cm.getScriptName() + ".js", c);
+            resetContext("BeiDouSpecial/" + cm.getScriptName() + ".js", c);
         } else {
             resetContext(scriptFolder + "/" + cm.getNpc() + ".js", c);
         }
