@@ -97,7 +97,7 @@
             </template>
           </a-table-column>
           <a-table-column
-            :title="$t('gachapon.list.column.isPublic')"
+            :title="$t('gachapon.list.column.gachaponRate')"
             align="center"
             :width="80"
           >

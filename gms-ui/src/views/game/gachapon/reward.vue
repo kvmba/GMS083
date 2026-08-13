@@ -44,13 +44,13 @@
         <a-table-column title="物品ID" :width="100" align="center">
           <template #cell="{ record }">
             <span v-if="editId !== record.id"> {{ record.itemId }}</span>
-            <a-input-number v-else v-model="record.itemId" />
+            <a-input v-else v-model="record.itemName" />
           </template>
         </a-table-column>
         <a-table-column title="物品名称" :width="140" align="center">
           <template #cell="{ record }">
             <span v-if="editId !== record.id"> {{ record.itemName }}</span>
-            <a-input-number v-else v-model="record.itemId" />
+            <a-input v-else v-model="record.itemName" />
           </template>
         </a-table-column>
         <a-table-column title="物品图标" :width="90" align="center">
