@@ -123,6 +123,9 @@ public class Equip extends Item {
         ret.setQuantity(getQuantity());
         ret.setExpiration(getExpiration());
         ret.setGiftFrom(getGiftFrom());
+        ret.ringid = ringid;
+        ret.sn = sn;
+        ret.cashId = cashId;
         return ret;
     }
 
