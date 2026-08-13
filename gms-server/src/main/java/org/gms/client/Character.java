@@ -6308,7 +6308,8 @@ public class Character extends AbstractCharacterObject {
             ret.mp = rs.getInt("mp");
             ret.setMaxMp(rs.getInt("maxmp"));
             ret.remainingAp = rs.getInt("ap");
-            ret.loadCharSkillPoints(rs.getString("sp").split(","));
+            String spValue = rs.getString("sp");
+            ret.loadCharSkillPoints(spValue != null ? spValue.split(",") : new String[0]);
             ret.exp.set(rs.getInt("exp"));
             ret.fame = rs.getInt("fame");
             ret.gachaExp.set(rs.getInt("gachaexp"));
