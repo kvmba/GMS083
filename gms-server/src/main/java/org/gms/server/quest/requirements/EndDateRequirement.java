@@ -52,8 +52,11 @@ public class EndDateRequirement extends AbstractQuestRequirement {
 
     @Override
     public boolean check(Character chr, Integer npcid) {
+        if (timeStr == null || timeStr.length() < 10) {
+            return true;
+        }
         Calendar cal = Calendar.getInstance();
-        cal.set(Integer.parseInt(timeStr.substring(0, 4)), Integer.parseInt(timeStr.substring(4, 6)), Integer.parseInt(timeStr.substring(6, 8)), Integer.parseInt(timeStr.substring(8, 10)), 0);
+        cal.set(Integer.parseInt(timeStr.substring(0, 4)), Integer.parseInt(timeStr.substring(4, 6)) - 1, Integer.parseInt(timeStr.substring(6, 8)), Integer.parseInt(timeStr.substring(8, 10)), 0);
         long endTime = cal.getTimeInMillis();
         // 如果结束时间小于2024-11-19 22:46:11，则认为是历史数据，结束时间无效
         if (endTime < 1732027571809L) {
