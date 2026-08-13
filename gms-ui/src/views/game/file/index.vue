@@ -101,7 +101,7 @@
       const response = await fetch(
         `https://cdn.jsdelivr.net/gh/shinobi9/beidoums-scripts-snippets/types/beidoums-scripts.d.ts`
       );
-      usingDts = response.ok ? await response.text() : usingDts;
+      usingDts = response.ok ? await response.text() : localDts;
     } catch (e) {
       // 请求不到
       usingDts = localDts;
