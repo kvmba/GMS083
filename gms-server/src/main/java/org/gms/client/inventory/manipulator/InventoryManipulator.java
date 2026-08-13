@@ -23,6 +23,7 @@ package org.gms.client.inventory.manipulator;
 
 import org.gms.client.BuffStat;
 import org.gms.client.Character;
+import org.gms.client.Ring;
 import org.gms.client.Client;
 import org.gms.client.inventory.Equip;
 import org.gms.client.inventory.Inventory;
@@ -646,7 +647,10 @@ public class InventoryManipulator {
         eqpdInv.lockInventory();
         try {
             if (source.getRingId() > -1) {
-                chr.getRingById(source.getRingId()).equip();
+                Ring ring = chr.getRingById(source.getRingId());
+                if (ring != null) {
+                    ring.equip();
+                }
             }
             chr.equippedItem(source);
             eqpdInv.addItemFromDB(source);
@@ -696,7 +700,10 @@ public class InventoryManipulator {
         eqpdInv.lockInventory();
         try {
             if (source.getRingId() > -1) {
-                chr.getRingById(source.getRingId()).unequip();
+                Ring ring = chr.getRingById(source.getRingId());
+                if (ring != null) {
+                    ring.unequip();
+                }
             }
             chr.unequippedItem(source);
             eqpdInv.removeSlot(src);
