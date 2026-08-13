@@ -96,6 +96,7 @@ public class CashShopService {
     public CashShopSearchRtnDTO getCommodityBySn(Integer sn) {
         RequireUtil.requireNotNull(sn, I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_NULL", "sn"));
         String snStr = String.valueOf(sn);
+        RequireUtil.requireTrue(snStr.length() >= 3, I18nUtil.getExceptionMessage("UNKNOWN_PARAMETER_VALUE", "sn", sn));
         int id = Integer.parseInt(snStr.substring(0, 1));
         int subId = Integer.parseInt(snStr.substring(1, 3));
         CashCategory cashCategory = getCategory(id, subId);
@@ -113,6 +114,7 @@ public class CashShopService {
     public void changeOnSale(ModifiedCashItemDO data) {
         RequireUtil.requireNotNull(data.getSn(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_NULL", "sn"));
         ModifiedCashItemDO cashItem = CashShop.CashItemFactory.getWzItem(data.getSn());
+        RequireUtil.requireNotNull(cashItem, I18nUtil.getExceptionMessage("UNKNOWN_PARAMETER_VALUE", "sn", data.getSn()));
         modifiedCashItemMapper.deleteById(data.getSn());
 
         // 如果是下架，直接插入或更新除状态外所有值为null
