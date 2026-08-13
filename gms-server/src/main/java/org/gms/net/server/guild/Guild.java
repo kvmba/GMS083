@@ -477,13 +477,20 @@ public class Guild {
             if (members.size() >= capacity) {
                 return 0;
             }
+            boolean inserted = false;
             for (int i = members.size() - 1; i >= 0; i--) {
                 if (members.get(i).getGuildRank() < 5 || members.get(i).getName().compareTo(mgc.getName()) < 0) {
                     mgc.setCharacter(chr);
                     members.add(i + 1, mgc);
+                    inserted = true;
                     bDirty = true;
                     break;
                 }
+            }
+            if (!inserted) {
+                mgc.setCharacter(chr);
+                members.add(0, mgc);
+                bDirty = true;
             }
 
             this.broadcast(GuildPackets.newGuildMember(mgc));
