@@ -26,7 +26,7 @@ values ('world', '0', 'java.lang.Integer', 'flag', '0', '0=普通大区，1=活�
        ('world', '0', 'java.lang.Float', 'travel_rate', '1.0', '旅行倍率(travel rate)'),
        ('world', '0', 'java.lang.Float', 'level_exp_rate', '0', '等级经验倍率，0为不启用(extra level exp rate, 0 is disabled)'),
        ('world', '0', 'java.lang.Integer', 'quick_level', '0', '冲刺等级，0为不启用(Gain bonus experience for levels below the target, and receive reduced experience for levels at or above the target.)'),
-       ('world', '0', 'java.lang.Float', 'quick_level_rate', '0', '冲刺等级倍率(Gain bonus experience for levels below the target, and receive reduced experience for levels at or above the target.)'),
+       ('world', '0', 'java.lang.Float', 'quick_level_exp_rate', '0', '冲刺等级倍率(Gain bonus experience for levels below the target, and receive reduced experience for levels at or above the target.)'),
 
        ('server', 'Core', 'java.lang.Integer', 'max_world_size', '21', '最多大区数(max world size)'),
        ('server', 'Core', 'java.lang.Integer', 'channel_locks', '20', '每个频道锁数量(Total number of structure management locks each channel has.)'),
