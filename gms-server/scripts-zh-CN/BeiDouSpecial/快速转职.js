@@ -80,8 +80,22 @@ function action(mode, type, selection) {
         } else if (status == 2) {
             var changeto = selection;
             var jobid = cm.getJobId();
+            // 职业白名单校验,防止客户端传入任意职业ID
+            var jobWhitelist = [100, 200, 300, 400, 500, 1100, 1200, 1300, 1400, 1500, 2100];
+            var isValidJob = false;
+            for (var wi = 0; wi < jobWhitelist.length; wi++) {
+                if (changeto == jobWhitelist[wi]) {
+                    isValidJob = true;
+                    break;
+                }
+            }
+            if (!isValidJob) {
+                cm.sendOk("无效的职业选择，请重新选择！");
+                cm.dispose();
+                return;
+            }
             if (jobid % 1000 == 0) {
-                if (cm.getChar().getLevel() >= 8 && changeto == 200 || cm.getPlayer().getLevel() >= 10) {
+                if ((cm.getChar().getLevel() >= 8 && changeto == 200) || (cm.getPlayer().getLevel() >= 10 && changeto != 200)) {
                     cm.changeJobById(changeto);
                     cm.dropMessage(5,"【转职系统】玩家 [" + cm.getPlayer() + "] 快速一转");
                 } else {
