@@ -352,6 +352,10 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                         String recipientName = p.readString();
                         String text = p.readString();
                         ModifiedCashItemDO itemRing = CashItemFactory.getItem(SN);
+                        if (!canBuy(chr, itemRing, cs.getCash(toCharge))) {
+                            c.enableCSActions();
+                            return;
+                        }
                         Character partner = c.getChannelServer().getPlayerStorage().getCharacterByName(recipientName);
                         if (partner == null) {
                             chr.sendPacket(PacketCreator.serverNotice(1, "找不到你指定的对象。\r\n请确认对方在线且与你处于同一频道。"));
@@ -418,6 +422,10 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                         p.skip(3); //0s
                         int snID = p.readInt();
                         ModifiedCashItemDO itemRing = CashItemFactory.getItem(snID);
+                        if (!canBuy(chr, itemRing, cs.getCash(payment))) {
+                            c.enableCSActions();
+                            return;
+                        }
                         String sentTo = p.readString();
                         String text = p.readString();
                         Character partner = c.getChannelServer().getPlayerStorage().getCharacterByName(sentTo);
