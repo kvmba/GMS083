@@ -537,6 +537,10 @@ public class InventoryManipulator {
         Inventory eqpdInv = chr.getInventory(InventoryType.EQUIPPED);
 
         Equip source = (Equip) eqpInv.getItem(src);
+        if (source == null || !ii.canWearEquipment(chr, source, dst)) {
+            c.sendPacket(PacketCreator.enableActions());
+            return;
+        }
         int itemGender = ItemId.getGender(source.getItemId());
         //控制台参数为true时进行校验判断
         if(GameConfig.getServerBoolean("use_equipment_gender_limit") && itemGender != 2 && itemGender != chr.getGender()) {  //判断装备是否要求角色性别
@@ -549,10 +553,6 @@ public class InventoryManipulator {
                     itemGender <= 0 ? I18nUtil.getMessage("Character.Gender0") : I18nUtil.getMessage("Character.Gender1"),
                     source.getItemId()
             );
-            return;
-        }
-        if (source == null || !ii.canWearEquipment(chr, source, dst)) {
-            c.sendPacket(PacketCreator.enableActions());
             return;
         } else if ((ItemId.isExplorerMount(source.getItemId()) && chr.isCygnus()) ||
                 ((ItemId.isCygnusMount(source.getItemId())) && !chr.isCygnus())) {// Adventurer taming equipment    //冒险家驯服设备
