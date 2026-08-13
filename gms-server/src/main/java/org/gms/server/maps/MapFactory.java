@@ -127,7 +127,11 @@ public class MapFactory {
 
             for (int i = 0; i < mobRespawnRate; i++) {
                 if (mobTime == -1) { //does not respawn, force spawn once
-                    map.spawnMonster(monster);
+                    if (i == 0) {
+                        map.spawnMonster(monster);
+                    } else {
+                        map.spawnMonster(new Monster(monster));
+                    }
                 } else {
                     map.addMonsterSpawn(monster, mobTime, team);
                 }
