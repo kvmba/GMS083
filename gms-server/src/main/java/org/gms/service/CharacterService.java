@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -352,6 +353,105 @@ public class CharacterService {
         // 补充heaven没有删除的2张表
         nameChangeService.cancelPendingNameChange(cid, false);
         worldTransferService.cancelPendingWorldTransfer(cid, false);
+
+        // 删除玩家NPC(playernpcs 按角色名关联)
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("SELECT id FROM playernpcs WHERE name = ?")) {
+            ps.setString(1, charactersDO.getName());
+            List<Integer> playerNpcIds = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    playerNpcIds.add(rs.getInt("id"));
+                }
+            }
+            if (!playerNpcIds.isEmpty()) {
+                StringBuilder inClause = new StringBuilder();
+                for (int i = 0; i < playerNpcIds.size(); i++) {
+                    inClause.append(i == 0 ? "?" : ", ?");
+                }
+                try (PreparedStatement psEquip = con.prepareStatement("DELETE FROM playernpcs_equip WHERE npcid IN (" + inClause + ")")) {
+                    for (int i = 0; i < playerNpcIds.size(); i++) {
+                        psEquip.setInt(i + 1, playerNpcIds.get(i));
+                    }
+                    psEquip.executeUpdate();
+                }
+                try (PreparedStatement psNpc = con.prepareStatement("DELETE FROM playernpcs WHERE id IN (" + inClause + ")")) {
+                    for (int i = 0; i < playerNpcIds.size(); i++) {
+                        psNpc.setInt(i + 1, playerNpcIds.get(i));
+                    }
+                    psNpc.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            log.error("删除 playernpcs 失败, cid={}", cid, e);
+        }
+        // 删除快递(duey):先删收件/发件包裹的物品,再删包裹
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("SELECT PackageId FROM dueypackages WHERE ReceiverId = ? OR SenderName = ?")) {
+            ps.setInt(1, cid);
+            ps.setString(2, charactersDO.getName());
+            List<Integer> packageIds = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    packageIds.add(rs.getInt("PackageId"));
+                }
+            }
+            if (!packageIds.isEmpty()) {
+                StringBuilder inClause = new StringBuilder();
+                for (int i = 0; i < packageIds.size(); i++) {
+                    inClause.append(i == 0 ? "?" : ", ?");
+                }
+                try (PreparedStatement psItems = con.prepareStatement("DELETE FROM dueyitems WHERE PackageId IN (" + inClause + ")")) {
+                    for (int i = 0; i < packageIds.size(); i++) {
+                        psItems.setInt(i + 1, packageIds.get(i));
+                    }
+                    psItems.executeUpdate();
+                }
+                try (PreparedStatement psPkg = con.prepareStatement("DELETE FROM dueypackages WHERE PackageId IN (" + inClause + ")")) {
+                    for (int i = 0; i < packageIds.size(); i++) {
+                        psPkg.setInt(i + 1, packageIds.get(i));
+                    }
+                    psPkg.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            log.error("删除 duey 快递失败, cid={}", cid, e);
+        }
+        // 删除举报记录
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM reports WHERE reporterid = ? OR victimid = ?")) {
+            ps.setInt(1, cid);
+            ps.setInt(2, cid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            log.error("删除 reports 失败, cid={}", cid, e);
+        }
+        // 删除礼物记录
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM gifts WHERE `to` = ?")) {
+            ps.setInt(1, cid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            log.error("删除 gifts 失败, cid={}", cid, e);
+        }
+        // 删除婚姻记录(双向)
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM marriages WHERE husbandid = ? OR wifeid = ?")) {
+            ps.setInt(1, cid);
+            ps.setInt(2, cid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            log.error("删除 marriages 失败, cid={}", cid, e);
+        }
+        // 删除信件
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM notes WHERE `to` = ? OR `from` = ?")) {
+            ps.setString(1, charactersDO.getName());
+            ps.setString(2, charactersDO.getName());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            log.error("删除 notes 失败, cid={}", cid, e);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
