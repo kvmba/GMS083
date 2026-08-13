@@ -299,27 +299,28 @@ public class FredrickProcessor {
                         return;
                     }
 
+                    if (!deleteFredrickItems(chr.getId())) {
+                        chr.message("An unknown error has occured.");
+                        return;
+                    }
+
                     chr.withdrawMerchantMesos();
 
-                    if (deleteFredrickItems(chr.getId())) {
-                        HiredMerchant merchant = chr.getHiredMerchant();
+                    HiredMerchant merchant = chr.getHiredMerchant();
 
-                        if (merchant != null) {
-                            merchant.clearItems();
-                        }
-
-                        for (Pair<Item, InventoryType> it : items) {
-                            Item item = it.getLeft();
-                            InventoryManipulator.addFromDrop(chr.getClient(), item, false);
-                            String itemName = ItemInformationProvider.getInstance().getName(item.getItemId());
-                            log.debug("Chr {} gained {}x {} ({})", chr.getName(), item.getQuantity(), itemName, item.getItemId());
-                        }
-
-                        chr.sendPacket(PacketCreator.fredrickMessage((byte) 0x1E));
-                        removeFredrickLog(chr.getId());
-                    } else {
-                        chr.message("An unknown error has occured.");
+                    if (merchant != null) {
+                        merchant.clearItems();
                     }
+
+                    for (Pair<Item, InventoryType> it : items) {
+                        Item item = it.getLeft();
+                        InventoryManipulator.addFromDrop(chr.getClient(), item, false);
+                        String itemName = ItemInformationProvider.getInstance().getName(item.getItemId());
+                        log.debug("Chr {} gained {}x {} ({})", chr.getName(), item.getQuantity(), itemName, item.getItemId());
+                    }
+
+                    chr.sendPacket(PacketCreator.fredrickMessage((byte) 0x1E));
+                    removeFredrickLog(chr.getId());
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
