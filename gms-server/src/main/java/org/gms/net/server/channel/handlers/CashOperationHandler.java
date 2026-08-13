@@ -211,6 +211,10 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                             return;
                         }
                         int type = (cItem.getItemId() - 9110000) / 1000;
+                        if (type < 1 || type > 4) {
+                            c.enableCSActions();
+                            return;
+                        }
                         if (!canBuy(chr, cItem, cs.getCash(cash))) {
                             c.enableCSActions();
                             return;
