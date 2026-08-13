@@ -42,8 +42,16 @@ public class LevelCommand extends Command {
             return;
         }
 
+        int targetLevel;
+        try {
+            targetLevel = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            player.yellowMessage(I18nUtil.getMessage("LevelCommand.message2"));
+            return;
+        }
+
         player.loseExp(player.getExp(), false, false);
-        player.setLevel(Math.min(Integer.parseInt(params[0]), player.getMaxClassLevel()) - 1);
+        player.setLevel(Math.min(Math.max(targetLevel, 1), player.getMaxClassLevel()) - 1);
 
         player.resetPlayerRates();
         if (GameConfig.getServerBoolean("use_add_rates_by_level")) {
