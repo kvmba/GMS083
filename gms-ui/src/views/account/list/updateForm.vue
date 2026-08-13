@@ -192,7 +192,7 @@
     pin: [
       {
         validator: (value: any, cb: any) => {
-          if (value === '' || /^\d{4}$/.test(value)) {
+          if (!value || value === '' || /^\d{4}$/.test(value)) {
             cb();
           } else {
             cb(t('account.list.updateForm.rules.pin.length'));
@@ -203,7 +203,7 @@
     pic: [
       {
         validator: (value: any, cb: any) => {
-          if (value === '' || /^\d{6}$/.test(value)) {
+          if (!value || value === '' || /^\d{6}$/.test(value)) {
             cb();
           } else {
             cb(t('account.list.updateForm.rules.pic.length'));
