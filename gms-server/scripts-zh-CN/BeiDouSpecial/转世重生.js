@@ -3,11 +3,12 @@ var jobId = 0;
 
 function start() {
     status = -1;
-    //const GameConfig = Java.type('org.gms.config.GameConfig');
-    //if (!GameConfig.getServerBoolean("use_rebirth_system"))
-      //  cm.sendOk("转生在这个服务器上是不允许的，你是怎么到这里来的？");
-        //cm.dispose();
-        //return;
+    const GameConfig = Java.type('org.gms.config.GameConfig');
+    if (!GameConfig.getServerBoolean("use_rebirth_system")) {
+        cm.sendOk("转生系统未开启，如有疑问请联系GM。");
+        cm.dispose();
+        return;
+    }
     action(1, 0, 0);
 }
 
