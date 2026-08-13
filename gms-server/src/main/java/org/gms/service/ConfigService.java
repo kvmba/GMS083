@@ -164,7 +164,7 @@ public class ConfigService {
             JSONArray worlds = gmsProperty.getJSONObject("world").getJSONArray("worlds");
             JSONObject server = gmsProperty.getJSONObject("server");
 
-            StringBuilder updateSql = new StringBuilder();
+            List<String[]> updates = new ArrayList<>();
             for (int i = 0; i < worlds.size(); i++) {
                 JSONObject world = worlds.getJSONObject(i);
                 if (world.getFloat("exp_rate") == null) {
@@ -174,9 +174,7 @@ public class ConfigService {
                     String configCode = entry.getKey().toLowerCase();
                     configCode = replaceWithEquals(configCode, new String[]{"why_am_i_recommended", "recommend_message"},
                             new String[]{"channels", "channel_size"});
-                    updateSql.append("update game_config set config_value = '").append(parseObject(entry.getValue()))
-                            .append("' where config_type = 'world' and config_sub_type = '").append(i)
-                            .append("' and config_code = '").append(configCode).append("';\n");
+                    updates.add(new String[]{String.valueOf(parseObject(entry.getValue())), "world", String.valueOf(i), configCode});
                 }
             }
             for (Map.Entry<String, Object> entry : server.entrySet()) {
@@ -202,13 +200,19 @@ public class ConfigService {
                 if ("npcs_scriptable".equalsIgnoreCase(entry.getKey())) {
                     configValue = JSONObject.toJSONString(entry.getValue());
                 }
-                updateSql.append("update game_config set config_value = '").append(configValue)
-                        .append("' where config_type = 'server' and config_code = '").append(configCode).append("';\n");
+                updates.add(new String[]{String.valueOf(configValue), "server", null, configCode});
             }
-            String[] updateArr = updateSql.toString().split("\n");
-            for (String str : updateArr) {
+            for (String[] u : updates) {
                 try (Connection connection = DatabaseConnection.getConnection();
-                     PreparedStatement statement = connection.prepareStatement(str)) {
+                     PreparedStatement statement = connection.prepareStatement(u[2] == null
+                             ? "update game_config set config_value = ? where config_type = ? and config_code = ?"
+                             : "update game_config set config_value = ? where config_type = ? and config_sub_type = ? and config_code = ?")) {
+                    statement.setString(1, u[0]);
+                    statement.setString(2, u[1]);
+                    if (u[2] != null) {
+                        statement.setString(3, u[2]);
+                    }
+                    statement.setString(u[2] == null ? 3 : 4, u[3]);
                     statement.executeUpdate();
                 }
             }
