@@ -70,7 +70,9 @@ public class ShopService {
                     .npcName(npcName)
                     .build());
         }
-        return BasePageUtil.create(matchedShopsDOList.stream().distinct().toList(), data).page();
+        return BasePageUtil.create(matchedShopsDOList.stream()
+                .collect(Collectors.toMap(ShopSearchRtnDTO::getShopId, dto -> dto, (a, b) -> a, LinkedHashMap::new))
+                .values().stream().toList(), data).page();
     }
 
     public Page<ShopItemSearchRtnDTO> getShopItemList(ShopSearchReqDTO data) {
