@@ -176,7 +176,7 @@
                   type="text"
                   size="mini"
                   status="normal"
-                  @click="editMode = record.id"
+                  @click="beginEdit(record)"
                 >
                   编辑
                 </a-button>
@@ -333,6 +333,12 @@
   };
 
   const editMode = ref<number>(-1);
+  const editBackup = ref<Partial<NpcShopItemState> | null>(null);
+
+  const beginEdit = (record: NpcShopItemState) => {
+    editBackup.value = { ...record };
+    editMode.value = record.id;
+  };
 
   const insertItemClick = () => {
     shopItemList.value?.unshift({
@@ -382,7 +388,10 @@
       if (index != null && index > -1) {
         shopItemList.value?.splice(index, 1);
       }
+    } else if (editBackup.value && editBackup.value.id === record.id) {
+      Object.assign(record, editBackup.value);
     }
+    editBackup.value = null;
     editMode.value = -1;
     setLoading(false);
   };

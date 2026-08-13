@@ -298,7 +298,7 @@
     try {
       setLoading(true);
       await shutdown();
-      Message.success(t('workplace.button.shutdown.success'));
+      Message.success(t('common.operationSuccess'));
       // 立即尝试更新服务器状态
       await loadSeverStatus();
     } catch (err) {
