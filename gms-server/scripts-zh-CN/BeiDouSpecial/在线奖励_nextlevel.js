@@ -146,8 +146,11 @@ function levelmain() {
 }
 
 function levelclaimrewards(Select) {
+	if (!config.reward[Select]) {
+		cm.dispose();
+		return;
+	}
 	const reward = config.reward[Select];
-	g_ClaimStatus |= (1 << Select);
 	let text = "\r\n";
 		text += getRewardList(Select);
 	if (reward.isReceive) {	//已领取
@@ -246,6 +249,7 @@ function giveRewardItems(Select,count = 1) {
 			successItems.push(`#fUI/Basic.img/CheckBox/1# ${succitemshow}`);
 		}
 	}
+	g_ClaimStatus |= (1 << Select);//确认发放成功后才标记已领取
 	saveOnlineStatus(g_ClaimStatus);//更新领取记录
 	cm.dropMessage(0,`你已成功领取了 ${reward.title.toString().replace(/#[a-zA-Z]/g,"")}！`);
 	return `#fUI/UIWindow.img/QuestIcon/4/0#\r\n\r\n${successItems.join('\r\n')}`;
