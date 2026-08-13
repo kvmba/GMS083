@@ -752,13 +752,13 @@ public class InventoryManipulator {
         Inventory inv = chr.getInventory(type);
         Item source = inv.getItem(src);
 
-        if (chr.isGM() && chr.gmLevel() < GameConfig.getServerInt("minimum_gm_level_to_drop")) {
-            chr.message("You cannot drop items at your GM level.");
-            log.info("GM %s tried to drop item id %d", chr.getName(), source.getItemId());
+        if (source == null || chr.getTrade() != null || chr.getMiniGame() != null) { //Only check needed would prob be merchants (to see if the player is in one)
             return;
         }
 
-        if (chr.getTrade() != null || chr.getMiniGame() != null || source == null) { //Only check needed would prob be merchants (to see if the player is in one)
+        if (chr.isGM() && chr.gmLevel() < GameConfig.getServerInt("minimum_gm_level_to_drop")) {
+            chr.message("You cannot drop items at your GM level.");
+            log.info("GM {} tried to drop item id {}", chr.getName(), source.getItemId());
             return;
         }
         int itemId = source.getItemId();
