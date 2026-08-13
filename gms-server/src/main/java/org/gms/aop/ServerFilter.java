@@ -50,18 +50,25 @@ public class ServerFilter extends HttpFilter {
             // 封禁ip禁止请求
             if (accountService.isBanned(remoteAddr)) {
                 request.getInputStream().close();
-                throw new BizException("Banned ip is requesting, forwardedIp: " + forwardedIp + ",realIp: " + realIp + ", remoteAddr: " + remoteAddr);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                log.warn("Banned ip is requesting, forwardedIp: {}, realIp: {}, remoteAddr: {}", forwardedIp, realIp, remoteAddr);
+                return;
             }
 
             // 限流
             if (!RateLimitUtil.getInstance().check(remoteAddr)) {
-                throw new BizException("IP " + remoteAddr + " has reached rate limit.");
+                response.sendError(HttpServletResponse.SC_TOO_MANY_REQUESTS, "Too many requests");
+                log.warn("IP {} has reached rate limit.", remoteAddr);
+                return;
             }
         } catch (Exception e) {
             log.error("Filter error", e);
             // 释放流，否则可能内存泄漏
             request.getInputStream().close();
-            response.getOutputStream().close();
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server error");
+            } catch (IOException ignored) {
+            }
             return;
         }
         // 这一步 应该在限流之后进行
