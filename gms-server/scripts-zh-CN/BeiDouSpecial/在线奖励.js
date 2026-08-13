@@ -35,6 +35,7 @@ function action(mode, type, selection)
 	    if (status == 0)
 	    {
 			//第一层对话
+			var time = "";
 	        if (cm.getOnlineTime() < 3600)
 			{
 	             time = "今日在线时间：#e#r"+ Math.floor(cm.getOnlineTime() / 60) +"#k#n 分钟\r\n\r\n";
