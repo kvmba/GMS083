@@ -52,6 +52,10 @@ export function importYml(option: RequestOption) {
     })
     .then((response) => {
       option.onSuccess(response);
+    })
+    .catch((error) => {
+      option.onError(error);
+      return Promise.reject(error);
     });
 }
 
