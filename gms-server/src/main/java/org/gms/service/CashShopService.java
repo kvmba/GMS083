@@ -226,6 +226,8 @@ public class CashShopService {
                     data.setPrice(submit.getValue());
                     break;
                 case "数量":
+                    RequireUtil.requireTrue(submit.getValue() >= 0 && submit.getValue() <= Short.MAX_VALUE,
+                            I18nUtil.getExceptionMessage("UNKNOWN_PARAMETER_VALUE", "count", submit.getValue()));
                     data.setCount(submit.getValue().shortValue());
                     break;
                 case "有效期":
