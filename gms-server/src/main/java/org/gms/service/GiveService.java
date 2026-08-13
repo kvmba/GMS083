@@ -19,6 +19,7 @@ import org.gms.net.server.world.World;
 import org.gms.server.CashShop;
 import org.gms.server.ItemInformationProvider;
 import org.gms.util.I18nUtil;
+import org.gms.util.RequireUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
