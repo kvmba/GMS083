@@ -241,6 +241,10 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
                     return;
                 }
                 eq = player.getInventory(InventoryType.EQUIPPED).getItem((short) equipSlot);
+                if (eq == null) {
+                    c.enableActions();
+                    return;
+                }
                 eq.setOwner(player.getName());
             } else if (itemId == 5060001 || itemId == 5061000 || itemId == 5061001 || itemId == 5061002 || itemId == 5061003) { // Sealing lock
                 InventoryType type = InventoryType.getByType((byte) p.readInt());
@@ -637,6 +641,10 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
             int itemSlot = p.readInt(); // 读取装备所在的槽位
             p.readInt(); // 读取一个整数，但未使用
             final Equip equip = (Equip) player.getInventory(InventoryType.EQUIP).getItem((short) itemSlot); // 获取指定槽位的装备
+            if (equip == null) {
+                c.enableActions();
+                return;
+            }
             if (equip.getVicious() >= 2 || player.getInventory(InventoryType.CASH).findById(ItemId.VICIOUS_HAMMER) == null) {
                 c.enableActions(); // 发送启用操作的封包，修复金锤子失败后客户端假死。
                 return; // 如果装备的金锤子使用次数大于等于2或玩家没有金锤子，则返回
