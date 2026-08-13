@@ -233,7 +233,8 @@ public class PlayerShop extends AbstractMapObject {
             if (shopItem.isExist()) {
                 if (shopItem.getBundles() > 0) {
                     Item iitem = shopItem.getItem().copy();
-                    iitem.setQuantity((short) (shopItem.getItem().getQuantity() * shopItem.getBundles()));
+                    int totalQuantity = shopItem.getItem().getQuantity() * shopItem.getBundles();
+                    iitem.setQuantity((short) Math.min(totalQuantity, Short.MAX_VALUE));
 
                     if (!Inventory.checkSpot(chr, iitem)) {
                         chr.sendPacket(PacketCreator.serverNotice(1, "Have a slot available on your inventory to claim back the item."));
@@ -267,6 +268,12 @@ public class PlayerShop extends AbstractMapObject {
 
                 PlayerShopItem pItem = items.get(item);
                 if (!pItem.isExist() || pItem.getBundles() < quantity) {
+                    c.sendPacket(PacketCreator.enableActions());
+                    return false;
+                }
+
+                if ((long) pItem.getItem().getQuantity() * quantity > Short.MAX_VALUE) {
+                    c.getPlayer().dropMessage(1, "单次购买数量过大，请分多次购买。");
                     c.sendPacket(PacketCreator.enableActions());
                     return false;
                 }
