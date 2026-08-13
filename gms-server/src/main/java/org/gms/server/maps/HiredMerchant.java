@@ -249,7 +249,8 @@ public class HiredMerchant extends AbstractMapObject {
             if (shopItem.isExist()) {
                 if (shopItem.getBundles() > 0) {
                     Item iitem = shopItem.getItem().copy();
-                    iitem.setQuantity((short) (shopItem.getItem().getQuantity() * shopItem.getBundles()));
+                    int totalQuantity = shopItem.getItem().getQuantity() * shopItem.getBundles();
+                    iitem.setQuantity((short) Math.min(totalQuantity, Short.MAX_VALUE));
 
                     if (!Inventory.checkSpot(chr, iitem)) {
                         chr.sendPacket(PacketCreator.serverNotice(1, "Have a slot available on your inventory to claim back the item."));
@@ -297,6 +298,12 @@ public class HiredMerchant extends AbstractMapObject {
 
             PlayerShopItem pItem = items.get(item);
             if (!pItem.isExist() || pItem.getBundles() < quantity) {
+                c.sendPacket(PacketCreator.enableActions());
+                return;
+            }
+
+            if ((long) pItem.getItem().getQuantity() * quantity > Short.MAX_VALUE) {
+                c.getPlayer().dropMessage(1, "单次购买数量过大，请分多次购买。");
                 c.sendPacket(PacketCreator.enableActions());
                 return;
             }
@@ -484,7 +491,7 @@ public class HiredMerchant extends AbstractMapObject {
                         if (mpsi.getItem().getInventoryType().equals(InventoryType.EQUIP)) {
                             InventoryManipulator.addFromDrop(c, mpsi.getItem(), false);
                         } else {
-                            InventoryManipulator.addById(c, mpsi.getItem().getItemId(), (short) (mpsi.getBundles() * mpsi.getItem().getQuantity()), mpsi.getItem().getOwner(), -1, mpsi.getItem().getFlag(), mpsi.getItem().getExpiration());
+                            InventoryManipulator.addById(c, mpsi.getItem().getItemId(), (short) Math.min((long) mpsi.getBundles() * mpsi.getItem().getQuantity(), Short.MAX_VALUE), mpsi.getItem().getOwner(), -1, mpsi.getItem().getFlag(), mpsi.getItem().getExpiration());
                         }
                     }
                 }
