@@ -143,7 +143,7 @@ public class ItemAction extends AbstractQuestAction {
             if (type.equals(InventoryType.EQUIP)) {
                 if (chr.getInventory(type).countById(itemid) < quantity) {
                     // Not enough in the equip inventoty, so check Equipped...
-                    if (chr.getInventory(InventoryType.EQUIPPED).countById(itemid) > quantity) {
+                    if (chr.getInventory(InventoryType.EQUIPPED).countById(itemid) >= quantity) {
                         // Found it equipped, so change the type to equipped.
                         type = InventoryType.EQUIPPED;
                     }
@@ -199,7 +199,7 @@ public class ItemAction extends AbstractQuestAction {
 
                     int freeSlotCount = chr.getInventory(type).freeSlotCountById(item.getId(), quantity);
                     if (freeSlotCount == -1) {
-                        if (type.equals(InventoryType.EQUIP) && chr.getInventory(InventoryType.EQUIPPED).countById(item.getId()) > quantity) {
+                        if (type.equals(InventoryType.EQUIP) && chr.getInventory(InventoryType.EQUIPPED).countById(item.getId()) >= quantity) {
                             continue;
                         }
 
