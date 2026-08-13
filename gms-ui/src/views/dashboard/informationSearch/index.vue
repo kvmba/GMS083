@@ -568,10 +568,10 @@
 </script>
 
 <style lang="less" scoped>
-  .arco-card-body > .arco-row > {
+  .arco-card-body > .arco-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    justify-content: flex-start;
   }
   :deep(.a-space-son) {
     width: 400px;
