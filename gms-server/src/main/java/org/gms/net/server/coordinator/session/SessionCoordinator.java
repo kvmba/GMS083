@@ -66,8 +66,8 @@ public class SessionCoordinator {
 
     private final SessionInitialization sessionInit = new SessionInitialization();
     private final LoginStorage loginStorage = new LoginStorage();
-    private final Map<Integer, Client> onlineClients = new HashMap<>(); // Key: account id
-    private final Set<Hwid> onlineRemoteHwids = new HashSet<>(); // Hwid/nibblehwid
+    private final Map<Integer, Client> onlineClients = new ConcurrentHashMap<>(); // Key: account id
+    private final Set<Hwid> onlineRemoteHwids = ConcurrentHashMap.newKeySet(); // Hwid/nibblehwid
     private final Map<String, Client> loginRemoteHosts = new ConcurrentHashMap<>(); // Key: Ip (+ nibblehwid)
     private final HostHwidCache hostHwidCache = new HostHwidCache();
 
