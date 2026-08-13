@@ -788,7 +788,11 @@ public class World {
     }
 
     public Pair<Boolean, Set<Integer>> removeMarriageQueued(int marriageId) {
-        Boolean type = queuedMarriages.remove(marriageId).getLeft().getRight();
+        Pair<Pair<Boolean, Boolean>, Pair<Integer, Integer>> queued = queuedMarriages.remove(marriageId);
+        if (queued == null) {
+            return null;
+        }
+        Boolean type = queued.getLeft().getRight();
         Set<Integer> guests = marriageGuests.remove(marriageId);
 
         return new Pair<>(type, guests);
