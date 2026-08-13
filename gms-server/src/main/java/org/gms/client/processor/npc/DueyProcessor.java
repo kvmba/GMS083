@@ -136,15 +136,20 @@ public class DueyProcessor {
         ItemFactory.DUEY.saveItems(new LinkedList<>(), packageId, con);
     }
 
-    private static void removePackageFromDB(int packageId) {
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("DELETE FROM dueypackages WHERE PackageId = ?")) {
-            ps.setInt(1, packageId);
-            ps.executeUpdate();
+    private static boolean removePackageFromDB(int packageId) {
+        try (Connection con = DatabaseConnection.getConnection()) {
+            con.setAutoCommit(false);
+            try (PreparedStatement ps = con.prepareStatement("DELETE FROM dueypackages WHERE PackageId = ?")) {
+                ps.setInt(1, packageId);
+                ps.executeUpdate();
 
-            deletePackageFromInventoryDB(con, packageId);
+                deletePackageFromInventoryDB(con, packageId);
+            }
+            con.commit();
+            return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Failed to remove duey package {} from db", packageId, e);
+            return false;
         }
     }
 
@@ -459,14 +464,22 @@ public class DueyProcessor {
                     }
 
                     return;
-                } else {
-                    InventoryManipulator.addFromDrop(c, dpItem, false);
                 }
+            }
+
+            // 先删除包裹(事务),成功后再发放,避免删除失败时重复领取
+            if (!removePackageFromDB(packageId)) {
+                c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+                return;
+            }
+
+            if (dpItem != null) {
+                InventoryManipulator.addFromDrop(c, dpItem, false);
             }
 
             c.getPlayer().gainMeso(dp.getMesos(), false);
 
-            dueyRemovePackage(c, packageId, false);
+            c.sendPacket(PacketCreator.removeItemFromDuey(false, packageId));
         } catch (SQLException e) {
             e.printStackTrace();
         }
