@@ -196,6 +196,8 @@ public class CommandService {
 
         RequireUtil.requireNotNull(request.getEnabled(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_NULL", "enabled"));
         RequireUtil.requireNotNull(request.getId(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_NULL", "id"));
+        RequireUtil.requireTrue(request.getLevel() != null && request.getLevel() >= 0 && request.getLevel() <= 6,
+                I18nUtil.getExceptionMessage("UNKNOWN_PARAMETER_VALUE", "level", request.getLevel()));
 
         /*
          * 只能改开关和等级，其他的不能改
