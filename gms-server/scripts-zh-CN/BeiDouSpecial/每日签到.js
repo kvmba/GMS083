@@ -31,10 +31,15 @@ function action(mode, type, selection)
 			}
 			else
 			{
-			    cm.saveOrUpdateCharacterExtendValue("每日签到", "TRUE",true);
-			    cm.sendOk("签到成功");
-				cm.gainItem(2430033,1);
-			    cm.dispose();				
+			    if (!cm.canHold(2430033, 1)) {
+			        cm.sendOk("背包空间不足，请清理背包后再来签到！");
+			        cm.dispose();
+			    } else {
+			        cm.saveOrUpdateCharacterExtendValue("每日签到", "TRUE",true);
+			        cm.sendOk("签到成功");
+			        cm.gainItem(2430033,1);
+			        cm.dispose();
+			    }
 			}
 	    }
 		else
