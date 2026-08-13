@@ -93,6 +93,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -116,6 +117,7 @@ public class MapleMap {
     private final AtomicInteger spawnedMonstersOnMap = new AtomicInteger(0);
     private final AtomicInteger droppedItemCount = new AtomicInteger(0);
     private final Collection<Character> characters = new LinkedHashSet<>();
+    private final Set<Character> chrDisconnectedWhileBroadcasting = ConcurrentHashMap.newKeySet();
     private final Map<Integer, Set<Integer>> mapParty = new LinkedHashMap<>();
     private final Map<Integer, Portal> portals = new HashMap<>();
     private final Map<Integer, Integer> backgroundTypes = new HashMap<>();
@@ -2898,6 +2900,7 @@ public class MapleMap {
      * @param {Point} rangedFrom - 广播的起点位置。The starting point for broadcasting.
      */
     private void broadcastMessage(Character source, Packet packet, double rangeSq, Point rangedFrom) {
+        removeDisconnectedCharacters();
         chrRLock.lock();
         try {
             Iterator<Character> iterator = characters.iterator();
@@ -2924,10 +2927,27 @@ public class MapleMap {
     private boolean chrDisconnected(Iterator<Character> iterator, Character chr) {
         // 如果玩家已经掉线，则移除地图该玩家，但不确保频道、大区该玩家是否仍会引发异常
         if (chr == null || chr.getClient() == null) {
-            iterator.remove();
+            chrDisconnectedWhileBroadcasting.add(chr);
             return true;
         }
         return false;
+    }
+
+    private void removeDisconnectedCharacters() {
+        if (chrDisconnectedWhileBroadcasting.isEmpty()) {
+            return;
+        }
+        chrWLock.lock();
+        try {
+            for (Character chr : chrDisconnectedWhileBroadcasting) {
+                if (chr == null || chr.getClient() == null) {
+                    characters.remove(chr);
+                }
+            }
+            chrDisconnectedWhileBroadcasting.clear();
+        } finally {
+            chrWLock.unlock();
+        }
     }
 
     private void updateBossSpawn(Monster monster) {
@@ -2981,6 +3001,7 @@ public class MapleMap {
     }
 
     private void broadcastItemDropMessage(MapItem mdrop, Point dropperPos, Point dropPos, byte mod, double rangeSq, Point rangedFrom) {
+        removeDisconnectedCharacters();
         chrRLock.lock();
         try {
             Iterator<Character> iterator = characters.iterator();
@@ -3013,6 +3034,7 @@ public class MapleMap {
     }
 
     private void broadcastSpawnPlayerMapObjectMessage(Character source, Character player, boolean enteringField, boolean gmBroadcast) {
+        removeDisconnectedCharacters();
         chrRLock.lock();
         try {
             if (gmBroadcast) {
@@ -3046,6 +3068,7 @@ public class MapleMap {
     }
 
     public void broadcastUpdateCharLookMessage(Character source, Character player) {
+        removeDisconnectedCharacters();
         chrRLock.lock();
         try {
             Iterator<Character> iterator = characters.iterator();
@@ -3489,6 +3512,7 @@ public class MapleMap {
     }
 
     public void broadcastNightEffect() {
+        removeDisconnectedCharacters();
         chrRLock.lock();
         try {
             Iterator<Character> iterator = characters.iterator();
@@ -3899,6 +3923,7 @@ public class MapleMap {
     }
 
     private void broadcastGMMessage(Character source, Packet packet, double rangeSq, Point rangedFrom) {
+        removeDisconnectedCharacters();
         chrRLock.lock();
         try {
             Iterator<Character> iterator = characters.iterator();
@@ -3923,6 +3948,7 @@ public class MapleMap {
     }
 
     public void broadcastNONGMMessage(Character source, Packet packet, boolean repeatToSource) {
+        removeDisconnectedCharacters();
         chrRLock.lock();
         try {
             Iterator<Character> iterator = characters.iterator();
