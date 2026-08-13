@@ -76,6 +76,30 @@ public class GameConfig {
             add(gameConfigDO);
             return;
         }
+
+        // 先校验可解析性,避免内存已改而DB回滚导致不一致
+        if ("world".equals(gameConfigDO.getConfigType())) {
+            int index = Integer.parseInt(gameConfigDO.getConfigSubType());
+            World world = Server.getInstance().getWorld(index);
+            if (world == null) {
+                return;
+            }
+            String configCode = gameConfigDO.getConfigCode();
+            switch (configCode) {
+                case "exp_rate":
+                case "meso_rate":
+                case "drop_rate":
+                case "boss_drop_rate":
+                case "quest_rate":
+                case "travel_rate":
+                case "fishing_rate":
+                    Float.parseFloat(gameConfigDO.getConfigValue());
+                    break;
+                default:
+                    break;
+            }
+        }
+
         valueProp.put("value", gameConfigDO.getConfigValue());
 
         // 手动重载不能重载的部分
