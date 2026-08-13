@@ -39,16 +39,16 @@
           <a-input-number v-model="formData.inventoryEquipment.mp" />
         </a-form-item>
         <a-form-item label="物攻">
-          <a-input-number v-model="formData.inventoryEquipment.patk" />
+          <a-input-number v-model="formData.inventoryEquipment.pAtk" />
         </a-form-item>
         <a-form-item label="魔法力">
-          <a-input-number v-model="formData.inventoryEquipment.matk" />
+          <a-input-number v-model="formData.inventoryEquipment.mAtk" />
         </a-form-item>
         <a-form-item label="物防">
-          <a-input-number v-model="formData.inventoryEquipment.pdef" />
+          <a-input-number v-model="formData.inventoryEquipment.pDef" />
         </a-form-item>
         <a-form-item label="魔防">
-          <a-input-number v-model="formData.inventoryEquipment.mdef" />
+          <a-input-number v-model="formData.inventoryEquipment.mDef" />
         </a-form-item>
         <a-form-item label="命中率">
           <a-input-number v-model="formData.inventoryEquipment.acc" />
@@ -120,10 +120,10 @@
       attLuk: 0,
       hp: 0,
       mp: 0,
-      patk: 0,
-      matk: 0,
-      pdef: 0,
-      mdef: 0,
+      pAtk: 0,
+      mAtk: 0,
+      pDef: 0,
+      mDef: 0,
       acc: 0,
       avoid: 0,
       hands: 0,

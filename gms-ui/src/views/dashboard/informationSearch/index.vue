@@ -522,10 +522,10 @@
       equipForm.value.luk = data.luk;
       equipForm.value.hp = data.hp;
       equipForm.value.mp = data.mp;
-      equipForm.value.pAtk = data.patk;
-      equipForm.value.mAtk = data.matk;
-      equipForm.value.pDef = data.pdef;
-      equipForm.value.mDef = data.mdef;
+      equipForm.value.pAtk = data.pAtk;
+      equipForm.value.mAtk = data.mAtk;
+      equipForm.value.pDef = data.pDef;
+      equipForm.value.mDef = data.mDef;
       equipForm.value.acc = data.acc;
       equipForm.value.avoid = data.avoid;
       equipForm.value.hands = data.hands;

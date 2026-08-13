@@ -14,10 +14,10 @@ export interface InventoryEquipmentState {
   attLuk: number;
   hp: number;
   mp: number;
-  patk: number;
-  matk: number;
-  pdef: number;
-  mdef: number;
+  pAtk: number;
+  mAtk: number;
+  pDef: number;
+  mDef: number;
   acc: number;
   avoid: number;
   hands: number;
