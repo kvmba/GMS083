@@ -118,7 +118,7 @@ function action(mode, type, selection) {
                     cm.sendOk("你还没有满足转职条件！");
                 }
             } else if (jobid % 10 == 1) {
-                if (jobid / 1000 >= 1 && jobid / 1000 < 2) {
+                if (Math.floor(jobid / 1000) === 1) {
                     cm.sendOk("骑士团共3转 已完成！");
                 } else if (cm.getChar().getLevel() >= 120) {
                     cm.changeJobById(changeto);
