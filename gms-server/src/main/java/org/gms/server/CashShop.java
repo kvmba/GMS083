@@ -423,6 +423,7 @@ public class CashShop {
                 ps.setInt(1, characterId);
 
                 try (ResultSet rs = ps.executeQuery()) {
+                    List<Integer> deliveredGiftIds = new ArrayList<>();
                     while (rs.next()) {
                         ModifiedCashItemDO cItem = CashItemFactory.getItem(rs.getInt("sn"));
                         Item item = cItem.toItem();
@@ -452,14 +453,23 @@ public class CashShop {
                         } else {
                             addToInventory(equip == null ? item : equip);
                         }
+                        deliveredGiftIds.add(rs.getInt("id"));
+                    }
+
+                    if (!deliveredGiftIds.isEmpty()) {
+                        StringBuilder inClause = new StringBuilder("DELETE FROM `gifts` WHERE `id` IN (");
+                        for (int i = 0; i < deliveredGiftIds.size(); i++) {
+                            inClause.append(i == 0 ? "?" : ", ?");
+                        }
+                        inClause.append(")");
+                        try (PreparedStatement delPs = con.prepareStatement(inClause.toString())) {
+                            for (int i = 0; i < deliveredGiftIds.size(); i++) {
+                                delPs.setInt(i + 1, deliveredGiftIds.get(i));
+                            }
+                            delPs.executeUpdate();
+                        }
                     }
                 }
-            }
-
-            try (PreparedStatement ps = con.prepareStatement("DELETE FROM `gifts` WHERE `to` = ?")) {
-                ps.setInt(1, characterId);
-                ps.executeUpdate();
-            }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
         }
