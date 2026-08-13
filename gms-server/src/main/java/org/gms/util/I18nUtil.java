@@ -42,7 +42,7 @@ public class I18nUtil {
      * @return 组合后的message
      */
     public static String getLogMessage(String code, Object... args) {
-        return logSource.getMessage(code, args, LANGUAGE);
+        return logSource.getMessage(code, toMessageFormatArgs(args), LANGUAGE);
     }
 
     /**
@@ -58,10 +58,19 @@ public class I18nUtil {
     }
 
     public static String getExceptionMessage(String code, Object... args) {
-        return exceptionSource.getMessage(code, args, LANGUAGE);
+        return exceptionSource.getMessage(code, toMessageFormatArgs(args), LANGUAGE);
     }
 
     public static String getExceptionMessage(Locale locale, String code, Object... args) {
-        return exceptionSource.getMessage(code, args, locale);
+        return exceptionSource.getMessage(code, toMessageFormatArgs(args), locale);
+    }
+
+    /**
+     * MessageFormat 对数字类型会应用千分位格式,统一转字符串规避
+     */
+    private static String[] toMessageFormatArgs(Object... args) {
+        return Arrays.stream(args)
+                .map(String::valueOf)
+                .toArray(String[]::new);
     }
 }
