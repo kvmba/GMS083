@@ -2338,6 +2338,11 @@ function action(mode, type, selection)
 		else if (status == 1 )
 		{
 			//第二层对话
+			if (!co[selection]) {
+			    cm.sendOk("无效的选择，请重新查询！");
+			    cm.dispose();
+			    return;
+			}
 			var iCount = parseInt(co[selection][1]);
 			text = "查询到的UI如下，请过目：\r\n\r\n";
 			for (i = 0; i < iCount; i++)
@@ -2354,6 +2359,11 @@ function action(mode, type, selection)
 		else
 		{
 			//最后一层对话完继续循环至此，退出结束
+			if (!UI_Total[target] || !UI_Total[target][selection]) {
+			    cm.sendOk("无效的选择，请重新查询！");
+			    cm.dispose();
+			    return;
+			}
 			cm.sendOk("查询到的编号为：" + "#r" + UI_Total[target][selection][0] + "#b-需要就复制拿出来用\r\n\r\n图示：#k" + UI_Total[target][selection][1]);
 			cm.dispose();
 		}
