@@ -181,15 +181,14 @@ public final class GuildOperationHandler extends AbstractPacketHandler {
                 mc.getMap().broadcastPacket(mc, GuildPackets.guildNameChanged(mc.getId(), ""));
                 break;
             case 0x08:
-                allianceId = mc.getGuild().getAllianceId();
-
                 cid = p.readInt();
                 name = p.readString();
-                if (mc.getGuildRank() > 2 || mc.getGuildId() <= 0) {
+                if (mc.getGuildId() <= 0 || mc.getGuildRank() > 2) {
                     log.warn("[Hack] Chr {} is trying to expel without rank 1 or 2", mc.getName());
                     return;
                 }
 
+                allianceId = mc.getGuild().getAllianceId();
                 Server.getInstance().expelMember(mc.getMGC(), name, cid);
                 if (allianceId > 0) {
                     Server.getInstance().getAlliance(allianceId).updateAlliancePackets(mc);
