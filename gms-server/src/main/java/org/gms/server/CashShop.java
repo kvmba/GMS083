@@ -470,6 +470,7 @@ public class CashShop {
                         }
                     }
                 }
+            }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
         }
