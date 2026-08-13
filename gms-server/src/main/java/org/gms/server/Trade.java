@@ -491,6 +491,10 @@ public class Trade {
 
     public static void inviteTrade(Character c1, Character c2) {
 
+        if (c1.getTrade() == null) {
+            startTrade(c1);
+        }
+
         if ((c1.isGM() && !c2.isGM()) && c1.gmLevel() < GameConfig.getServerInt("minimum_gm_level_to_trade")) {//GM等级低于几级不允许与非GM角色进行交易
             c1.message(I18nUtil.getMessage("Trade.inviteTrade.GM.msg1"));
             log.info(I18nUtil.getLogMessage("Trade.info.inviteTrade.GM.msg1"), c1.getName(), c2.getName());
