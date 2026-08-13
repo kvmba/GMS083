@@ -9,6 +9,7 @@ import org.gms.model.dto.*;
 import org.gms.model.pojo.InformationSearch;
 import org.gms.model.pojo.InformationResult;
 import org.gms.net.server.Server;
+import org.gms.net.server.world.World;
 import org.gms.server.CommonInformation;
 import org.gms.util.I18nUtil;
 import org.gms.util.RequireUtil;
@@ -69,8 +70,12 @@ public class CommonService {
         if (worldId == null) {
             return 0;
         }
+        World world = Server.getInstance().getWorld(worldId);
+        if (world == null) {
+            return 0;
+        }
         //如果传参未序列化可能导致数据丢失Optional做兜底
-        return Server.getInstance().getWorld(worldId).getPlayerStorage().getSize();
+        return world.getPlayerStorage().getSize();
     }
 
     /**

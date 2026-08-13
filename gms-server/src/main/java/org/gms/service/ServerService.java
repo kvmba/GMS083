@@ -3,6 +3,7 @@ package org.gms.service;
 import org.gms.model.dto.ChannelListRtnDTO;
 import org.gms.model.dto.WorldListRtnDTO;
 import org.gms.net.server.Server;
+import org.gms.net.server.world.World;
 import org.gms.net.server.channel.Channel;
 import org.gms.net.server.world.World;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,11 @@ public class ServerService {
     }
 
     public List<ChannelListRtnDTO> channelList(int worldId) {
-        List<Channel> channels = Server.getInstance().getWorld(worldId).getChannels();
+        World world = Server.getInstance().getWorld(worldId);
+        if (world == null) {
+            return List.of();
+        }
+        List<Channel> channels = world.getChannels();
         return channels.stream()
                 .map(c -> ChannelListRtnDTO.builder().id(c.getId()).worldId(c.getWorld()).build())
                 .toList();

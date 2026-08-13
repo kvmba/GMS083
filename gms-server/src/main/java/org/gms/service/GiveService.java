@@ -15,6 +15,7 @@ import org.gms.exception.BizException;
 
 
 import org.gms.net.server.Server;
+import org.gms.net.server.world.World;
 import org.gms.server.CashShop;
 import org.gms.server.ItemInformationProvider;
 import org.gms.util.I18nUtil;
@@ -87,9 +88,11 @@ public class GiveService {
         if (wId == null || wId < 0 || cId == null || cId < 1) {
             throw new BizException(I18nUtil.getExceptionMessage("CHR_OR_WORLD_ID_ERROR"));
         }
-        Character chr = Server.getInstance()
-                .getWorlds().get(wId)
-                .getPlayerStorage().getCharacterById(cId);
+        World world = Server.getInstance().getWorld(wId);
+        if (world == null) {
+            throw new BizException(I18nUtil.getExceptionMessage("CHR_OR_WORLD_ID_ERROR"));
+        }
+        Character chr = world.getPlayerStorage().getCharacterById(cId);
         if (chr == null) throw new BizException(I18nUtil.getExceptionMessage("CHR_OFFLINE"));
 
         switch (submitData.getType()) {
