@@ -112,7 +112,7 @@ public class ItemAction extends AbstractQuestAction {
 
             if (iEntry.getProp() != null) {
                 if (iEntry.getProp() == -1) {
-                    if (extSelection != extNum++) {
+                    if (extSelection == null || extSelection != extNum++) {
                         continue;
                     }
                 } else {
@@ -236,8 +236,10 @@ public class ItemAction extends AbstractQuestAction {
         }
 
         if (!selectList.isEmpty()) {
-            Pair<Item, InventoryType> selected = selectList.get(extSelection);
-            gainList.add(selected);
+            if (extSelection != null && extSelection >= 0 && extSelection < selectList.size()) {
+                Pair<Item, InventoryType> selected = selectList.get(extSelection);
+                gainList.add(selected);
+            }
         }
 
         if (!canHold(chr, gainList)) {
