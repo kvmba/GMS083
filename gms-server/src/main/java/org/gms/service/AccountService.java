@@ -162,6 +162,9 @@ public class AccountService {
 
     public boolean checkPassword(String pwd, AccountsDO accountsDO) {
         String passHash = accountsDO.getPassword();
+        if (passHash == null || passHash.length() < 2) {
+            return false;
+        }
         if (passHash.charAt(0) == '$' && passHash.charAt(1) == '2' && BCrypt.checkpw(pwd, passHash)) {
             return true;
         } else {
