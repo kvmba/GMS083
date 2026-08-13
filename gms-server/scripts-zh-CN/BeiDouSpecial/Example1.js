@@ -17,7 +17,8 @@ function action(mode, type, selection) {
     if (mode === 1) {
         status++;
     } else {
-        status--;
+        cm.dispose();
+        return;
     }
 
     if (status === 0) {
