@@ -224,20 +224,20 @@ public class PartySearchCoordinator {
     }
 
     private void addQueueLeader(Character leader) {
-        leaderQueueRLock.lock();
+        leaderQueueWLock.lock();
         try {
             leaderQueue.add(leader);
         } finally {
-            leaderQueueRLock.unlock();
+            leaderQueueWLock.unlock();
         }
     }
 
     private void removeQueueLeader(Character leader) {
-        leaderQueueRLock.lock();
+        leaderQueueWLock.lock();
         try {
             leaderQueue.remove(leader);
         } finally {
-            leaderQueueRLock.unlock();
+            leaderQueueWLock.unlock();
         }
     }
 
@@ -326,22 +326,22 @@ public class PartySearchCoordinator {
     }
 
     private void registerLongTermPartyLeaders(List<Pair<Character, LeaderSearchMetadata>> recycledLeaders) {
-        leaderQueueRLock.lock();
+        leaderQueueWLock.lock();
         try {
             for (Pair<Character, LeaderSearchMetadata> p : recycledLeaders) {
                 timeoutLeaders.put(p.getLeft(), p.getRight());
             }
         } finally {
-            leaderQueueRLock.unlock();
+            leaderQueueWLock.unlock();
         }
     }
 
     private void unregisterLongTermPartyLeader(Character leader) {
-        leaderQueueRLock.lock();
+        leaderQueueWLock.lock();
         try {
             timeoutLeaders.remove(leader);
         } finally {
-            leaderQueueRLock.unlock();
+            leaderQueueWLock.unlock();
         }
     }
 
@@ -384,7 +384,7 @@ public class PartySearchCoordinator {
             }
         }
 
-        leaderQueueRLock.lock();
+        leaderQueueWLock.lock();
         try {
             leaderQueue.clear();
             leaderQueue.addAll(queuedLeaders.getRight());
@@ -395,7 +395,7 @@ public class PartySearchCoordinator {
                 leaderQueue.addAll(recalledLeaders);
             }
         } finally {
-            leaderQueueRLock.unlock();
+            leaderQueueWLock.unlock();
         }
 
         for (Character leader : searchedLeaders) {
