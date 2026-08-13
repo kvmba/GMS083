@@ -36,7 +36,7 @@ public class AccountController {
     @Tag(name = "/account/" + ApiConstant.LATEST)
     @Operation(summary = "获取账号列表")
     @GetMapping("/" + ApiConstant.LATEST)
-    public ResultBody<Page<AccountsDO>> getAccountList(@RequestParam(name = "page", required = false) Integer page,
+    public ResultBody<Page<AccountListDTO>> getAccountList(@RequestParam(name = "page", required = false) Integer page,
                                                        @RequestParam(name = "size", required = false) Integer size,
                                                        @RequestParam(name = "id", required = false) Integer id,
                                                        @RequestParam(name = "name", required = false) String name,

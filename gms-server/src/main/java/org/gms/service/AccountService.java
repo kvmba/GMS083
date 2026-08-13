@@ -9,6 +9,7 @@ import org.gms.client.DefaultDates;
 import org.gms.config.GameConfig;
 import org.gms.dao.entity.*;
 import org.gms.dao.mapper.*;
+import org.gms.model.dto.AccountListDTO;
 import org.gms.model.dto.AddAccountDTO;
 import org.gms.model.dto.UpdateAccountByGmDTO;
 import org.gms.model.dto.UpdateAccountByUserDTO;
@@ -17,6 +18,7 @@ import org.gms.util.BCrypt;
 import org.gms.util.HexTool;
 import org.gms.util.I18nUtil;
 import org.gms.util.RequireUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -55,14 +57,14 @@ public class AccountService {
         return findByName(userDetails.getUsername());
     }
 
-    public Page<AccountsDO> getAccountList(Integer page,
-                                           Integer size,
-                                           Integer id,
-                                           String name,
-                                           String lastLoginStart,
-                                           String lastLoginEnd,
-                                           String createdAtStart,
-                                           String createdAtEnd) {
+    public Page<AccountListDTO> getAccountList(Integer page,
+                                               Integer size,
+                                               Integer id,
+                                               String name,
+                                               String lastLoginStart,
+                                               String lastLoginEnd,
+                                               String createdAtStart,
+                                               String createdAtEnd) {
         QueryWrapper queryWrapper = new QueryWrapper();
         if (id != null) queryWrapper.eq("id", id);
         if (name != null) queryWrapper.like("name", name);
@@ -72,8 +74,15 @@ public class AccountService {
         if (createdAtEnd != null) queryWrapper.le(AccountsDO::getCreatedat, createdAtEnd);
 
         if (page == null) page = 1;
-        if (size == null) size = Integer.MAX_VALUE;
-        return accountsMapper.paginateWithRelations(page, size, queryWrapper);
+        if (size == null || size > 100) size = 100;
+        Page<AccountsDO> accountsPage = accountsMapper.paginateWithRelations(page, size, queryWrapper);
+        Page<AccountListDTO> result = new Page<>(accountsPage.getPageNumber(), accountsPage.getPageSize(), accountsPage.getTotalRow());
+        result.setRecords(accountsPage.getRecords().stream().map(account -> {
+            AccountListDTO dto = new AccountListDTO();
+            BeanUtils.copyProperties(account, dto);
+            return dto;
+        }).toList());
+        return result;
     }
 
     public void update(AccountsDO condition) {
