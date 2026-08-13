@@ -7932,6 +7932,8 @@ public class Character extends AbstractCharacterObject {
                 }
 
                 con.commit();
+
+                log.info(I18nUtil.getLogMessage("Character.saveCharToDB.info3"), name);
             } catch (Exception e) {
                 con.rollback();
                 throw e;
