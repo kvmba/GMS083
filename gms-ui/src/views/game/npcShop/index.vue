@@ -337,7 +337,7 @@
 
   const beginEdit = (record: NpcShopItemState) => {
     editBackup.value = { ...record };
-    editMode.value = record.id;
+    editMode.value = record.id ?? -1;
   };
 
   const insertItemClick = () => {

@@ -509,15 +509,11 @@
     uploadRef.value.submit();
   };
 
-  const customRequest = async (option: RequestOption) => {
+  const customRequest = (option: RequestOption) => {
     setLoading(true);
-    try {
-      await importYml(option);
-    } catch (e) {
-      // 失败已由 interceptor 提示,onError 也已回调
-    } finally {
-      setLoading(false);
-    }
+    importYml(option)
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
     return undefined;
   };
 
