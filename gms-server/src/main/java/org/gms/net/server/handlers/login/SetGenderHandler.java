@@ -38,7 +38,13 @@ public class SetGenderHandler extends AbstractPacketHandler {
         if (c.getGender() == 10) { //Packet shouldn't come if Gender isn't 10.
             byte confirmed = p.readByte();
             if (confirmed == 0x01) {
-                c.setGender(p.readByte());
+                byte gender = p.readByte();
+                if (gender != 0 && gender != 1) {
+                    SessionCoordinator.getInstance().closeSession(c, null);
+                    c.updateLoginState(Client.LOGIN_NOTLOGGEDIN);
+                    return;
+                }
+                c.setGender(gender);
                 c.sendPacket(PacketCreator.getAuthSuccess(c));
 
                 Server.getInstance().registerLoginState(c);
