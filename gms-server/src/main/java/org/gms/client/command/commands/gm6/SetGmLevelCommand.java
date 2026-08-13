@@ -26,6 +26,9 @@ package org.gms.client.command.commands.gm6;
 import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.command.Command;
+import org.gms.dao.entity.CharactersDO;
+import org.gms.manager.ServerManager;
+import org.gms.service.CharacterService;
 import org.gms.util.I18nUtil;
 
 public class SetGmLevelCommand extends Command {
@@ -46,6 +49,12 @@ public class SetGmLevelCommand extends Command {
         if (target != null) {
             target.setGMLevel(newLevel);
             target.getClient().setGMLevel(newLevel);
+
+            CharacterService characterService = ServerManager.getApplicationContext().getBean(CharacterService.class);
+            characterService.update(CharactersDO.builder()
+                    .id(target.getId())
+                    .gm(newLevel)
+                    .build());
 
             target.dropMessage(I18nUtil.getMessage("SetGmLevelCommand.message3", newLevel));
             player.dropMessage(I18nUtil.getMessage("SetGmLevelCommand.message4", target, newLevel));
