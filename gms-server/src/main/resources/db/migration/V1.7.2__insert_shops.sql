@@ -124,4 +124,3 @@ values (9900001, 2000005, 20000, 0, 1),
 ;
 
 
-select * from shopitems where itemid = 2190000;
