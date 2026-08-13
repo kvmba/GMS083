@@ -217,6 +217,9 @@ public class CashShop {
                     .filter(ModifiedCashItemDO::isSelling)
                     .filter(cashItem -> !ItemId.isCashPackage(cashItem.getItemId()))
                     .toList();
+            if (itemPool.isEmpty()) {
+                return Optional.empty();
+            }
             return Optional.of(getRandomItem(itemPool));
         }
 
