@@ -316,7 +316,12 @@ public class Server {
     public String[] getInetSocket(Client client, int world, int channel) {
         String remoteIp = client.getRemoteAddress();
 
-        String[] hostAddress = getIP(world, channel).split(":");
+        String ip = getIP(world, channel);
+        if (ip == null) {
+            return null;
+        }
+
+        String[] hostAddress = ip.split(":");
         if (IpAddresses.isLocalAddress(remoteIp)) {
             hostAddress[0] = serviceProperty.getLocalhost();
         } else if (IpAddresses.isLanAddress(remoteIp)) {
