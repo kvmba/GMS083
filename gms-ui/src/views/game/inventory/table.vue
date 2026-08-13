@@ -157,7 +157,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { ref, watch } from 'vue';
   import {
     deleteInventory,
     getInventoryList,
@@ -200,6 +200,10 @@
     }
   };
   loadData();
+
+  watch(() => props.characterId, () => {
+    loadData();
+  });
 
   const saveClick = async (data: InventoryState) => {
     setLoading(true);
