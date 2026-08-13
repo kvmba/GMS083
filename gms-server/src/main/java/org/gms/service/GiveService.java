@@ -60,6 +60,8 @@ public class GiveService {
                 giveExpAllOnlineChr(submitData.getQuantity());
                 break;
             case 5: // item
+                RequireUtil.requireTrue(submitData.getQuantity() != null && submitData.getQuantity() > 0 && submitData.getQuantity() <= Short.MAX_VALUE,
+                        I18nUtil.getExceptionMessage("UNKNOWN_PARAMETER_VALUE", "quantity", submitData.getQuantity()));
                 giveItemAllOnlineChr(submitData.getId(), Short.parseShort(submitData.getQuantity().toString()));
                 break;
             case 6: // equip
@@ -113,6 +115,8 @@ public class GiveService {
                 giveExpChr(chr, submitData.getQuantity());
                 break;
             case 5: // item
+                RequireUtil.requireTrue(submitData.getQuantity() != null && submitData.getQuantity() > 0 && submitData.getQuantity() <= Short.MAX_VALUE,
+                        I18nUtil.getExceptionMessage("UNKNOWN_PARAMETER_VALUE", "quantity", submitData.getQuantity()));
                 giveItemChr(chr, submitData.getId(), Short.parseShort(submitData.getQuantity().toString()));
                 break;
             case 6: // equip
@@ -121,15 +125,15 @@ public class GiveService {
             case 7: // expRate
             case 8: // mesosRate
             case 9: // dropRate
-            case 10: // bossRate
                 String rateType = switch (submitData.getType()) {
                     case 7 -> "expRate";
                     case 8 -> "mesoRate";
-                    case 9 -> "dropRate";
-                    default -> "None";
+                    default -> "dropRate";
                 };
                 giveRateChr(chr, rateType, submitData.getRate());
                 break;
+            case 10: // bossRate 暂不支持,避免映射为非法类型
+                throw new BizException(I18nUtil.getExceptionMessage("UNKNOWN_PARAMETER_VALUE", "type", submitData.getType()));
             case 11:
                 giveGMChr(chr, submitData.getQuantity());
                 break;
