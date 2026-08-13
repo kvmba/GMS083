@@ -150,10 +150,12 @@ public final class CouponCodeHandler extends AbstractPacketHandler {
                     }
                 }
 
-                try (PreparedStatement ps = con.prepareStatement("UPDATE nxcode SET retriever = ? WHERE code = ?")) {
+                try (PreparedStatement ps = con.prepareStatement("UPDATE nxcode SET retriever = ? WHERE code = ? AND retriever IS NULL")) {
                     ps.setString(1, chr.getName());
                     ps.setString(2, code);
-                    ps.executeUpdate();
+                    if (ps.executeUpdate() == 0) {
+                        return new Pair<>(-2, null);
+                    }
                 }
             }
         } catch (SQLException ex) {
