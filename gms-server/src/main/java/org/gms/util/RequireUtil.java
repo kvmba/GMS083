@@ -26,7 +26,7 @@ public class RequireUtil {
     }
 
     public static void requireNotNull(Object obj) {
-        requireNull(obj, null);
+        requireNotNull(obj, null);
     }
 
     public static void requireNotNull(Object obj, String msg) {
