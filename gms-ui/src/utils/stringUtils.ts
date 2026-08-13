@@ -22,7 +22,7 @@ export function timestampToChineseTime(timestamp: number | string) {
   if (timestamp === -1) {
     return locale.value === 'en-US' ? 'Permanent' : '永久';
   }
-  if (typeof timestamp === 'string') timestamp?.replace(' ', 'T');
+  if (typeof timestamp === 'string') timestamp = timestamp.replace(' ', 'T');
   const date = new Date(timestamp);
 
   // 获取年、月、日、时、分、秒
