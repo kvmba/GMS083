@@ -905,7 +905,7 @@ public class EventManager {
      * @return 是否成功启动
      */
     public boolean startInstance(int lobbyId, EventInstanceManager eim, String ldr) {
-        return startInstance(-1, eim, ldr, eim.getEm().getChannelServer().getPlayerStorage().getCharacterByName(ldr));
+        return startInstance(lobbyId, eim, ldr, eim.getEm().getChannelServer().getPlayerStorage().getCharacterByName(ldr));
     }
 
     /**
