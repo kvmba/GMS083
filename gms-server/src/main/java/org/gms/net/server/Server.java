@@ -1249,10 +1249,16 @@ public class Server {
     public void deleteCharacterEntry(Integer accountid, Integer chrid) {
         lgnWLock.lock();
         try {
-            accountCharacterCount.put(accountid, (short) (accountCharacterCount.get(accountid) - 1));
+            Short currentCount = accountCharacterCount.get(accountid);
+            if (currentCount == null || currentCount <= 0) {
+                return;
+            }
+            accountCharacterCount.put(accountid, (short) (currentCount - 1));
 
             Set<Integer> accChars = accountChars.get(accountid);
-            accChars.remove(chrid);
+            if (accChars != null) {
+                accChars.remove(chrid);
+            }
 
             Integer world = worldChars.remove(chrid);
             if (world != null) {
