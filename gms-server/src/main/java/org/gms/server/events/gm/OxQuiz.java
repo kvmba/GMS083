@@ -22,6 +22,7 @@
 package org.gms.server.events.gm;
 
 import org.gms.client.Character;
+import org.gms.provider.Data;
 import org.gms.provider.DataProvider;
 import org.gms.provider.DataProviderFactory;
 import org.gms.provider.DataTool;
@@ -90,7 +91,7 @@ public final class OxQuiz {
                 question++;
             }
             //send question
-            if (map.getCharacters().size() - number <= 2) {
+            if (question >= 100 || map.getCharacters().size() - number <= 2) {
                 map.broadcastMessage(PacketCreator.serverNotice(6, "The event has ended"));
                 map.getPortal("join00").setPortalStatus(true);
                 map.setOx(null);
@@ -103,6 +104,15 @@ public final class OxQuiz {
     }
 
     private static int getOXAnswer(int imgdir, int id) {
-        return DataTool.getInt(stringData.getData("OXQuiz.img").getChildByPath("" + imgdir + "").getChildByPath("" + id + "").getChildByPath("a"));
+        Data child = stringData.getData("OXQuiz.img").getChildByPath("" + imgdir + "");
+        if (child == null) {
+            return -1;
+        }
+        Data answer = child.getChildByPath("" + id + "");
+        if (answer == null) {
+            return -1;
+        }
+        Data value = answer.getChildByPath("a");
+        return value != null ? DataTool.getInt(value) : -1;
     }
 }
