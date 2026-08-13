@@ -25,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -40,7 +42,7 @@ public class GachaponService {
     private GachaponRewardMapper gachaponRewardMapper;
 
 
-    private static final HashMap<Integer, List<GachaponRewardDO>> poolRewardsCache = new HashMap<>();
+    private static final Map<Integer, List<GachaponRewardDO>> poolRewardsCache = new ConcurrentHashMap<>();
     private static final ReadWriteLock lock = new ReentrantReadWriteLock(true);
     private static final Lock rLock = lock.readLock();
     private static final Lock wLock = lock.writeLock();
@@ -167,16 +169,16 @@ public class GachaponService {
     }
 
     private void setRealProb(List<GachaponPoolSearchRtnDTO> pools) {
-        int probTotal = pools.stream().mapToInt(GachaponPoolSearchRtnDTO::getProb).sum();
+        int probTotal = pools.stream().mapToInt(p -> Optional.ofNullable(p.getProb()).orElse(0)).sum();
         int probPoint = 100 * probTotal;
         int weightPoint = 1000000 - probPoint;
 
-        int totalWeight = pools.stream().mapToInt(GachaponPoolSearchRtnDTO::getWeight).sum(); // 总权重
+        int totalWeight = pools.stream().mapToInt(p -> Optional.ofNullable(p.getWeight()).orElse(0)).sum(); // 总权重
         for (GachaponPoolSearchRtnDTO pool : pools) {
             if (pool.getIsPublic()) {
-                pool.setRealProb(pool.getProb() * 100);
+                pool.setRealProb(Optional.ofNullable(pool.getProb()).orElse(0) * 100);
             } else {
-                pool.setRealProb(Math.round((float) weightPoint * pool.getWeight() / totalWeight));
+                pool.setRealProb(totalWeight == 0 ? 0 : Math.round((float) weightPoint * Optional.ofNullable(pool.getWeight()).orElse(0) / totalWeight));
             }
         }
     }
@@ -211,19 +213,19 @@ public class GachaponService {
             int point; // 积分
             int pointTotal = 0; // 累计积分
 
-            int probTotal = pools.stream().mapToInt(GachaponRewardPoolDO::getProb).sum();
+            int probTotal = pools.stream().mapToInt(p -> Optional.ofNullable(p.getProb()).orElse(0)).sum();
             int probPoint = 100 * probTotal; // 公共奖池积分总额
             int weightPoint = 1000000 - probPoint; // 非公共奖池积分总额
 
-            int totalWeight = pools.stream().mapToInt(GachaponRewardPoolDO::getWeight).sum(); // 总权重
+            int totalWeight = pools.stream().mapToInt(p -> Optional.ofNullable(p.getWeight()).orElse(0)).sum(); // 总权重
             int random = Randomizer.nextInt(1000000); // 随机数
             GachaponRewardPoolDO target = null;
             for (GachaponRewardPoolDO pool : pools) {
                 // 按权重分配积分
                 if (pool.getIsPublic()) {
-                    point = pool.getProb() * 100;
+                    point = Optional.ofNullable(pool.getProb()).orElse(0) * 100;
                 } else {
-                    point = Math.round((float) weightPoint * pool.getWeight() / totalWeight);
+                    point = totalWeight == 0 ? 0 : Math.round((float) weightPoint * Optional.ofNullable(pool.getWeight()).orElse(0) / totalWeight);
                 }
 
                 pointTotal += point;
