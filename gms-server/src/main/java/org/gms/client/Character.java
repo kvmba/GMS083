@@ -10034,7 +10034,8 @@ public class Character extends AbstractCharacterObject {
         }
         if (map == null && showMsg) {
             String msg = I18nUtil.getMessage("Character.Map.Change.message1", Integer.toString(mapid));
-            log.warn(I18nUtil.getLogMessage("Character.Map.Change.warn1"), getName(), getMap().getMapName(), getMapId(),
+            MapleMap currentMap = getMap();
+            log.warn(I18nUtil.getLogMessage("Character.Map.Change.warn1"), getName(), currentMap != null ? currentMap.getMapName() : "null", getMapId(),
                     I18nUtil.getLogMessage("SystemRescue.info.map.message1"),
                     mapid);
             dropMessage(5, msg);                 //聊天窗红色消息提示
