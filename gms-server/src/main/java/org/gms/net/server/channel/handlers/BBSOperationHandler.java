@@ -182,25 +182,37 @@ public final class BBSOperationHandler extends AbstractPacketHandler {
         }
         int nextId = 0;
         try (Connection con = DatabaseConnection.getConnection()) {
-            if (!bNotice) {
-                try (PreparedStatement ps = con.prepareStatement("SELECT MAX(localthreadid) AS lastLocalId FROM bbs_threads WHERE guildid = ?")) {
-                    ps.setInt(1, chr.getGuildId());
-                    try (ResultSet rs = ps.executeQuery()) {
-                        rs.next();
-                        nextId = rs.getInt("lastLocalId") + 1;
+            con.setAutoCommit(false);
+            try {
+                if (!bNotice) {
+                    // 用 FOR UPDATE 串行化同一公会的取号,避免并发发帖得到相同localthreadid
+                    try (PreparedStatement ps = con.prepareStatement("SELECT MAX(localthreadid) AS lastLocalId FROM bbs_threads WHERE guildid = ? FOR UPDATE")) {
+                        ps.setInt(1, chr.getGuildId());
+                        try (ResultSet rs = ps.executeQuery()) {
+                            rs.next();
+                            nextId = rs.getInt("lastLocalId") + 1;
+                        }
                     }
                 }
-            }
 
-            try (PreparedStatement ps = con.prepareStatement("INSERT INTO bbs_threads (`postercid`, `name`, `timestamp`, `icon`, `startpost`, `guildid`, `localthreadid`) VALUES(?, ?, ?, ?, ?, ?, ?)")) {
-                ps.setInt(1, chr.getId());
-                ps.setString(2, title);
-                ps.setLong(3, currentServerTime());
-                ps.setInt(4, icon);
-                ps.setString(5, text);
-                ps.setInt(6, chr.getGuildId());
-                ps.setInt(7, nextId);
-                ps.executeUpdate();
+                try (PreparedStatement ps = con.prepareStatement("INSERT INTO bbs_threads (`postercid`, `name`, `timestamp`, `icon`, `startpost`, `guildid`, `localthreadid`) VALUES(?, ?, ?, ?, ?, ?, ?)")) {
+                    ps.setInt(1, chr.getId());
+                    ps.setString(2, title);
+                    ps.setLong(3, currentServerTime());
+                    ps.setInt(4, icon);
+                    ps.setString(5, text);
+                    ps.setInt(6, chr.getGuildId());
+                    ps.setInt(7, nextId);
+                    ps.executeUpdate();
+                }
+
+                con.commit();
+            } catch (SQLException se) {
+                try {
+                    con.rollback();
+                } catch (SQLException ignored) {
+                }
+                throw se;
             }
 
             displayThread(client, nextId);
