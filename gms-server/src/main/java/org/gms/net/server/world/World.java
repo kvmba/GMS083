@@ -1132,7 +1132,9 @@ public class World {
                     }
                 } else {
                     Character from = getChannel(fromchannel).getPlayerStorage().getCharacterByName(sender);
-                    from.sendPacket(PacketCreator.messengerChat(sender + " : " + target + " is already using Maple Messenger"));
+                    if (from != null) {
+                        from.sendPacket(PacketCreator.messengerChat(sender + " : " + target + " is already using Maple Messenger"));
+                    }
                 }
             }
         }
