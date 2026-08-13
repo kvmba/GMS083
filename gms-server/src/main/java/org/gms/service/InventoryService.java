@@ -322,6 +322,9 @@ public class InventoryService {
                 data.setQuantity((short) 1);
             }
             InventoryEquipRtnDTO equipment = data.getInventoryEquipment();
+            if (equipment == null) {
+                equipment = new InventoryEquipRtnDTO();
+            }
             inventoryequipmentMapper.updateByQuery(InventoryequipmentDO.builder()
                             .upgradeslots(Optional.ofNullable(equipment.getUpgradeSlots()).map(Byte::intValue).orElse(null))
                             .level(Optional.ofNullable(equipment.getLevel()).map(Byte::intValue).orElse(null))
@@ -371,6 +374,14 @@ public class InventoryService {
             character.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(3, item))));
         } else {
             InventoryitemsDO inventoryitemsDO = getModifyItemOffline(data);
+            if (inventoryitemsDO.getPetid() != null) {
+                petsMapper.deleteById(inventoryitemsDO.getPetid());
+                CashIdGenerator.freeCashId(inventoryitemsDO.getPetid());
+            }
+            InventoryequipmentDO inventoryequipmentDO = inventoryequipmentMapper.selectOneByQuery(QueryWrapper.create().where(INVENTORYEQUIPMENT_D_O.INVENTORYITEMID.eq(inventoryitemsDO.getInventoryitemid())));
+            if (inventoryequipmentDO != null && inventoryequipmentDO.getRingid() != null) {
+                ringsMapper.deleteById(inventoryequipmentDO.getRingid());
+            }
             inventoryequipmentMapper.deleteByQuery(QueryWrapper.create().where(INVENTORYEQUIPMENT_D_O.INVENTORYITEMID.eq(inventoryitemsDO.getInventoryitemid())));
             inventoryitemsMapper.deleteById(inventoryitemsDO.getInventoryitemid());
         }
