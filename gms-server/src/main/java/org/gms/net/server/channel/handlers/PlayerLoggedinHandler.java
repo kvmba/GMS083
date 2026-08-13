@@ -117,6 +117,7 @@ public final class PlayerLoggedinHandler extends AbstractPacketHandler {
         if (!c.tryacquireClient()) {
             // thanks MedicOP for assisting on concurrency protection here
             c.sendPacket(PacketCreator.getAfterLoginError(10));
+            return;
         }
 
         try {
