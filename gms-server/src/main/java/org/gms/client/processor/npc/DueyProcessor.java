@@ -345,6 +345,18 @@ public class DueyProcessor {
                     return;
                 }
 
+                // 预校验物品:避免先扣费建包再校验失败导致费用损失
+                if (invTypeId > 0) {
+                    ItemInformationProvider ii = ItemInformationProvider.getInstance();
+                    InventoryType invType = InventoryType.getByType(invTypeId);
+                    Inventory inv = c.getPlayer().getInventory(invType);
+                    Item preItem = inv.getItem(itemPos);
+                    if (preItem == null || preItem.getQuantity() < amount || preItem.isUntradeable() || ii.isUnmerchable(preItem.getItemId())) {
+                        c.sendPacket(PacketCreator.sendDueyMSG(DueyProcessor.Actions.TOCLIENT_SEND_INCORRECT_REQUEST.getCode()));
+                        return;
+                    }
+                }
+
                 if (quick) {
                     InventoryManipulator.removeById(c, InventoryType.CASH, ItemId.QUICK_DELIVERY_TICKET, (short) 1, false, false);
                 }
