@@ -242,6 +242,7 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
                 }
                 eq = player.getInventory(InventoryType.EQUIPPED).getItem((short) equipSlot);
                 if (eq == null) {
+                    player.dropMessage(1, I18nUtil.getMessage("Error.Handler.invalidRequest"));
                     c.enableActions();
                     return;
                 }
@@ -642,6 +643,7 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
             p.readInt(); // 读取一个整数，但未使用
             final Equip equip = (Equip) player.getInventory(InventoryType.EQUIP).getItem((short) itemSlot); // 获取指定槽位的装备
             if (equip == null) {
+                player.dropMessage(1, I18nUtil.getMessage("Error.Handler.invalidRequest"));
                 c.enableActions();
                 return;
             }

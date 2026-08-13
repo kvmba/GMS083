@@ -185,6 +185,7 @@ public final class GuildOperationHandler extends AbstractPacketHandler {
                 name = p.readString();
                 if (mc.getGuildId() <= 0 || mc.getGuildRank() > 2) {
                     log.warn("[Hack] Chr {} is trying to expel without rank 1 or 2", mc.getName());
+                    mc.dropMessage(1, I18nUtil.getMessage("Error.Handler.invalidRequest"));
                     return;
                 }
 

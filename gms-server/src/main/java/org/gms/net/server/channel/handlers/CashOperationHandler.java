@@ -45,6 +45,7 @@ import org.gms.server.CashShop;
 import org.gms.server.CashShop.CashItemFactory;
 import org.gms.server.ItemInformationProvider;
 import org.gms.service.NoteService;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Pair;
 
@@ -353,6 +354,7 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                         String text = p.readString();
                         ModifiedCashItemDO itemRing = CashItemFactory.getItem(SN);
                         if (!canBuy(chr, itemRing, cs.getCash(toCharge))) {
+                            chr.dropMessage(1, I18nUtil.getMessage("Error.Handler.invalidRequest"));
                             c.enableCSActions();
                             return;
                         }
@@ -423,6 +425,7 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                         int snID = p.readInt();
                         ModifiedCashItemDO itemRing = CashItemFactory.getItem(snID);
                         if (!canBuy(chr, itemRing, cs.getCash(payment))) {
+                            chr.dropMessage(1, I18nUtil.getMessage("Error.Handler.invalidRequest"));
                             c.enableCSActions();
                             return;
                         }

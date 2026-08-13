@@ -34,6 +34,7 @@ import org.gms.net.server.world.Party;
 import org.gms.net.server.world.PartyCharacter;
 import org.gms.net.server.world.PartyOperation;
 import org.gms.net.server.world.World;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 
 import java.util.List;
@@ -119,10 +120,12 @@ public final class PartyOperationHandler extends AbstractPacketHandler {
             case 6: { // change leader
                 int newLeader = p.readInt();
                 if (party == null || party.getLeaderId() != player.getId()) {
+                    player.dropMessage(1, I18nUtil.getMessage("Error.Handler.invalidRequest"));
                     return;
                 }
                 PartyCharacter newLeadr = party.getMemberById(newLeader);
                 if (newLeadr == null) {
+                    player.dropMessage(1, I18nUtil.getMessage("Error.Handler.invalidRequest"));
                     return;
                 }
                 world.updateParty(party.getId(), PartyOperation.CHANGE_LEADER, newLeadr);
