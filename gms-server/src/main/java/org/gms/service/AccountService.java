@@ -14,6 +14,7 @@ import org.gms.model.dto.AddAccountDTO;
 import org.gms.model.dto.UpdateAccountByGmDTO;
 import org.gms.model.dto.UpdateAccountByUserDTO;
 import org.gms.net.server.Server;
+import org.gms.net.server.world.World;
 import org.gms.util.BCrypt;
 import org.gms.util.HexTool;
 import org.gms.util.I18nUtil;
@@ -22,6 +23,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -186,6 +188,7 @@ public class AccountService {
         accountsMapper.update(account);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void banAccount(int accountId, String reason) {
         RequireUtil.requireNotNull(findById(accountId), I18nUtil.getExceptionMessage("AccountService.id.NotExist"));
 
@@ -198,11 +201,11 @@ public class AccountService {
         // 遍历账号下的角色，如果在线，追封客户端/Mac/IP
         List<CharactersDO> characterList = charactersMapper.selectIdAndWorldListByAccountId(accountId); // 仅查询角色ID和所在world
         for (CharactersDO chr : characterList) {
-            Character player = Server.getInstance()
-                    .getWorlds()
-                    .get(chr.getWorld())
-                    .getPlayerStorage()
-                    .getCharacterById(chr.getId());
+            World world = Server.getInstance().getWorld(chr.getWorld());
+            if (world == null) {
+                continue;
+            }
+            Character player = world.getPlayerStorage().getCharacterById(chr.getId());
             if (player == null) continue; // 角色离线
             player.setBanned(true);
             Client c = player.getClient(); // 角色在线，获取客户端
