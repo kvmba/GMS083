@@ -86,37 +86,44 @@ function loadCategoryItems(categoryId) {
     
     try {
         var con = DatabaseConnection.getConnection();
-        // 构建动态SQL：用多个 BETWEEN OR 连接
-        var sql = "SELECT itemid FROM drop_data WHERE ";
-        var conditions = [];
-        var params = [];
-        for (var i = 0; i < category.ranges.length; i++) {
-            conditions.push("(itemid BETWEEN ? AND ?)");
-            params.push(category.ranges[i][0], category.ranges[i][1]);
-        }
-        sql += conditions.join(" OR ");
-        sql += " GROUP BY itemid LIMIT 200"; // 最多取200个物品
-        
-        var ps = con.prepareStatement(sql);
-        for (var i = 0; i < params.length; i++) {
-            ps.setInt(i+1, params[i]);
-        }
-        var rs = ps.executeQuery();
-        
-        while (rs.next()) {
-            var itemId = rs.getInt("itemid");
-            var itemName = ItemInformationProvider.getInstance().getName(itemId);
-            if (itemName != null && itemName != "MISSINGNO") {
-                categoryItems.push({
-                    id: itemId,
-                    name: itemName
-                });
+        try {
+            // 构建动态SQL：用多个 BETWEEN OR 连接
+            var sql = "SELECT itemid FROM drop_data WHERE ";
+            var conditions = [];
+            var params = [];
+            for (var i = 0; i < category.ranges.length; i++) {
+                conditions.push("(itemid BETWEEN ? AND ?)");
+                params.push(category.ranges[i][0], category.ranges[i][1]);
             }
+            sql += conditions.join(" OR ");
+            sql += " GROUP BY itemid LIMIT 200"; // 最多取200个物品
+
+            var ps = con.prepareStatement(sql);
+            try {
+                for (var i = 0; i < params.length; i++) {
+                    ps.setInt(i+1, params[i]);
+                }
+                var rs = ps.executeQuery();
+                try {
+                    while (rs.next()) {
+                        var itemId = rs.getInt("itemid");
+                        var itemName = ItemInformationProvider.getInstance().getName(itemId);
+                        if (itemName != null && itemName != "MISSINGNO") {
+                            categoryItems.push({
+                                id: itemId,
+                                name: itemName
+                            });
+                        }
+                    }
+                } finally {
+                    rs.close();
+                }
+            } finally {
+                ps.close();
+            }
+        } finally {
+            con.close();
         }
-        
-        rs.close();
-        ps.close();
-        con.close();
         
         if (categoryItems.length == 0) {
             cm.sendOkLevel('levelStart', "#r该分类下没有找到有掉落记录的物品。#k", 2);
