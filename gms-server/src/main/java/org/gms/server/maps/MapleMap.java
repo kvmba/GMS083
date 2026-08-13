@@ -676,7 +676,7 @@ public class MapleMap {
                     pos.x = mobpos + ((d % 2 == 0) ? (25 * ((d + 1) / 2)) : -(25 * (d / 2)));
                 }
                 if (de.itemId == 0) { // meso
-                    int mesos = Randomizer.nextInt(de.Maximum - de.Minimum) + de.Minimum;
+                    int mesos = (de.Maximum != 1 && de.Maximum > de.Minimum) ? Randomizer.nextInt(de.Maximum - de.Minimum) + de.Minimum : de.Maximum;
 
                     if (mesos > 0) {
                         if (chr.getBuffedValue(BuffStat.MESOUP) != null) {
