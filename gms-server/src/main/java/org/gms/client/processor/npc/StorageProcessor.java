@@ -66,7 +66,7 @@ public class StorageProcessor {
                 case 4: { // Take out
                     byte type = p.readByte();
                     byte slot = p.readByte();
-                    if (slot < 0 || slot > storage.getSlots()) { // removal starts at zero
+                    if (slot < 0 || slot >= storage.getSlots()) { // removal starts at zero
                         AutobanFactory.PACKET_EDIT.alert(c.getPlayer(), c.getPlayer().getName() + " tried to packet edit with storage.");
                         log.warn("Chr {} tried to work with storage slot {}", c.getPlayer().getName(), slot);
                         c.disconnect(true, false);
