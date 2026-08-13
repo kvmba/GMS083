@@ -144,11 +144,11 @@ public class Shop {
 
             } else if (c.getPlayer().getInventory(InventoryType.CASH).countById(token) != 0) {
                 int amount = c.getPlayer().getInventory(InventoryType.CASH).countById(token);
-                int value = amount * tokenvalue;
-                int cost = item.getPrice() * quantity;
-                if (c.getPlayer().getMeso() + value >= cost) {
-                    int cardreduce = value - cost;
-                    int diff = cardreduce + c.getPlayer().getMeso();
+                long value = (long) amount * tokenvalue;
+                long cost = Math.min((long) item.getPrice() * quantity, Integer.MAX_VALUE);
+                if ((long) c.getPlayer().getMeso() + value >= cost) {
+                    long cardreduce = value - cost;
+                    int diff = (int) Math.min(cardreduce, Integer.MAX_VALUE);
                     if (InventoryManipulator.checkSpace(c, itemId, quantity, "")) {
                         if (ItemConstants.isPet(itemId)) {
                             int petid = Pet.createPet(itemId);
