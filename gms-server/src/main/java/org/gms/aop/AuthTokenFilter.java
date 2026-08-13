@@ -48,6 +48,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             // 测试token，所以生产环境一定要把swagger关掉，否则裸奔
             if (springDocConfigProperties != null && swaggerUiConfigProperties != null && "swagger".equals(jwt) && springDocConfigProperties.getApiDocs().isEnabled() && swaggerUiConfigProperties.isEnabled()) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername("admin");
+                if (userDetails == null) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                    return;
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -57,6 +61,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (userDetails == null) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                    return;
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -67,7 +75,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             logger.error("Filter error", e);
             // 释放流，否则可能内存泄漏
             request.getInputStream().close();
-            response.getOutputStream().close();
+            try {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            } catch (IOException ignored) {
+            }
             return;
         }
         filterChain.doFilter(request, response);
