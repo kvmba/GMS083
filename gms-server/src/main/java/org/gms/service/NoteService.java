@@ -68,12 +68,20 @@ public class NoteService {
     /**
      * Delete a read note
      *
-     * @param noteId Id of note to discard
+     * @param noteId        Id of note to discard
+     * @param recipientName Name of the character requesting the discard
      * @return Discarded note. Empty optional if failed to discard.
      */
-    public Optional<NotesDO> delete(int noteId) {
+    public Optional<NotesDO> delete(int noteId, String recipientName) {
         try {
             NotesDO notesDO = notesMapper.selectOneById(noteId);
+            if (notesDO == null) {
+                return Optional.empty();
+            }
+            if (!notesDO.getTo().equals(recipientName)) {
+                log.warn("Character {} tried to discard note {} which does not belong to them", recipientName, noteId);
+                return Optional.empty();
+            }
             notesMapper.deleteById(noteId);
             return Optional.of(notesDO);
         } catch (Exception e) {
