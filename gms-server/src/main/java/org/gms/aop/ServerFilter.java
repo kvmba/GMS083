@@ -57,7 +57,7 @@ public class ServerFilter extends HttpFilter {
 
             // 限流
             if (!RateLimitUtil.getInstance().check(remoteAddr)) {
-                response.sendError(HttpServletResponse.SC_TOO_MANY_REQUESTS, "Too many requests");
+                response.sendError(429, "Too many requests");
                 log.warn("IP {} has reached rate limit.", remoteAddr);
                 return;
             }
