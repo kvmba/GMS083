@@ -32,7 +32,7 @@ import org.gms.server.quest.QuestActionType;
 public class PetSpeedAction extends AbstractQuestAction {
 
     public PetSpeedAction(Quest quest, Data data) {
-        super(QuestActionType.PETTAMENESS, quest);
+        super(QuestActionType.PETSPEED, quest);
         questID = quest.getId();
     }
 
