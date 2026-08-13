@@ -146,10 +146,12 @@ public class CharacterService {
             extendValueMapper.update(data);
         }
 
-        Character character = getCharacter(data);
-        character.resetPlayerRates();
-        character.setWorldRates();
-        character.setCouponRates();
+        Character character = findOnlineCharacter(data);
+        if (character != null) {
+            character.resetPlayerRates();
+            character.setWorldRates();
+            character.setCouponRates();
+        }
     }
 
     public void resetRate(ExtendValueDO data) {
@@ -158,10 +160,12 @@ public class CharacterService {
                 .where(EXTEND_VALUE_D_O.EXTEND_ID.eq(data.getExtendId()))
                 .and(EXTEND_VALUE_D_O.EXTEND_TYPE.eq(ExtendType.CHARACTER_EXTEND.getType()))
                 .and(EXTEND_VALUE_D_O.EXTEND_NAME.eq(data.getExtendName())));
-        Character character = getCharacter(data);
-        character.resetPlayerRates();
-        character.setWorldRates();
-        character.setCouponRates();
+        Character character = findOnlineCharacter(data);
+        if (character != null) {
+            character.resetPlayerRates();
+            character.setWorldRates();
+            character.setCouponRates();
+        }
     }
 
     public void resetRates(ExtendValueDO data) {
@@ -170,10 +174,12 @@ public class CharacterService {
                 .where(EXTEND_VALUE_D_O.EXTEND_ID.eq(data.getExtendId()))
                 .and(EXTEND_VALUE_D_O.EXTEND_TYPE.eq(ExtendType.CHARACTER_EXTEND.getType()))
                 .and(EXTEND_VALUE_D_O.EXTEND_NAME.in("expRate", "dropRate", "mesoRate")));
-        Character character = getCharacter(data);
-        character.resetPlayerRates();
-        character.setWorldRates();
-        character.setCouponRates();
+        Character character = findOnlineCharacter(data);
+        if (character != null) {
+            character.resetPlayerRates();
+            character.setWorldRates();
+            character.setCouponRates();
+        }
     }
 
     public void resetMerchant() {
@@ -620,7 +626,7 @@ public class CharacterService {
         RequireUtil.requireNotEmpty(data.getExtendName(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_EMPTY", "extendName"));
     }
 
-    private Character getCharacter(ExtendValueDO data) {
+    private Character findOnlineCharacter(ExtendValueDO data) {
         for (World world : Server.getInstance().getWorlds()) {
             for (Character character : world.getPlayerStorage().getAllCharacters()) {
                 if (ExtendType.isAccount(data.getExtendType()) && Objects.equals(String.valueOf(character.getAccountId()), data.getExtendId())) {
@@ -632,6 +638,6 @@ public class CharacterService {
                 }
             }
         }
-        throw BizException.illegalArgument(I18nUtil.getExceptionMessage("CharacterService.getCharacter.exception1"));
+        return null;
     }
 }
