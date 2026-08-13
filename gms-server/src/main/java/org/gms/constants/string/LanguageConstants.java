@@ -107,6 +107,10 @@ public class LanguageConstants {
     }
 
     public static String getMessage(Character chr, String[] message) {
-        return message[chr.getClient().getLanguage()];
+        int language = chr.getClient().getLanguage();
+        if (language < 0 || language >= message.length) {
+            return message.length > 0 ? message[0] : "";
+        }
+        return message[language];
     }
 }
