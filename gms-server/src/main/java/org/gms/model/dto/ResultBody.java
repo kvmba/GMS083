@@ -62,7 +62,7 @@ public class ResultBody<T> {
         String method = req.getMethod();
         String contentType = req.getContentType();
         ResultBody<T> rb = new ResultBody<>();
-        if (RequestMethod.POST.name().equals(method) && contentType.contains("application/json")) {
+        if (RequestMethod.POST.name().equals(method) && contentType != null && contentType.contains("application/json")) {
             StringBuilder body = new StringBuilder();
             try (BufferedReader reader = req.getReader()) {
                 String line;
