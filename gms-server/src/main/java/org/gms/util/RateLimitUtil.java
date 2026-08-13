@@ -6,24 +6,28 @@ import org.gms.model.pojo.RateLimitContext;
 import org.gms.property.ServiceProperty;
 import org.gms.service.AccountService;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class RateLimitUtil {
-    private static RateLimitUtil instance;
+    private static volatile RateLimitUtil instance;
     private final ServiceProperty.RateLimitProperty rateLimitProperty;
     private final Map<String, RateLimitContext> contextMap;
 
     private RateLimitUtil() {
         rateLimitProperty = ServerManager.getApplicationContext().getBean(ServiceProperty.class).getRateLimit();
-        contextMap = new HashMap<>();
+        contextMap = new ConcurrentHashMap<>();
     }
 
     public static RateLimitUtil getInstance() {
         if (instance == null) {
-            instance = new RateLimitUtil();
+            synchronized (RateLimitUtil.class) {
+                if (instance == null) {
+                    instance = new RateLimitUtil();
+                }
+            }
         }
         return instance;
     }
