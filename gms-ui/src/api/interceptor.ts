@@ -37,7 +37,7 @@ axios.interceptors.request.use(
       }
       config.headers.Authorization = `Bearer ${token}`;
     }
-    const isUpload = config.headers?.['Content-type'] === 'multipart/form-data';
+    const isUpload = config.data instanceof FormData || config.headers?.['Content-Type'] === 'multipart/form-data';
     if (config.data && !isUpload) {
       config.data = {
         requestId: generateUUID(),
@@ -63,15 +63,39 @@ axios.interceptors.response.use(
         });
         return Promise.reject(new Error(response.statusText || 'Error'));
       }
+      // 业务错误会以200+JSON返回,优先嗅探避免把错误信息当文件下载
+      if (res.type === 'application/json') {
+        res.text().then((text) => {
+          try {
+            const err = JSON.parse(text);
+            Message.error({
+              content: err.message || '导出失败',
+              duration: 5 * 1000,
+            });
+          } catch (e) {
+            Message.error({
+              content: '导出失败',
+              duration: 5 * 1000,
+            });
+          }
+        });
+        return Promise.reject(new Error('导出失败'));
+      }
       const url = window.URL.createObjectURL(new Blob([res]));
       const link = document.createElement('a');
       link.href = url;
       // 从Content-Disposition中获取文件名
+      const disposition = response.headers['content-disposition'];
+      let filename = 'download';
+      if (disposition) {
+        const match = disposition.split('filename=')[1];
+        if (match) {
+          filename = decodeURIComponent(match.replace(/"/g, ''));
+        }
+      }
       link.setAttribute(
         'download',
-        response.headers['content-disposition']
-          .split('filename=')[1]
-          .replace(/"/g, '')
+        filename
       );
       document.body.appendChild(link);
       link.click();
