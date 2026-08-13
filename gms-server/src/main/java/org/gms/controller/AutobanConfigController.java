@@ -1,5 +1,7 @@
 package org.gms.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/autoban")
+@PreAuthorize("hasRole('ADMIN')")
 public class AutobanConfigController {
     private final AutobanConfigService autobanConfigService;
 

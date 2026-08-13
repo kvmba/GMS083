@@ -1,5 +1,7 @@
 package org.gms.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/gachapon")
+@PreAuthorize("hasRole('ADMIN')")
 public class GachaponController {
     @Autowired
     private GachaponService gachaponService;

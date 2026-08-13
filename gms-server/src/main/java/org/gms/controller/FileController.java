@@ -1,5 +1,7 @@
 package org.gms.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -13,6 +15,7 @@ import java.util.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/file")
+@PreAuthorize("hasRole('ADMIN')")
 public class FileController {
     private final FileTreeService fileTreeService;
 

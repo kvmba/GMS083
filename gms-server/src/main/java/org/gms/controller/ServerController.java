@@ -1,5 +1,7 @@
 package org.gms.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -22,6 +24,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/server")
+@PreAuthorize("hasRole('ADMIN')")
 public class ServerController {
     private final ApplicationContext applicationContext;
     private final ServerService serverService;

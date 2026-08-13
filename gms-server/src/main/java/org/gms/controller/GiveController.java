@@ -1,5 +1,7 @@
 package org.gms.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/give")
+@PreAuthorize("hasRole('ADMIN')")
 public class GiveController {
     @Autowired
     private final GiveService giveService;
