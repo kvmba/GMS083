@@ -985,6 +985,11 @@ function action(mode, type, selection) {
         } else if (selection === 30) {
             beauty = 1;
             var currentBaseHair = parseInt(cm.getPlayer().getHair() / 10) * 10;
+            if (!hairColors[currentBaseHair]) {
+                cm.sendOk("该发型暂不支持染发！");
+                cm.dispose();
+                return;
+            }
             for (var i = 0; i < hairColors[currentBaseHair].length; i++) {
                 newHairs.push(currentBaseHair + hairColors[currentBaseHair][i]);
             }
@@ -993,6 +998,11 @@ function action(mode, type, selection) {
             beauty = 2;
             var currentColor = cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100);
             var currentBaseFace = cm.getPlayer().getFace() - currentColor;
+            if (!faceColors[currentBaseFace]) {
+                cm.sendOk("该脸型暂不支持改色！");
+                cm.dispose();
+                return;
+            }
             for (var i = 0; i < faceColors[currentBaseFace].length; i++) {
                 newFaces.push(currentBaseFace + faceColors[currentBaseFace][i]);
             }
@@ -1009,5 +1019,7 @@ function action(mode, type, selection) {
         } else if (beauty == 3) {
             cm.setSkin(skins[selection]);
         }
+        cm.sendOk("形象修改成功！");
+        cm.dispose();
     }
 }
