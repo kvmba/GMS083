@@ -41,7 +41,7 @@ public class CharacterController {
 
     @Tag(name = "/character/" + ApiConstant.LATEST)
     @Operation(summary = "重置玩家个人所有倍率")
-    @GetMapping("/" + ApiConstant.LATEST + "/resetRates")
+    @PostMapping("/" + ApiConstant.LATEST + "/resetRates")
     public ResultBody<Object> resetRates(@RequestBody SubmitBody<ExtendValueDO> submitBody) {
         characterService.resetRates(submitBody.getData());
         return ResultBody.success();
