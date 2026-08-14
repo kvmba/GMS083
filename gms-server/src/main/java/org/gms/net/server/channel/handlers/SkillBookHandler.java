@@ -84,7 +84,7 @@ public final class SkillBookHandler extends AbstractPacketHandler {
                     canuse = true;
                     if (ItemInformationProvider.rollSuccessChance(skilldata.get("success"))) {
                         success = true;
-                        player.changeSkillLevel(skill2, player.getSkillLevel(skill2), Math.max(skilldata.get("masterLevel"), player.getMasterLevel(skill2)), -1);
+                        player.changeSkillLevel(skill2, player.getBaseSkillLevel(skill2), Math.max(skilldata.get("masterLevel"), player.getMasterLevel(skill2)), -1);
                     } else {
                         success = false;
                         //player.dropMessage("技能书发光了，但技能却毫无反应。");

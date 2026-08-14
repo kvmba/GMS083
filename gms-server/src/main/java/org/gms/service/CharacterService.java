@@ -579,6 +579,7 @@ public class CharacterService {
         }
         chr.setStorage(accountStorage);
         chr.reapplyLocalStats();
+        chr.applyEquipSkillBonus();   // 已穿戴的永恒/重生装备技能加成
         chr.changeHpMp(charactersDO.getHp(), charactersDO.getMp(), true);
         return chr;
     }
