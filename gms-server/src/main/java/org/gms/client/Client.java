@@ -652,10 +652,6 @@ public class Client extends ChannelInboundHandlerAdapter {
 
     public int login(String login, String pwd, Hwid hwid) {
         int loginok = 5;
-        long loginStart = System.currentTimeMillis();
-        long loginDbTime = 0;
-        long loginBcryptTime = 0;
-        long loginSessTime;
 
         loginattempt++;
         if (loginattempt > 4) {
@@ -667,7 +663,6 @@ public class Client extends ChannelInboundHandlerAdapter {
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement("SELECT id, password, gender, banned, pin, pic, characterslots, tos, language FROM accounts WHERE name = ?")) {
             ps.setString(1, login);
-            loginDbTime = System.currentTimeMillis() - loginStart;   // 建连+预编译
 
             try (ResultSet rs = ps.executeQuery()) {
                 accId = -2;
@@ -687,7 +682,6 @@ public class Client extends ChannelInboundHandlerAdapter {
                     lang = rs.getInt("language");
                     String passhash = rs.getString("password");
                     byte tos = rs.getByte("tos");
-                    loginDbTime = System.currentTimeMillis() - loginStart;   // 建连+预编译+查询+结果读取
 
                     if (banned) {
                         return 3;
@@ -713,13 +707,6 @@ public class Client extends ChannelInboundHandlerAdapter {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-
-        loginBcryptTime = System.currentTimeMillis() - loginStart - loginDbTime;
-        loginSessTime = System.currentTimeMillis() - loginStart - loginDbTime - loginBcryptTime;
-        long loginTotal = System.currentTimeMillis() - loginStart;
-        if (loginTotal > 2000) {
-            log.info("登录分段耗时 账号[{}] DB{}ms 密码校验{}ms 会话检查{}ms 合计{}ms", login, loginDbTime, loginBcryptTime, loginSessTime, loginTotal);
         }
 
         if (loginok == 0 || loginok == 4) {
