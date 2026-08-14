@@ -86,13 +86,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -126,12 +126,7 @@ public class Client extends ChannelInboundHandlerAdapter {
     private volatile long lastPong;
     private int gmlevel;
     private Set<String> macs = new HashSet<>();
-    private Map<String, ScriptEngine> engines = new LinkedHashMap<String, ScriptEngine>(16, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, ScriptEngine> eldest) {
-            return size() > 32;
-        }
-    };
+    private final Map<String, ScriptEngine> engines = new ConcurrentHashMap<>();
     private byte characterSlots = 3;
     private byte loginattempt = 0;
     private String pin = "";
@@ -1217,15 +1212,23 @@ public class Client extends ChannelInboundHandlerAdapter {
         gmlevel = level;
     }
 
-    public synchronized void setScriptEngine(String name, ScriptEngine e) {
+    public void setScriptEngine(String name, ScriptEngine e) {
         engines.put(name, e);
+        // 封顶每客户端缓存的 GraalJS 引擎数量,防止长时间在线逛图玩家内存无界增长。
+        // 逐出任一条(引擎仅是缓存,逐出后下次对话重建,无功能影响)。
+        if (engines.size() > 32) {
+            Iterator<String> it = engines.keySet().iterator();
+            if (it.hasNext()) {
+                engines.remove(it.next());
+            }
+        }
     }
 
-    public synchronized ScriptEngine getScriptEngine(String name) {
+    public ScriptEngine getScriptEngine(String name) {
         return engines.get(name);
     }
 
-    public synchronized void removeScriptEngine(String name) {
+    public void removeScriptEngine(String name) {
         engines.remove(name);
     }
 
