@@ -652,6 +652,10 @@ public class Client extends ChannelInboundHandlerAdapter {
 
     public int login(String login, String pwd, Hwid hwid) {
         int loginok = 5;
+        long loginStart = System.currentTimeMillis();
+        long loginDbTime;
+        long loginBcryptTime;
+        long loginSessTime;
 
         loginattempt++;
         if (loginattempt > 4) {
@@ -663,6 +667,7 @@ public class Client extends ChannelInboundHandlerAdapter {
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement("SELECT id, password, gender, banned, pin, pic, characterslots, tos, language FROM accounts WHERE name = ?")) {
             ps.setString(1, login);
+            loginDbTime = System.currentTimeMillis() - loginStart;
 
             try (ResultSet rs = ps.executeQuery()) {
                 accId = -2;
@@ -691,14 +696,18 @@ public class Client extends ChannelInboundHandlerAdapter {
                         loggedIn = false;
                         loginok = 7;
                     } else if (GameConfig.getServerBoolean("use_debug") && GameConfig.getServerBoolean("no_password")) {
+                        loginBcryptTime = System.currentTimeMillis() - loginStart - loginDbTime;
                         return 0;
                     } else if (passhash.charAt(0) == '$' && passhash.charAt(1) == '2' && BCrypt.checkpw(pwd, passhash)) {
+                        loginBcryptTime = System.currentTimeMillis() - loginStart - loginDbTime;
                         loginok = (tos == 0) ? 23 : 0;
                     } else if (pwd.equals(passhash) || checkHash(passhash, "SHA-1", pwd) || checkHash(passhash, "SHA-512", pwd)) {
                         // thanks GabrielSin for detecting some no-bcrypt inconsistencies here
+                        loginBcryptTime = System.currentTimeMillis() - loginStart - loginDbTime;
                         loginok = (tos == 0) ? (!GameConfig.getServerBoolean("bcrypt_migration") ? 23 : -23) : (!GameConfig.getServerBoolean("bcrypt_migration") ? 0 : -10); // migrate to bcrypt
                     } else {
                         loggedIn = false;
+                        loginBcryptTime = System.currentTimeMillis() - loginStart - loginDbTime;
                         loginok = 4;
                     }
                 } else {
@@ -707,6 +716,12 @@ public class Client extends ChannelInboundHandlerAdapter {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+
+        loginSessTime = System.currentTimeMillis() - loginStart - loginDbTime - loginBcryptTime;
+        long loginTotal = System.currentTimeMillis() - loginStart;
+        if (loginTotal > 2000) {
+            log.info("登录分段耗时 账号[{}] DB{}ms 密码校验{}ms 会话检查{}ms 合计{}ms", login, loginDbTime, loginBcryptTime, loginSessTime, loginTotal);
         }
 
         if (loginok == 0 || loginok == 4) {
