@@ -98,8 +98,8 @@ function action(mode, type, selection) {
             cm.sendOk("你还不能离开！你需要点击Pelvis Bebop并得到他的许可，然后我才能让你离开。");
             cm.dispose();
         } else if (hasGoldenLeaf && hasRing) {
-            var choice = Array("Go to the Afterparty", "What should I be doing");
-            var msg = "What can I help you with?#b";
+            var choice = Array("去参加聚会 ", "我该怎么办");
+            var msg = "我能帮你什么忙吗?#b";
             for (i = 0; i < choice.length; i++) {
                 msg += "\r\n#L" + i + "#" + choice[i] + "#l";
             }
@@ -122,13 +122,13 @@ function action(mode, type, selection) {
                     eim.warpEventTeam(680000300);
                     cm.sendOk("享受吧！永远珍惜你的照片！");
                     if (cmPartner != null) {
-                        cmPartner.npcTalk(cm.getNpc(), "Enjoy! Cherish your Photos Forever!");
+                        cmPartner.npcTalk(cm.getNpc(), "享受吧！永远珍惜你的照片！");
                     }
                 } else {    // skip the party-time (premium only)
                     eim.warpEventTeam(680000500);
                     cm.sendOk("恭喜新婚！我会护送你到出口。");
                     if (cmPartner != null) {
-                        cmPartner.npcTalk(cm.getNpc(), "Congratulations for the newly-wed! I will escort you to the exit.");
+                        cmPartner.npcTalk(cm.getNpc(), "恭喜新婚！我陪你到出口。");
                     }
                 }
 

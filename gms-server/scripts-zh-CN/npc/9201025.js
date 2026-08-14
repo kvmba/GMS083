@@ -115,7 +115,7 @@ function action(mode, type, selection) {
             if (!cm.haveItem(4031367 + nanaLoc, 1)) {
                 if (cm.isQuestCompleted(100401 + nanaLoc)) {
                     state = 1;
-                    cm.sendAcceptDecline("Did you lost the #k#t4031367##k I gave to you? Well, I can share another one with you, but you will need to redo the favor I asked last time, is that ok? I need you to bring me #r50 #t" + questItems[nanaLoc] + "#'s.#k");
+                    cm.sendAcceptDecline("我给了你#k#t4031367##k 你是不是丢了 ? 好吧，我可以再和你分享一个，但你需要重做我上次问你的那件事，可以吗？我需要你带我来 #r50 #t" + questItems[nanaLoc] + "#'s.#k");
                 } else if (cm.isQuestStarted(100401 + nanaLoc)) {
                     if (processNanaQuest()) {
                         cm.gainExp(questExp[nanaLoc] * cm.getPlayer().getExpRate());
@@ -125,7 +125,7 @@ function action(mode, type, selection) {
                     cm.dispose();
                 } else {
                     state = 0;
-                    cm.sendAcceptDecline("Are you searching for #k#t4031367#'s#k? I can share one with you, but you must do a favor for me, is that ok?");
+                    cm.sendAcceptDecline("你在找#k#t4031367#吗？我可以分享一个给你，但你必须帮我做一件事，可以吗？");
                 }
             } else {
                 cm.sendOk("嘿，你好。你已经从其他娜娜那里得到了#t4031367#了吗？");

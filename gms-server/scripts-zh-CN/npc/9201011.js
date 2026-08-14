@@ -151,7 +151,7 @@ function action(mode, type, selection) {
                 var wstg = eim.getIntProperty("weddingStage");
 
                 if (wstg == 2) {
-"Awhoooooooooosh~, the guests have proclaimed their love to y'all. The time has come baby~, #rshould I make you Husband and Wife#k?"
+"哦哦哦哦哦哦，客人们已经向你们宣布了他们的爱。现在是时候了，宝贝，我该让你做夫妻吗？"
                     state = 1;
                 } else if (wstg == 1) {
                     cm.sendOk("哇-等一下，好吗？你的客人们正在给你们表达爱意。让我们来点动感，宝贝~~。");
@@ -179,7 +179,7 @@ function action(mode, type, selection) {
                     cm.sendOk("哇哦！现在这对夫妇的爱就像一个超级大闪亮的心一样！而且它将在这个节日之后继续下去。请准备好参加派对，宝贝~。跟着新婚夫妇的步伐走吧！");
                     cm.dispose();
                 } else {
-"It's now guys... Stay with your eyes and ears keened up! They are about to smooch it all over the place!!!"
+"就是现在，各位……睁大眼睛竖起耳朵！他们马上就要当众亲热了！！！"
                     cm.dispose();
                 }
             }
@@ -249,12 +249,12 @@ function action(mode, type, selection) {
 
                                         giveCoupleBlessings(eim, player, partner);
 
-                                        cm.getMap().dropMessage(6, "Wayne: I'll call it out right now, and it shall go on: you guys are the key of the other's lock, a lace of a pendant. That's it, snog yourselves!");
+                                        cm.getMap().dropMessage(6, "韦恩：我现在就说出来，然后继续说：你们是对方锁的钥匙，一个吊坠的花边。就这样，亲自己！");
                                         eim.schedule("showMarriedMsg", 2 * 1000);
                                     }
                                 } else {
                                     eim.setIntProperty("confirmedVows", player.getId());
-                                    cm.getMap().dropMessage(6, "Wedding Assistant: " + player.getName() + " has confirmed vows! Alright, one step away to make it official. Tighten your seatbelts!");
+                                    cm.getMap().dropMessage(6, "婚礼助理：" + player.getName() + " 已确认誓言！好，离正式成婚只差一步了。系好安全带！");
                                 }
 
                                 break;

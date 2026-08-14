@@ -56,8 +56,8 @@ function action(mode, type, selection) {
     }
     if (marriageRoom) {
         if (status == 0) {
-            var talk = "Hi there, welcome to the wedding's Gift Registry. From which spouse's wishlist would you like to take a look?";
-            var options = ["Groom", "Bride"];
+            var talk = "你好，欢迎来到婚礼礼物登记处。你想查看哪一位新人的心愿清单？";
+            var options = ["新郎", "新娘"];
 
             cm.sendSimple(talk + "\r\n\r\n#b" + generateSelectionMenu(options) + "#k");
         } else {
@@ -67,7 +67,7 @@ function action(mode, type, selection) {
     } else {
         if (marriageAction == 2) {     // unclaimed gifts
             if (status == 0) {
-                var talk = "Hi there, it seems you have unclaimed gifts from your wedding. Claim them here on the wedding's Gift Registry reserve.";
+                var talk = "你好，看来你还有婚礼上未领取的礼物。请到婚礼礼物登记处领取。";
                 cm.sendNext(talk);
             } else {
                 cm.sendMarriageGifts(marriageGifts);
@@ -75,8 +75,8 @@ function action(mode, type, selection) {
             }
         } else if (marriageAction == 1) {     // onyx prizes
             if (status == 0) {
-                var msg = "Hello I exchange Onyx Chest for Bride and Groom and the Onyx Chest for prizes!#b";
-                var choice1 = ["I have an Onyx Chest for Bride and Groom", "I have an Onyx Chest"];
+                var msg = "你好，我用黑曜石宝箱兑换新娘和新郎的礼物，也兑换奖品的黑曜石宝箱！#b";
+                var choice1 = ["我有新娘和新郎的黑曜石宝箱", "我有黑曜石宝箱"];
                 for (var i = 0; i < choice1.length; i++) {
                     msg += "\r\n#L" + i + "#" + choice1[i] + "#l";
                 }
