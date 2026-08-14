@@ -107,22 +107,22 @@ function action(mode, type, selection) {
 function ellinMapMessage(mapid) {
     switch (mapid) {
         case 930000000:
-            return "Welcome to the Forest of Poison Haze. Proceed by entering the portal.";
+            return "欢迎来到毒雾森林。进入入口继续。";
 
         case 930000100:
-            return "The #b#o9300172##k have taken the area. We have to eliminate all these contaminated monsters to proceed further.";
+            return " #b#o9300172##k 已经占领了这个地区。我们必须消灭所有这些被污染的怪物才能继续前进。";
 
         case 930000200:
-            return "A great spine has blocked the way ahead. To remove this barrier we must retrieve the poison the #b#o9300173##k carries to deter the overgrown spine. However, the poison in natural state can't be handled, as it is way too concentrated. Use the #bfountain#k over there to dilute it.";
+            return "一根大刺藤挡住了前面的路。为了消除这个障碍，我们必须找回#b#o9300173##k携带的毒素来阻止过度生长的刺藤。然而，天然状态下的毒素无法直接处理，因为它浓度太高了。请利用那边的#b泉水#k将其稀释。";
 
         case 930000300:
-            return "Oh great, you have reached me. We can now proceed further inside the forest.";
+            return "太好了，你找到我了。我们现在可以继续深入森林。";
 
         case 930000400:
-            return "The #b#o9300175##k took over this area. However they are not ordinary monsters, then regrow pretty fast, #rnormal weapon and magic does no harm to it#k at all. We have to purify all these contaminated monsters, using #b#t2270004##k! Let your group leader get me 20 Monster Marbles from them.";
+            return "#b#o9300175##k接管了这个地区。然而它们不是普通的怪物，它们重生得很快，#r普通武器和魔法对它完全无效#k。我们必须用#b#t2270004##k净化所有这些被污染的怪物！让你的组长从我这里拿20个怪物毒珠。";
 
         case 930000600:
-            return "The root of all problems of the forest! Place the obtained Magic Stone on the Altar and prepare yourselves!";
+            return "森林所有问题的根源！把得到的魔法石放在祭坛上，做好准备！";
 
         case 930000700:
             return "This is it, you guys did it! Thank you so much for purifying the forest!!";

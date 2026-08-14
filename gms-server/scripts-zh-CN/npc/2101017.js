@@ -54,14 +54,14 @@ function action(mode, type, selection) {
                     cm.sendSimple("你想做什么？#b\r\n#L1#查看当前成员#l\r\n#L2#禁止成员#l\r\n#L3#开始战斗#l\r\n#L4#离开竞技场#l");
                     status = 1;
                 } else {
-                    var toSend = "Current members inside this arena:\r\n#b";
+                    var toSend = "该竞技场内的当前成员:\r\n#b";
                     toSend += cm.getExpeditionMemberNames(exped);
                     cm.sendOk(toSend);
                     cm.dispose();
                 }
             } else if (status == 1) {
                 if (selection == 1) {
-                    var toSend = "Current members inside this arena:\r\n#b";
+                    var toSend = "该竞技场内的当前成员:\r\n#b";
                     toSend += cm.getExpeditionMemberNames(exped);
                     cm.sendOk(toSend);
                     cm.dispose();
@@ -98,7 +98,7 @@ function action(mode, type, selection) {
                         cm.dispose();
                     }
                 } else if (selection == 4) {
-                    cm.mapMessage(5, "The Leader of the arena left.");
+                    cm.mapMessage(5, "竞技场的队长离开了。");
                     expedicao.warpExpeditionTeam(980010000);
                     cm.endExpedition(expedicao);
                     cm.dispose();

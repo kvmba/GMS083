@@ -47,7 +47,7 @@ function action(mode, type, selection) {
                 var expedicao2 = cm.getExpedition(exped2);
 
                 var channelMaps = cm.getClient().getChannelServer().getMapFactory();
-                var startSnd = "What would you like to do? \r\n\r\n\t#e#r(Choose a Battle Arena)#n#k\r\n#b";
+                var startSnd = "你想做什么？ \r\n\r\n\t#e#r(选择一个战斗竞技场)#n#k\r\n#b";
                 var toSnd = startSnd;
 
                 if (expedicao == null) {
@@ -82,7 +82,7 @@ function action(mode, type, selection) {
                 if (expedicao != null) {
                     enterArena(-1);
                 } else {
-                    cm.sendGetText("Up to how many partipants can join in this match? (2~5 people)");
+                    cm.sendGetText("这场对战最多允许多少名参与者加入？(2~5人)");
                 }
             } else if (status == 2) {
                 var players = parseInt(cm.getText());   // AriantPQ option limit found thanks to NarutoFury (iMrSiN)
@@ -136,7 +136,7 @@ function enterArena(arenaPlayers) {
             var res = cm.createExpedition(exped, true, 0, arenaPlayers);
             if (res == 0) {
                 cm.warp(map, 0);
-                cm.getPlayer().dropMessage("Your arena was created successfully. Wait for people to join the battle.");
+                cm.getPlayer().dropMessage("你的竞技场创建成功。等待人们加入战斗。");
             } else if (res > 0) {
                 cm.sendOk("抱歉，您已经达到了此次远征的尝试配额！请另选他日再试……");
             } else {

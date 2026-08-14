@@ -20,7 +20,7 @@ function action(mode, type, selection) {
             cm.dispose();
         } else {
             // thanks yuxaij for noticing a few methods having parameters not matching the expected Math library function parameter types
-            cm.sendGetNumber("Hey, that's a good idea! I can give you #i4310000#Perfect Pitch for each 100 #i" + exchangeItem + "##t" + exchangeItem + "# you give me. How many do you want? (Current Items: " + cm.itemQuantity(exchangeItem) + ")", Math.min(300, cm.itemQuantity(exchangeItem) / 100), 1, Math.min(300, cm.itemQuantity(exchangeItem) / 100));
+            cm.sendGetNumber("嘿，好主意！每给我100个#i" + exchangeItem + "##t" + exchangeItem + "#，我就给你1个#i4310000#完美音调。你想要多少个？(当前持有: " + cm.itemQuantity(exchangeItem) + ")", Math.min(300, cm.itemQuantity(exchangeItem) / 100), 1, Math.min(300, cm.itemQuantity(exchangeItem) / 100));
         }
     } else if (status == 2) {
         if (selection >= 1 && selection <= cm.itemQuantity(exchangeItem) / 100) {

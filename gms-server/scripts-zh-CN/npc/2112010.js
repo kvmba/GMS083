@@ -99,7 +99,7 @@ function action(mode, type, selection) {
                         cm.sendOk("瞧！这就是马加提亚炼金术研究的顶峰！哈哈哈哈哈……");
                     } else if (state == 0) {
                         cm.sendOk("你们真是一群讨厌的家伙，哎。好吧，我向你们展示我的最新武器，由最优秀的炼金术带来，#r弗兰肯罗伊德#k。");
-                        eim.dropMessage(5, "Yulete: I present you my newest weapon, brought by the finest alchemy, Frankenroid!");
+                        eim.dropMessage(5, "尤利特：我要展示我最新研制的武器，用最精湛的炼金术打造的弗兰肯机器人！");
 
                         var mapobj = eim.getMapInstance(926110401);
                         var bossobj = LifeFactory.getMonster(9300151);
@@ -109,7 +109,7 @@ function action(mode, type, selection) {
                         eim.setIntProperty("yuletePassed", -1);
                     } else {
                         cm.sendOk("你们真是一群讨厌的家伙，唉。好吧，我向你们展示我的最新武器，由阿尔卡德诺和泽尼米斯特最精湛的炼金术结合而成，那些令马加提亚社会中无聊的人们禁止携带的东西，#rmighty Frankenroid#k！");
-                        eim.dropMessage(5, "Yulete: I present you my newest weapon, brought by the finest combined alchemy of Alcadno's and Zenumist's, those that the boring people of Magatia societies have banned to bring along, the mighty Frankenroid!!");
+                        eim.dropMessage(5, "尤利特：我要展示我最新研制的武器，它融合了阿尔卡多与泽努米斯特两大派系的最高炼金术，那些无聊的玛加提亚人早已将其列为禁忌，强大的弗兰肯机器人诞生了！！");
 
                         var mapobj = eim.getMapInstance(926110401);
                         var bossobj = LifeFactory.getMonster(9300152);
