@@ -32,7 +32,7 @@ const ExpeditionType = Java.type('org.gms.server.expeditions.ExpeditionType');
 var exped = ExpeditionType.SHOWA;
 var expedName = "Showa Gang";
 var expedBoss = "The Boss";
-var expedMap = "Nightmarish Last Days";
+var expedMap = "噩梦般的最后时刻";
 var expedItem = 4000138;
 
 var list = "你想做什么？#b\r\n\r\n#L1#查看当前远征队成员#l\r\n#L2#开始战斗！#l\r\n#L3#退出远征队#l";

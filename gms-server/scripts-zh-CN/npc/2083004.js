@@ -32,7 +32,7 @@ var em;
 const ExpeditionType = Java.type('org.gms.server.expeditions.ExpeditionType');
 const exped = ExpeditionType.HORNTAIL;
 var expedName = "Horntail";
-var expedBoss = "mighty Horntail";
+var expedBoss = "强大的暗黑龙王";
 
 var list = "你想做什么？#b\r\n\r\n#L1#查看当前远征队成员#l\r\n#L2#开始战斗！#l\r\n#L3#退出远征队#l";
 

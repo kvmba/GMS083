@@ -28,7 +28,7 @@ function start() {
                 cm.sendOk("这个房间里的武器已经被取走了。");
             }
         } else {
-"Eliminate all Master Guardians."
+"消灭所有的宗师守护者。"
         }
         cm.dispose();
     }

@@ -49,10 +49,10 @@ function action(mode, type, selection) {
                 const GameConstants = Java.type('org.gms.constants.game.GameConstants');
                 var branchJobName = GameConstants.getJobName(pnpc.getJob());
 
-                var rankStr = "Hi, I am #b" + pnpc.getName() + "#k, #r" + GameConstants.ordinal(pnpc.getWorldJobRank()) + "#k in the #r" + branchJobName + "#k class to reach the max level and obtain a statue on " + GameConstants.WORLD_NAMES[cm.getPlayer().getWorld()] + ".\r\n";
-                rankStr += "\r\n    World rank: #e#b" + GameConstants.ordinal(pnpc.getWorldRank()) + "#k#n";
-                rankStr += "\r\n    Overall " + branchJobName + " rank: #e#b" + GameConstants.ordinal(pnpc.getOverallJobRank()) + "#k#n";
-                rankStr += "\r\n    Overall rank: #e#b" + GameConstants.ordinal(pnpc.getOverallRank()) + "#k#n";
+                var rankStr = "你好，我是 #b" + pnpc.getName() + "#k，在 #r" + branchJobName + "#k 职业中排名第 #r" + GameConstants.ordinal(pnpc.getWorldJobRank()) + "#k 位，达到最高等级后可在" + GameConstants.WORLD_NAMES[cm.getPlayer().getWorld()] + "获得雕像。\r\n";
+                rankStr += "\r\n    世界排名: #e#b" + GameConstants.ordinal(pnpc.getWorldRank()) + "#k#n";
+                rankStr += "\r\n    " + branchJobName + "职业排名: #e#b" + GameConstants.ordinal(pnpc.getOverallJobRank()) + "#k#n";
+                rankStr += "\r\n    总排名: #e#b" + GameConstants.ordinal(pnpc.getOverallRank()) + "#k#n";
 
                 cm.sendOk("排名字符串");
             } else {
