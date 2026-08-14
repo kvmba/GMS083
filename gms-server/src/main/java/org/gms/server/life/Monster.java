@@ -1546,8 +1546,9 @@ public class Monster extends AbstractLoadedLife {
             monsterLock.unlock();
         }
 
-        // 释放后按该技能的 interval(秒)整体停歇
-        nextSkillAllowedTime.set(Server.getInstance().getCurrentTime() + skill.getCoolTime());
+        // 动画结束后技能效果实际生效,从那时起算 interval 整体停歇
+        long animationTime = MonsterInformationProvider.getInstance().getMobSkillAnimationTime(skill);
+        nextSkillAllowedTime.set(Server.getInstance().getCurrentTime() + animationTime + skill.getCoolTime());
 
         final Monster mons = this;
         MapleMap mmap = mons.getMap();
