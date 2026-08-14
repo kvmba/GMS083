@@ -157,7 +157,7 @@ function action(mode, type, selection) {
                     cm.sendOk("哇-等一下，好吗？你的客人们正在给你们表达爱意。让我们来点动感，宝贝~~。");
                     cm.dispose();
                 } else {
-                    cm.sendOk("Wheeeeeeeeeeeeeew! 我们的节日现在已经结束了，和#b#p9201009#交谈一下，她会带领你和你的朋友去参加后派对。感谢你们的热情！");
+                    cm.sendOk("哇呼——！我们的节日现在已经结束了，和#b#p9201009#交谈一下，她会带领你和你的朋友去参加后派对。感谢你们的热情！");
                     cm.dispose();
                 }
             } else {
