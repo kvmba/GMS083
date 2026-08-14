@@ -7,7 +7,7 @@ function start() {
 function action(mode, type, selection) {
     var eim = cm.getEventInstance();
     if (eim != null && eim.getIntProperty("glpq6") == 3) {
-        cm.sendOk("干得漂亮。你超越了扭曲大师。通过那扇门领取你的奖品。");
+        cm.sendOk("干得漂亮。你超越了扭曲宗师。通过那扇门领取你的奖品。");
         cm.dispose();
         return;
     }
@@ -27,12 +27,12 @@ function action(mode, type, selection) {
     if (eim != null) {
         if (eim.getIntProperty("glpq6") == 0) {
             if (status == 0) {
-                cm.sendNext("欢迎来到扭曲大师的堡垒。我将是今晚的主持人…");
+                cm.sendNext("欢迎来到扭曲宗师的堡垒。我将是今晚的主持人…");
             } else if (status == 1) {
                 cm.sendNext("今晚，我们有一群冒险岛玩家的盛宴.. 哈哈哈...");
             } else if (status == 2) {
-                cm.sendNext("让我们经过特别训练的守护大师护送你！");
-                cm.mapMessage(6, "守护大师来了！")
+                cm.sendNext("让我们经过特别训练的守护宗师护送你！");
+                cm.mapMessage(6, "守护宗师来了！")
                 for (var i = 0; i < 10; i++) {
                     var mob = eim.getMonster(9400594);
                     const xPos = Math.floor(-1337 + (Math.random() * 1337))
@@ -51,8 +51,8 @@ function action(mode, type, selection) {
                 if (status == 0) {
                     cm.sendOk("嗯，这是什么？你打败了它们？");
                 } else if (status == 1) {
-                    cm.sendNext("好吧，无论如何！扭曲之主将很高兴欢迎你。");
-                    cm.mapMessage(6, "宗师的主人接近！")
+                    cm.sendNext("好吧，无论如何！扭曲宗师将很高兴欢迎你。");
+                    cm.mapMessage(6, "扭曲宗师接近！")
 
                     //Margana
                     var mob = eim.getMonster(9400590);
@@ -89,11 +89,11 @@ function action(mode, type, selection) {
                 eim.clearPQ();
                 cm.dispose();
             } else {
-                cm.sendOk("不要理会我。扭曲之主会护送你！");
+                cm.sendOk("不要理会我。扭曲宗师会护送你！");
                 cm.dispose();
             }
         } else {
-            cm.sendOk("干得漂亮。你超越了扭曲大师。通过那扇门领取你的奖品。");
+            cm.sendOk("干得漂亮。你超越了扭曲宗师。通过那扇门领取你的奖品。");
             cm.dispose();
         }
     } else {

@@ -45,7 +45,7 @@ function action(mode, type, selection) {
     }
 
     if (status == 0) {
-        var outText = "看起来你已经完成了圣瑞尼亚遗址的探索，是吗？你现在要返回登记地图吗？";
+        var outText = "看起来你已经完成了锡安列遗址的探索，是吗？你现在要返回登记地图吗？";
         cm.sendYesNo(outText);
     } else if (mode == 1) {
         var eim = cm.getEventInstance();

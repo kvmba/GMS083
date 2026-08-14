@@ -34,7 +34,7 @@ var em;
 const ExpeditionType = Java.type('org.gms.server.expeditions.ExpeditionType');
 var exped = ExpeditionType.PINKBEAN;
 var expedName = "诸神的黄昏";
-var expedBoss = "粉红豆豆";
+var expedBoss = "品克缤";
 var expedMap = "诸神黄昏";
 
 var list = "你想做什么？#b\r\n\r\n#L1#查看当前远征队成员#l\r\n#L2#开始战斗！#l\r\n#L3#退出远征队#l";
