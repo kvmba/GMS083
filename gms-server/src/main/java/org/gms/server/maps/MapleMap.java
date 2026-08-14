@@ -707,12 +707,15 @@ public class MapleMap {
     }
 
     private byte dropGlobalItemsFromMonsterOnMap(List<MonsterGlobalDropEntry> globalEntry, Point pos, byte d, byte droptype, int mobpos, Character chr, Monster mob) {
-        Collections.shuffle(globalEntry);
+        // globalEntry 是 MonsterInformationProvider 按大陆缓存的共享列表,直接 shuffle 会并发污染共享数据;
+        // 洗本地副本,随机顺序语义不变。
+        List<MonsterGlobalDropEntry> shuffledEntry = new ArrayList<>(globalEntry);
+        Collections.shuffle(shuffledEntry);
 
         Item idrop;
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
-        for (final MonsterGlobalDropEntry de : globalEntry) {
+        for (final MonsterGlobalDropEntry de : shuffledEntry) {
             if (Randomizer.nextInt(999999) < de.chance) {
                 if (droptype == 3) {
                     pos.x = mobpos + (d % 2 == 0 ? (40 * (d + 1) / 2) : -(40 * (d / 2)));
