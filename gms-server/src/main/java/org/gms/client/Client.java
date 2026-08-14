@@ -86,7 +86,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -126,7 +126,12 @@ public class Client extends ChannelInboundHandlerAdapter {
     private volatile long lastPong;
     private int gmlevel;
     private Set<String> macs = new HashSet<>();
-    private Map<String, ScriptEngine> engines = new HashMap<>();
+    private Map<String, ScriptEngine> engines = new LinkedHashMap<String, ScriptEngine>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, ScriptEngine> eldest) {
+            return size() > 32;
+        }
+    };
     private byte characterSlots = 3;
     private byte loginattempt = 0;
     private String pin = "";
@@ -1212,15 +1217,15 @@ public class Client extends ChannelInboundHandlerAdapter {
         gmlevel = level;
     }
 
-    public void setScriptEngine(String name, ScriptEngine e) {
+    public synchronized void setScriptEngine(String name, ScriptEngine e) {
         engines.put(name, e);
     }
 
-    public ScriptEngine getScriptEngine(String name) {
+    public synchronized ScriptEngine getScriptEngine(String name) {
         return engines.get(name);
     }
 
-    public void removeScriptEngine(String name) {
+    public synchronized void removeScriptEngine(String name) {
         engines.remove(name);
     }
 
