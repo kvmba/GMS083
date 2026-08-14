@@ -37,6 +37,8 @@ public class StartupWarmup {
 
         try {
             String warmupHash = BCrypt.hashpw("warmup", BCrypt.gensalt(12));
+            // 跑两次:第一次完成类加载,第二次触发 JIT C1 编译
+            BCrypt.checkpw("warmup", warmupHash);
             if (BCrypt.checkpw("warmup", warmupHash)) {
                 log.info("启动预热:BCrypt 就绪");
             }
