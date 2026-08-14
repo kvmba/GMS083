@@ -15,7 +15,7 @@ function end(mode, type, selection) {
     } else if (status == 1) {
         const InventoryType = Java.type('org.gms.client.inventory.InventoryType');
         if (qm.getPlayer().getInventory(InventoryType.USE).getNumFreeSlot() < 1) {
-            qm.getPlayer().dropMessage(1, "USE inventory full.");
+            qm.getPlayer().dropMessage(1, "消耗栏已满。");
             qm.dispose();
             return;
         }

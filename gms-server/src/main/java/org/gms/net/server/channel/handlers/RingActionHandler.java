@@ -92,7 +92,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target == null) {
-            source.dropMessage(1, "找不到 " + name + " on this channel.");
+            source.dropMessage(1, "在本频道找不到 " + name + "。");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target == source) {
@@ -432,11 +432,11 @@ public final class RingActionHandler extends AbstractPacketHandler {
                                 String baseMessage = "You've been invited to %s and %s's Wedding!".formatted(groom, bride);
                                 Character guestChr = c.getWorldServer().getPlayerStorage().getCharacterById(guest);
                                 if (guestChr != null && InventoryManipulator.checkSpace(guestChr.getClient(), newItemId, 1, "") && InventoryManipulator.addById(guestChr.getClient(), newItemId, (short) 1, expiration)) {
-                                    guestChr.dropMessage(6, "[Wedding] %s".formatted(baseMessage));
+                                    guestChr.dropMessage(6, "[婚礼] %s".formatted(baseMessage));
                                 } else {
                                     String dueyMessage = baseMessage + " Receive your invitation from Duey!";
                                     if (guestChr != null && guestChr.isLoggedInWorld()) {
-                                        guestChr.dropMessage(6, "[Wedding] %s".formatted(dueyMessage));
+                                        guestChr.dropMessage(6, "[婚礼] %s".formatted(dueyMessage));
                                     } else {
                                         noteService.sendNormal(dueyMessage, groom, name);
                                     }

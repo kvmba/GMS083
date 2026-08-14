@@ -306,7 +306,7 @@ public class Alliance {
         srv.allianceMessage(alliance.getId(), GuildPackets.allianceNotice(alliance.getId(), alliance.getNotice()), -1, -1);
         srv.guildMessage(guildId, GuildPackets.disbandAlliance(alliance.getId()));
 
-        alliance.dropMessage("[" + srv.getGuild(guildId, worldId).getName() + "] guild has left the union.");
+        alliance.dropMessage("[" + srv.getGuild(guildId, worldId).getName() + "] 公会已退出联盟。");
         return true;
     }
 

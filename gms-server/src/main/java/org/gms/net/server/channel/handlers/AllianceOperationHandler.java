@@ -150,7 +150,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
                 Server.getInstance().allianceMessage(alliance.getId(), GuildPackets.allianceNotice(alliance.getId(), alliance.getNotice()), -1, -1);
                 Server.getInstance().guildMessage(guildid, GuildPackets.disbandAlliance(allianceid));
 
-                alliance.dropMessage("[" + Server.getInstance().getGuild(guildid).getName() + "] guild has been expelled from the union.");
+                alliance.dropMessage("[" + Server.getInstance().getGuild(guildid).getName() + "] 公会已被逐出联盟。");
                 break;
             }
             case 0x07: { // Change Alliance Leader
@@ -190,7 +190,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
                 Server.getInstance().setAllianceNotice(alliance.getId(), notice);
                 Server.getInstance().allianceMessage(alliance.getId(), GuildPackets.allianceNotice(alliance.getId(), notice), -1, -1);
 
-                alliance.dropMessage(5, "* Alliance Notice : " + notice);
+                alliance.dropMessage(5, "* 联盟公告 : " + notice);
                 break;
             default:
                 chr.dropMessage("该功能暂不可用");
@@ -209,7 +209,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
         newLeader.saveGuildStatus();
 
         Server.getInstance().allianceMessage(alliance.getId(), GuildPackets.getGuildAlliances(alliance, newLeader.getWorld()), -1, -1);
-        alliance.dropMessage("'" + newLeader.getName() + "' has been appointed as the new head of this Alliance.");
+        alliance.dropMessage("'" + newLeader.getName() + "' 已被任命为联盟的新盟主。");
     }
 
     private void changePlayerAllianceRank(Alliance alliance, Character chr, boolean raise) {
@@ -222,7 +222,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
         chr.saveGuildStatus();
 
         Server.getInstance().allianceMessage(alliance.getId(), GuildPackets.getGuildAlliances(alliance, chr.getWorld()), -1, -1);
-        alliance.dropMessage("'" + chr.getName() + "' has been reassigned to '" + alliance.getRankTitle(newRank) + "' in this Alliance.");
+        alliance.dropMessage("'" + chr.getName() + "' 在联盟中的职位已调整为 '" + alliance.getRankTitle(newRank) + "'。");
     }
 
 }

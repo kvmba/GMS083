@@ -66,7 +66,7 @@ public class MakerProcessor {
                     int fromLeftover = toCreate;
                     toCreate = ii.getMakerCrystalFromLeftover(toCreate);
                     if (toCreate == -1) {
-                        c.sendPacket(PacketCreator.serverNotice(1, ii.getName(fromLeftover) + " is unavailable for Monster Crystal conversion."));
+                        c.sendPacket(PacketCreator.serverNotice(1, ii.getName(fromLeftover) + " 无法用于怪物结晶转换。"));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         return;
                     }
@@ -84,7 +84,7 @@ public class MakerProcessor {
                         if (pair != null) {
                             recipe = MakerItemFactory.generateDisassemblyCrystalEntry(toDisassemble, pair.getLeft(), pair.getRight());
                         } else {
-                            c.sendPacket(PacketCreator.serverNotice(1, ii.getName(toCreate) + " is unavailable for Monster Crystal disassembly."));
+                            c.sendPacket(PacketCreator.serverNotice(1, ii.getName(toCreate) + " 无法用于怪物结晶分解。"));
                             c.sendPacket(PacketCreator.makerEnableActions());
                             return;
                         }

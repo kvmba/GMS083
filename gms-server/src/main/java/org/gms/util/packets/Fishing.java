@@ -61,7 +61,7 @@ public class Fishing {
         double baitLikelihood = 0.0002 * chr.getWorldServer().getFishingRate() * baitLevel;   // can improve 10.0 at "max level 50000" on rate 1x
 
         if (GameConfig.getServerBoolean("use_debug") && chr.isGM()) {
-            chr.dropMessage(5, "----- FISHING RESULT -----");
+            chr.dropMessage(5, "----- 钓鱼结果 -----");
             chr.dropMessage(5, "概率 - 年: " + yearLikelihood + " 时间: " + timeLikelihood + " 金币: " + baitLikelihood);
             chr.dropMessage(5, "积分统计 - 年: " + (0.23 * yearLikelihood) + " 时间: " + (0.77 * timeLikelihood) + " 金币: " + baitLikelihood);
         }

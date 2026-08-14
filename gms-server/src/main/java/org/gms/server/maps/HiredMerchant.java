@@ -385,7 +385,7 @@ public class HiredMerchant extends AbstractMapObject {
 
         Character player = Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(ownerId);
         if (player != null && player.isLoggedInWorld()) {
-            player.dropMessage(6, "[Hired Merchant] Item '" + ItemInformationProvider.getInstance().getName(item.getItemId()) + "'" + qtyStr + " has been sold for " + mesos + " mesos. (" + inStore + " left)");
+            player.dropMessage(6, "[雇佣商店] 物品 '" + ItemInformationProvider.getInstance().getName(item.getItemId()) + "'" + qtyStr + " 已售出 " + mesos + " 金币。(剩余 " + inStore + " 件)");
         }
     }
 

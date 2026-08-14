@@ -101,7 +101,7 @@ public final class NewYearCardHandler extends AbstractPacketHandler {
 
                         player.getAbstractPlayerInteraction().gainItem(ItemId.NEW_YEARS_CARD_RECEIVED, (short) 1);
                         if (!newyear.getMessage().isEmpty()) {
-                            player.dropMessage(6, "[New Year] " + newyear.getSenderName() + ": " + newyear.getMessage());
+                            player.dropMessage(6, "[新年] " + newyear.getSenderName() + ": " + newyear.getMessage());
                         }
 
                         player.addNewYearRecord(newyear);
@@ -112,17 +112,17 @@ public final class NewYearCardHandler extends AbstractPacketHandler {
                         Character sender = c.getWorldServer().getPlayerStorage().getCharacterById(newyear.getSenderId());
                         if (sender != null && sender.isLoggedInWorld()) {
                             sender.getMap().broadcastMessage(PacketCreator.onNewYearCardRes(sender, newyear, 0xD, 0));
-                            sender.dropMessage(6, "[New Year] Your addressee successfully received the New Year card.");
+                            sender.dropMessage(6, "[新年] 对方已成功收到你的新年贺卡。");
                         }
                     } else {
                         player.sendPacket(PacketCreator.onNewYearCardRes(player, -1, 5, 0x10));  // inventory full
                     }
                 } else {
-                    player.dropMessage(6, "[New Year] The sender of the New Year card already dropped it. Nothing to receive.");
+                    player.dropMessage(6, "[新年] 寄件人已经丢弃了新年贺卡，没有可领取的内容。");
                 }
             } else {
                 if (newyear == null) {
-                    player.dropMessage(6, "[New Year] The sender of the New Year card already dropped it. Nothing to receive.");
+                    player.dropMessage(6, "[新年] 寄件人已经丢弃了新年贺卡，没有可领取的内容。");
                 }
             }
         }

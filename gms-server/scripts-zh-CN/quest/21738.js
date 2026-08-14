@@ -42,7 +42,7 @@ function start(mode, type, selection) {
         } else if (status == 2) {
             qm.sendNext("Giant Nependeath? It's definitely a big problem, but I don't think it's enough to really affect Orbis. Wait, where did you say the Giant Nependeath was, again?", 9);
         } else if (status == 3) {
-            qm.sendNext("Neglected Strolling Path.", 3);
+            qm.sendNext("被忽视的散步小径。", 3);
         } else if (status == 4) {
             qm.sendNext("...Neglected Strolling Path? If Giant Nependeath is there, someone is trying to enter Sealed Garden! But why? And more importantly, who?", 9);
         } else if (status == 5) {

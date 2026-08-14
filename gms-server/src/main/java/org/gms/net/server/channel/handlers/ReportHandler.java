@@ -77,7 +77,7 @@ public final class ReportHandler extends AbstractPacketHandler {
             Server.getInstance().broadcastGMMessage(c.getWorld(), PacketCreator.serverNotice(6, victim + " 被举报原因: " + description));
             addReport(c.getPlayer().getId(), Character.getIdByName(victim), reason, description, chatlog);
         } else {
-            Server.getInstance().broadcastGMMessage(c.getWorld(), PacketCreator.serverNotice(6, c.getPlayer().getName() + " is probably packet editing. Got unknown report type, which is impossible."));
+            Server.getInstance().broadcastGMMessage(c.getWorld(), PacketCreator.serverNotice(6, c.getPlayer().getName() + " 可能在进行封包修改。收到了无法识别的举报类型。"));
         }
     }
 
