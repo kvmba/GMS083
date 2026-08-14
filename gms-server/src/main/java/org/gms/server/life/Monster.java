@@ -964,6 +964,10 @@ public class Monster extends AbstractLoadedLife {
         MonsterListener[] listenersList;
         statiLock.lock();
         try {
+            if (listeners.isEmpty()) {
+                return;
+            }
+
             listenersList = listeners.toArray(new MonsterListener[listeners.size()]);
         } finally {
             statiLock.unlock();
@@ -978,6 +982,10 @@ public class Monster extends AbstractLoadedLife {
         MonsterListener[] listenersList;
         statiLock.lock();
         try {
+            if (listeners.isEmpty()) {
+                return;
+            }
+
             listenersList = listeners.toArray(new MonsterListener[listeners.size()]);
         } finally {
             statiLock.unlock();

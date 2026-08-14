@@ -998,6 +998,10 @@ public class MapleMap {
 
         lootLock.lock();
         try {
+            if (mobLootEntries.isEmpty()) {
+                return;
+            }
+
             mleList = new HashSet<>(mobLootEntries.entrySet());
         } finally {
             lootLock.unlock();
@@ -1264,12 +1268,19 @@ public class MapleMap {
     }
 
     public final List<Monster> getAllMonsters() {
-        List<Monster> list = new LinkedList<>();
-        for (MapObject mmo : getMonsters()) {
-            list.add((Monster) mmo);
+        List<Monster> ret = new ArrayList<>();
+        objectRLock.lock();
+        try {
+            for (MapObject mo : mapobjects.values()) {
+                if (mo.getType() == MapObjectType.MONSTER) {
+                    ret.add((Monster) mo);
+                }
+            }
+        } finally {
+            objectRLock.unlock();
         }
 
-        return list;
+        return ret;
     }
 
     public int countItems() {
