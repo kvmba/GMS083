@@ -78,7 +78,7 @@ function action(mode, type, selection) {
                     }
                 }
 
-                cm.sendStyle("Using the SPECIAL coupon you can choose the style your hair will become. Pick the style that best provides you delight...", hairnew);
+                cm.sendStyle("您可以选择您的发型将成为。选择最能给你带来愉悦的发型…", hairnew);
             }
         } else if (status == 2) {
             if (beauty == 1) {

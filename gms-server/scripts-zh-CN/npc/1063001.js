@@ -27,7 +27,7 @@ var repeatablePrizes = [[4020000, 4], [4020002, 4], [4020006, 4]];
 function start() {
     if (cm.isQuestStarted(2053) && !cm.haveItem(4031026, 20)) {
         if (!cm.canHold(4031026, 20)) {
-            cm.sendNext("Check for a available slot on your ETC inventory.")
+            cm.sendNext("请检查你的其他栏是否有足够的位置")
             cm.dispose();
             return;
         }
