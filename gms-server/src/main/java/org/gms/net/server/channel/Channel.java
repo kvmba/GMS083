@@ -290,7 +290,7 @@ public final class Channel {
     }
 
     public int getChannelCapacity() {
-        return (int) (Math.ceil(((float) players.getAllCharacters().size() / GameConfig.getServerInt("channel_capacity")) * 800));
+        return (int) (Math.ceil(((float) players.getSize() / GameConfig.getServerInt("channel_capacity")) * 800));
     }
 
     public void broadcastPacket(Packet packet) {
