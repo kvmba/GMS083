@@ -571,8 +571,20 @@ public class AbstractPlayerInteraction {
         gainItem(id, quantity, false, true);
     }
 
+    /**
+     * GraalJS 中整数运算可能出现 -0.0/NaN/小数等 double 值,直接匹配 short 参数会抛
+     * "no applicable overload found"。这里提供 double 重载做安全转换后走原逻辑。
+     */
+    public void gainItem(int id, double quantity) {
+        gainItem(id, toShortQuantity(quantity), false, true);
+    }
+
     public void gainItem(int id, short quantity, boolean show) {//this will fk randomStats equip :P
         gainItem(id, quantity, false, show);
+    }
+
+    public void gainItem(int id, double quantity, boolean show) {
+        gainItem(id, toShortQuantity(quantity), false, show);
     }
 
     public void gainItem(int id, boolean show) {
@@ -587,8 +599,23 @@ public class AbstractPlayerInteraction {
         return gainItem(id, quantity, randomStats, showMessage, -1);
     }
 
+    public Item gainItem(int id, double quantity, boolean randomStats, boolean showMessage) {
+        return gainItem(id, toShortQuantity(quantity), randomStats, showMessage, -1);
+    }
+
     public Item gainItem(int id, short quantity, boolean randomStats, boolean showMessage, long expires) {
         return gainItem(id, quantity, randomStats, showMessage, expires, null);
+    }
+
+    public Item gainItem(int id, double quantity, boolean randomStats, boolean showMessage, long expires) {
+        return gainItem(id, toShortQuantity(quantity), randomStats, showMessage, expires, null);
+    }
+
+    private static short toShortQuantity(double quantity) {
+        if (Double.isNaN(quantity)) {
+            return 0;
+        }
+        return (short) quantity;
     }
 
     public Item gainItem(int id, short quantity, boolean randomStats, boolean showMessage, long expires, Pet from) {
@@ -673,6 +700,29 @@ public class AbstractPlayerInteraction {
 
     public void gainFame(int delta) {
         getPlayer().gainFame(delta);
+    }
+
+    /**
+     * GraalJS 传 double(-0.0/NaN/小数)时兜底,与 gainItem 的 double 重载同理
+     */
+    public void gainFame(double delta) {
+        getPlayer().gainFame(Double.isNaN(delta) ? 0 : (int) delta);
+    }
+
+    public void gainMeso(int gain) {
+        getPlayer().gainMeso(gain);
+    }
+
+    public void gainMeso(double gain) {
+        getPlayer().gainMeso(Double.isNaN(gain) ? 0 : (int) gain);
+    }
+
+    public void gainExp(int gain) {
+        getPlayer().gainExp(gain, true, true);
+    }
+
+    public void gainExp(double gain) {
+        getPlayer().gainExp(Double.isNaN(gain) ? 0 : (int) gain, true, true);
     }
 
     public void changeMusic(String songName) {
