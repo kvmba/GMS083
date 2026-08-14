@@ -1823,12 +1823,12 @@ public class Character extends AbstractCharacterObject {
 
     public void changeSkillLevel(Skill skill, byte newLevel, int newMasterlevel, long expiration) {
         if (newLevel > -1) {
-            // 入参为基础等级,叠加装备技能加成后写入(封顶技能最大等级),发给客户端的是有效等级
+            // 入参为基础等级,叠加装备技能加成后存储;获取时按最大等级封顶
             int bonus = equipSkillBonus.getOrDefault(skill.getId(), 0);
-            int effective = Math.min(newLevel + bonus, skill.getMaxLevel());
+            int effective = newLevel + bonus;
             skills.put(skill, new SkillEntry(effective, newMasterlevel, expiration));
             if (!GameConstants.isHiddenSkills(skill.getId())) {
-                sendPacket(PacketCreator.updateSkill(skill.getId(), effective, newMasterlevel, expiration));
+                sendPacket(PacketCreator.updateSkill(skill.getId(), Math.min(effective, skill.getMaxLevel()), newMasterlevel, expiration));
             }
         } else {
             skills.remove(skill);
@@ -1838,8 +1838,22 @@ public class Character extends AbstractCharacterObject {
     }
 
     /**
-     * 重算装备技能加成(永恒/重生类):与旧加成对比,增减技能等级并向客户端推送变化。
-     * 装载(登录)、穿戴、卸下、装备升级时调用。
+     * 登录时初始化装备技能加成基线(只记录当前穿戴装备的加成和,不修改技能等级:
+     * 数据库中保存的已是穿戴状态下的有效等级,后续穿脱按基线做增减)。
+     */
+    public void initEquipSkillBonus() {
+        Map<Integer, Integer> newBonus = new HashMap<>();
+        for (Item item : getInventory(InventoryType.EQUIPPED).list()) {
+            if (item instanceof Equip equip && equip.hasActiveSkillBonus()) {
+                equip.getSkillBonus().forEach((skillId, lv) -> newBonus.merge(skillId, lv, Integer::sum));
+            }
+        }
+        equipSkillBonus = newBonus;
+    }
+
+    /**
+     * 重算装备技能加成(永恒/重生类):与旧加成对比,增减技能等级并推送变化。
+     * 穿戴、卸下、装备升级时调用。
      */
     public void applyEquipSkillBonus() {
         Map<Integer, Integer> newBonus = new HashMap<>();
@@ -1849,12 +1863,15 @@ public class Character extends AbstractCharacterObject {
             }
         }
 
-        Set<Integer> affected = new HashSet<>(equipSkillBonus.keySet());
+        Map<Integer, Integer> oldBonus = equipSkillBonus;
+        equipSkillBonus = newBonus;
+
+        Set<Integer> affected = new HashSet<>(oldBonus.keySet());
         affected.addAll(newBonus.keySet());
         for (Integer skillId : affected) {
-            int oldBonus = equipSkillBonus.getOrDefault(skillId, 0);
+            int oldB = oldBonus.getOrDefault(skillId, 0);
             int newB = newBonus.getOrDefault(skillId, 0);
-            if (oldBonus == newB) {
+            if (oldB == newB) {
                 continue;
             }
 
@@ -1864,15 +1881,12 @@ public class Character extends AbstractCharacterObject {
                 continue;   // 未学习的技能不受加成影响
             }
 
-            int base = Math.max(0, entry.skillLevel - oldBonus);
-            int effective = Math.min(base + newB, skill.getMaxLevel());
+            int effective = Math.max(0, entry.skillLevel - oldB) + newB;
             skills.put(skill, new SkillEntry(effective, entry.masterLevel, entry.expiration));
             if (!GameConstants.isHiddenSkills(skillId)) {
-                sendPacket(PacketCreator.updateSkill(skillId, effective, entry.masterLevel, entry.expiration));
+                sendPacket(PacketCreator.updateSkill(skillId, Math.min(effective, skill.getMaxLevel()), entry.masterLevel, entry.expiration));
             }
         }
-
-        equipSkillBonus = newBonus;
     }
 
     public void changeTab(int tab) {
@@ -5479,18 +5493,19 @@ public class Character extends AbstractCharacterObject {
     }
 
     public int getSkillLevel(int skill) {
-        SkillEntry ret = skills.get(SkillFactory.getSkill(skill));
-        if (ret == null) {
+        Skill sk = SkillFactory.getSkill(skill);
+        SkillEntry ret = skills.get(sk);
+        if (ret == null || sk == null) {
             return 0;
         }
-        return ret.skillLevel;
+        return Math.min(ret.skillLevel, sk.getMaxLevel());
     }
 
     public byte getSkillLevel(Skill skill) {
         if (skills.get(skill) == null) {
             return 0;
         }
-        return skills.get(skill).skillLevel;
+        return (byte) Math.min(skills.get(skill).skillLevel, skill.getMaxLevel());
     }
 
     /**
@@ -5505,7 +5520,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     /**
-     * 当前装备技能加成(技能id -> 加成等级),保存时需从技能等级中扣除
+     * 当前装备技能加成(技能id -> 加成等级)
      */
     public Map<Integer, Integer> getEquipSkillBonus() {
         return equipSkillBonus;
@@ -7578,7 +7593,7 @@ public class Character extends AbstractCharacterObject {
                         ps.setInt(1, id);
                         for (Entry<Skill, SkillEntry> skill : skills.entrySet()) {
                             ps.setInt(2, skill.getKey().getId());
-                            ps.setInt(3, Math.max(0, skill.getValue().skillLevel - equipSkillBonus.getOrDefault(skill.getKey().getId(), 0)));
+                            ps.setInt(3, skill.getValue().skillLevel);
                             ps.setInt(4, skill.getValue().masterLevel);
                             ps.setLong(5, skill.getValue().expiration);
                             ps.addBatch();
@@ -7836,7 +7851,7 @@ public class Character extends AbstractCharacterObject {
                     psSkill.setInt(1, id);
                     for (Entry<Skill, SkillEntry> skill : skills.entrySet()) {
                         psSkill.setInt(2, skill.getKey().getId());
-                        psSkill.setInt(3, Math.max(0, skill.getValue().skillLevel - equipSkillBonus.getOrDefault(skill.getKey().getId(), 0)));
+                        psSkill.setInt(3, skill.getValue().skillLevel);
                         psSkill.setInt(4, skill.getValue().masterLevel);
                         psSkill.setLong(5, skill.getValue().expiration);
                         psSkill.addBatch();
