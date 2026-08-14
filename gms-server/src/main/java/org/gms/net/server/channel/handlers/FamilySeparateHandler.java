@@ -71,7 +71,7 @@ public class FamilySeparateHandler extends AbstractPacketHandler {
         if (senior.getSenior() != null) {
             senior.getSenior().gainReputation(-(repCost / 2), false);
         }
-        forkOn.announceToSenior(PacketCreator.serverNotice(5, forkOn.getName() + " has left the family."), true);
+        forkOn.announceToSenior(PacketCreator.serverNotice(5, forkOn.getName() + " 离开了家族。"), true);
         forkOn.fork();
         c.sendPacket(PacketCreator.getFamilyInfo(forkOn)); //pedigree info will be requested from the client if the window is open
         forkOn.updateSeniorFamilyInfo(true);

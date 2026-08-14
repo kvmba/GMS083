@@ -47,7 +47,7 @@ public class MesoRequirement extends AbstractQuestRequirement {
         if (chr.getMeso() >= meso) {
             return true;
         } else {
-            chr.dropMessage(5, "You don't have enough mesos to complete this quest.");
+            chr.dropMessage(5, "你没有足够的金币来完成此任务。");
             return false;
         }
     }

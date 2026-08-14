@@ -267,7 +267,7 @@ public final class PlayerInteractionHandler extends AbstractPacketHandler {
                         //c.sendPacket(PacketCreator.getPlayerShopRemoveVisitor(1));
                     } else if (ItemConstants.isHiredMerchant(itemId)) {
                         if (chr.hasMerchant() || c.getWorldServer().getHiredMerchant(chr.getId()) != null) {
-                            chr.dropMessage(1, "You already have a store open.");
+                            chr.dropMessage(1, "你已经开了一家商店。");
                             log.warn("Character {} attempted to create a duplicate HiredMerchant on channel {}",
                                     chr.getName(), c.getChannel());
                             return;
@@ -284,7 +284,7 @@ public final class PlayerInteractionHandler extends AbstractPacketHandler {
                             if (channelAdded) {
                                 channelServer.removeHiredMerchant(chr.getId(), merchant);
                             }
-                            chr.dropMessage(1, "You already have a store open.");
+                            chr.dropMessage(1, "你已经开了一家商店。");
                             log.warn("Character {} could not create HiredMerchant because a channel or world instance already exists",
                                     chr.getName());
                         }

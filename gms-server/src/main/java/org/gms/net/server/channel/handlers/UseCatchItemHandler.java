@@ -98,7 +98,7 @@ public final class UseCatchItemHandler extends AbstractPacketHandler {
                                     chr.getMap().broadcastMessage(PacketCreator.catchMonster(monsterid, itemId, (byte) 0));
                                 }
                             } else {
-                                chr.dropMessage(5, "Make a ETC slot available before using this item.");
+                                chr.dropMessage(5, "使用此物品前，请先在其他栏空出一个位置。");
                             }
 
                             abm.spam(10);
@@ -183,7 +183,7 @@ public final class UseCatchItemHandler extends AbstractPacketHandler {
                         InventoryManipulator.removeById(c, InventoryType.USE, itemId, 1, true, true);
                         InventoryManipulator.addById(c, ItemId.FISH_NET_WITH_A_CATCH, (short) 1, "", -1);
                     } else {
-                        chr.message("You cannot use the Fishing Net yet.");
+                        chr.message("你现在还不能使用渔网。");
                     }
                     c.sendPacket(PacketCreator.enableActions());
                 }
@@ -211,7 +211,7 @@ public final class UseCatchItemHandler extends AbstractPacketHandler {
                                 c.sendPacket(PacketCreator.catchMessage(0));
                             }
                         } else {
-                            chr.message("You cannot use the Fishing Net yet.");
+                            chr.message("你现在还不能使用渔网。");
                         }
                     }
                 }

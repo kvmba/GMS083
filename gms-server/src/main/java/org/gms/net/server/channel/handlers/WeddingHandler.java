@@ -124,11 +124,11 @@ public final class WeddingHandler extends AbstractPacketHandler {
 
                                     c.sendPacket(WeddingPackets.onWeddingGiftResult((byte) 0xF, marriage.getWishlistItems(groomWishlist), marriage.getGiftItems(c, groomWishlist)));
                                 } else {
-                                    c.getPlayer().dropMessage(1, "Free a slot on your inventory before collecting this item.");
+                                    c.getPlayer().dropMessage(1, "领取此物品前，请先在你的背包中空出一个位置。");
                                     c.sendPacket(WeddingPackets.onWeddingGiftResult((byte) 0xE, marriage.getWishlistItems(groomWishlist), marriage.getGiftItems(c, groomWishlist)));
                                 }
                             } else {
-                                c.getPlayer().dropMessage(1, "You have already collected this item.");
+                                c.getPlayer().dropMessage(1, "你已经收集过此物品了。");
                                 c.sendPacket(WeddingPackets.onWeddingGiftResult((byte) 0xE, marriage.getWishlistItems(groomWishlist), marriage.getGiftItems(c, groomWishlist)));
                             }
                         }
@@ -143,11 +143,11 @@ public final class WeddingHandler extends AbstractPacketHandler {
                                 InventoryManipulator.addFromDrop(c, item, true);
                                 c.sendPacket(WeddingPackets.onWeddingGiftResult((byte) 0xF, Collections.singletonList(""), items));
                             } else {
-                                c.getPlayer().dropMessage(1, "Free a slot on your inventory before collecting this item.");
+                                c.getPlayer().dropMessage(1, "领取此物品前，请先在你的背包中空出一个位置。");
                                 c.sendPacket(WeddingPackets.onWeddingGiftResult((byte) 0xE, Collections.singletonList(""), items));
                             }
                         } catch (Exception e) {
-                            c.getPlayer().dropMessage(1, "You have already collected this item.");
+                            c.getPlayer().dropMessage(1, "你已经收集过此物品了。");
                             c.sendPacket(WeddingPackets.onWeddingGiftResult((byte) 0xE, Collections.singletonList(""), items));
                         }
                     }

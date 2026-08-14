@@ -237,7 +237,7 @@ public class PlayerShop extends AbstractMapObject {
                     iitem.setQuantity((short) Math.min(totalQuantity, Short.MAX_VALUE));
 
                     if (!Inventory.checkSpot(chr, iitem)) {
-                        chr.sendPacket(PacketCreator.serverNotice(1, "Have a slot available on your inventory to claim back the item."));
+                        chr.sendPacket(PacketCreator.serverNotice(1, "请在你的背包中空出一个位置再取回物品。"));
                         chr.sendPacket(PacketCreator.enableActions());
                         return;
                     }
@@ -294,7 +294,7 @@ public class PlayerShop extends AbstractMapObject {
 
                     if (c.getPlayer().getMeso() >= price) {
                         if (!owner.canHoldMeso(price)) {    // thanks Rohenn for noticing owner hold check misplaced
-                            c.getPlayer().dropMessage(1, "Transaction failed since the shop owner can't hold any more mesos.");
+                            c.getPlayer().dropMessage(1, "交易失败，因为店主无法持有更多金币。");
                             c.sendPacket(PacketCreator.enableActions());
                             return false;
                         }
@@ -318,16 +318,16 @@ public class PlayerShop extends AbstractMapObject {
                                     owner.setPlayerShop(null);
                                     this.setOpen(false);
                                     this.closeShop();
-                                    owner.dropMessage(1, "Your items are sold out, and therefore your shop is closed.");
+                                    owner.dropMessage(1, "你的商品已售罄，因此商店已关闭。");
                                 }
                             }
                         } else {
-                            c.getPlayer().dropMessage(1, "Your inventory is full. Please clear a slot before buying this item.");
+                            c.getPlayer().dropMessage(1, "你的背包已满。请在购买此物品前空出一个位置。");
                             c.sendPacket(PacketCreator.enableActions());
                             return false;
                         }
                     } else {
-                        c.getPlayer().dropMessage(1, "You don't have enough mesos to purchase this item.");
+                        c.getPlayer().dropMessage(1, "你没有足够的金币来购买此物品。");
                         c.sendPacket(PacketCreator.enableActions());
                         return false;
                     }
@@ -545,14 +545,14 @@ public class PlayerShop extends AbstractMapObject {
 
     public synchronized boolean visitShop(Character chr) {
         if (this.isBanned(chr.getName())) {
-            chr.dropMessage(1, "You have been banned from this store.");
+            chr.dropMessage(1, "你已被这家商店禁止进入。");
             return false;
         }
 
         visitorLock.lock();
         try {
             if (!open.get()) {
-                chr.dropMessage(1, "This store is not yet open.");
+                chr.dropMessage(1, "这家商店还没有开门。");
                 return false;
             }
 

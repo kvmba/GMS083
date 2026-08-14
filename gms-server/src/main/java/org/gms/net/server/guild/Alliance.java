@@ -438,19 +438,19 @@ public class Alliance {
     public static void sendInvitation(Client c, String targetGuildName, int allianceId) {
         Guild mg = Server.getInstance().getGuildByName(targetGuildName);
         if (mg == null) {
-            c.getPlayer().dropMessage(5, "The entered guild does not exist.");
+            c.getPlayer().dropMessage(5, "输入的公会不存在。");
         } else {
             if (mg.getAllianceId() > 0) {
-                c.getPlayer().dropMessage(5, "The entered guild is already registered on a guild alliance.");
+                c.getPlayer().dropMessage(5, "输入的公会已经注册在某个公会联盟中。");
             } else {
                 Character victim = mg.getMGC(mg.getLeaderId()).getCharacter();
                 if (victim == null) {
-                    c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently not online.");
+                    c.getPlayer().dropMessage(5, "你发出邀请的公会会长目前不在线。");
                 } else {
                     if (InviteCoordinator.createInvite(InviteType.ALLIANCE, c.getPlayer(), allianceId, victim.getId())) {
                         victim.sendPacket(GuildPackets.allianceInvite(allianceId, c.getPlayer()));
                     } else {
-                        c.getPlayer().dropMessage(5, "The master of the guild that you offered an invitation is currently managing another invite.");
+                        c.getPlayer().dropMessage(5, "你发出邀请的公会会长目前正在处理另一个邀请。");
                     }
                 }
             }

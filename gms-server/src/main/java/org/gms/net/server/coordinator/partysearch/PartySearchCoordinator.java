@@ -404,7 +404,7 @@ public class PartySearchCoordinator {
                 addQueueLeader(leader);
             } else {
                 if (leader.isLoggedInWorld()) {
-                    leader.dropMessage(5, "Your Party Search token session has finished as your party reached full capacity.");
+                    leader.dropMessage(5, "你的组队搜索令牌会话已结束，因为你的队伍已满员。");
                 }
                 searchLeaders.remove(leader.getId());
                 searchSettings.remove(leader.getId());
@@ -420,10 +420,10 @@ public class PartySearchCoordinator {
                 if (settings != null) {
                     recycledLeaders.add(new Pair<>(leader, settings));
                     if (GameConfig.getServerBoolean("use_debug") && leader.isGM()) {
-                        leader.dropMessage(5, "Your Party Search token session is now on waiting queue for up to 7 minutes, to get it working right away please stop your Party Search and retry again later.");
+                        leader.dropMessage(5, "你的组队搜索令牌会话现已进入等待队列，最长等待7分钟。想立即生效请停止组队搜索后再重试。");
                     }
                 } else {
-                    leader.dropMessage(5, "Your Party Search token session expired, please stop your Party Search and retry again later.");
+                    leader.dropMessage(5, "你的组队搜索令牌会话已过期，请停止组队搜索后再重试。");
                 }
             }
         }

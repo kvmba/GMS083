@@ -55,7 +55,7 @@ public final class GeneralChatHandler extends AbstractPacketHandler {
         } else if (heading != '/') {
             int show = p.readByte();
             if (chr.getMap().isMuted() && !chr.isGM()) {
-                chr.dropMessage(5, "The map you are in is currently muted. Please try again later.");
+                chr.dropMessage(5, "你所在的频道当前处于禁言状态。请稍后再试。");
                 return;
             }
 

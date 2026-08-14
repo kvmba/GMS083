@@ -80,66 +80,66 @@ public final class RingActionHandler extends AbstractPacketHandler {
 
         // TODO: get the correct packet bytes for these popups
         if (source.isMarried()) {
-            source.dropMessage(1, "You're already married!");
+            source.dropMessage(1, "你已经结婚了！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (source.getPartnerId() > 0) {
-            source.dropMessage(1, "You're already engaged!");
+            source.dropMessage(1, "你已经订婚了！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (source.getMarriageItemId() > 0) {
-            source.dropMessage(1, "You're already engaging someone!");
+            source.dropMessage(1, "你已经和某人订婚了！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target == null) {
-            source.dropMessage(1, "Unable to find " + name + " on this channel.");
+            source.dropMessage(1, "找不到 " + name + " on this channel.");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target == source) {
-            source.dropMessage(1, "You can't engage yourself.");
+            source.dropMessage(1, "你不能和自己订婚。");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target.getLevel() < 50) {
-            source.dropMessage(1, "You can only propose to someone level 50 or higher.");
+            source.dropMessage(1, "只能向50级或以上的玩家求婚。");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (source.getLevel() < 50) {
-            source.dropMessage(1, "You can only propose being level 50 or higher.");
+            source.dropMessage(1, "只有50级或以上才能求婚。");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (!target.getMap().equals(source.getMap())) {
-            source.dropMessage(1, "Make sure your partner is on the same map!");
+            source.dropMessage(1, "请确保你的伴侣和你在同一张地图上！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (!source.haveItem(itemid) || itemid < ItemId.ENGAGEMENT_BOX_MIN || itemid > ItemId.ENGAGEMENT_BOX_MAX) {
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target.isMarried()) {
-            source.dropMessage(1, "The player is already married!");
+            source.dropMessage(1, "该玩家已经结婚了！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target.getPartnerId() > 0 || target.getMarriageItemId() > 0) {
-            source.dropMessage(1, "The player is already engaged!");
+            source.dropMessage(1, "该玩家已经订婚了！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target.haveWeddingRing()) {
-            source.dropMessage(1, "The player already holds a marriage ring...");
+            source.dropMessage(1, "该玩家已经持有结婚戒指……");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (source.haveWeddingRing()) {
-            source.dropMessage(1, "You can't propose while holding a marriage ring!");
+            source.dropMessage(1, "持有结婚戒指时无法求婚！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (target.getGender() == source.getGender()) {
-            source.dropMessage(1, "You may only propose to a " + (source.getGender() == 1 ? "male" : "female") + "!");
+            source.dropMessage(1, "你只能向 " + (source.getGender() == 1 ? "男性" : "女性") + " 求婚！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (!InventoryManipulator.checkSpace(c, newBoxId, 1, "")) {
-            source.dropMessage(5, "You don't have a ETC slot available right now!");
+            source.dropMessage(5, "你现在没有其他栏空位！");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         } else if (!InventoryManipulator.checkSpace(target.getClient(), newBoxId + 1, 1, "")) {
-            source.dropMessage(5, "The girl you proposed doesn't have a ETC slot available right now.");
+            source.dropMessage(5, "你求婚的对象现在没有其他栏空位。");
             source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
             return;
         }
@@ -202,7 +202,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
         if (partner == null) {
             eraseEngagementOffline(partnerid);
         } else {
-            partner.dropMessage(5, chr.getName() + " has decided to break up the marriage.");
+            partner.dropMessage(5, chr.getName() + " 决定与你离婚。");
 
             //partner.sendPacket(Wedding.OnMarriageResult((byte) 0)); ok, how to gracefully unengage someone without the need to cc?
             partner.sendPacket(WeddingPackets.OnNotifyWeddingPartnerTransfer(0, 0));
@@ -213,7 +213,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
             org.gms.server.quest.medal.OutstandingCitizenMedal.refreshEligibility(partner);
         }
 
-        chr.dropMessage(5, "You have successfully break the marriage with " + Character.getNameById(partnerid) + ".");
+        chr.dropMessage(5, "你已成功解除与 " + Character.getNameById(partnerid) + ".");
 
         //chr.sendPacket(Wedding.OnMarriageResult((byte) 0));
         chr.sendPacket(WeddingPackets.OnNotifyWeddingPartnerTransfer(0, 0));
@@ -248,7 +248,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
         if (partner == null) {
             breakEngagementOffline(partnerid);
         } else {
-            partner.dropMessage(5, chr.getName() + " has decided to break up the engagement.");
+            partner.dropMessage(5, chr.getName() + " 决定解除婚约。");
 
             int partnerMarriageitemid = marriageitemid + ((chr.getGender() == 0) ? 1 : -1);
             if (partner.haveItem(partnerMarriageitemid)) {
@@ -264,7 +264,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
         if (chr.haveItem(marriageitemid)) {
             InventoryManipulator.removeById(chr.getClient(), InventoryType.ETC, marriageitemid, (short) 1, false, false);
         }
-        chr.dropMessage(5, "You have successfully break the engagement with " + Character.getNameById(partnerid) + ".");
+        chr.dropMessage(5, "你已成功解除与 " + Character.getNameById(partnerid) + ".");
 
         //chr.sendPacket(Wedding.OnMarriageResult((byte) 0));
         chr.sendPacket(WeddingPackets.OnNotifyWeddingPartnerTransfer(0, 0));
@@ -378,7 +378,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
                         log.error("Error with engagement", e);
                     }
                 } else {
-                    source.dropMessage(1, "She has politely declined your engagement request.");
+                    source.dropMessage(1, "她礼貌地拒绝了你的订婚请求。");
                     source.sendPacket(WeddingPackets.OnMarriageResult((byte) 0));
 
                     source.setMarriageItemId(-1);
@@ -411,7 +411,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
                 String bride = Character.getNameById(c.getPlayer().getPartnerId());
                 int guest = Character.getIdByName(name);
                 if (groom == null || bride == null || groom.equals("") || bride.equals("") || guest <= 0) {
-                    c.getPlayer().dropMessage(5, "Unable to find " + name + "!");
+                    c.getPlayer().dropMessage(5, "找不到 " + name + "!");
                     return;
                 }
 
@@ -447,13 +447,13 @@ public final class RingActionHandler extends AbstractPacketHandler {
                                     DueyProcessor.dueyCreatePackage(weddingTicket, 0, groom, guest);
                                 }
                             } else {
-                                c.getPlayer().dropMessage(5, "Wedding is already under way. You cannot invite any more guests for the event.");
+                                c.getPlayer().dropMessage(5, "婚礼已经开始了。你不能再邀请更多宾客参加活动。");
                             }
                         } else {
                             c.getPlayer().dropMessage(5, "'" + name + "' is already invited for your marriage.");
                         }
                     } else {
-                        c.getPlayer().dropMessage(5, "Invitation was not sent to '" + name + "'. Either the time for your marriage reservation already came or it was not found.");
+                        c.getPlayer().dropMessage(5, "邀请未能发送给 '" + name + "'。要么你的婚礼预约时间已到，要么预约不存在。");
                     }
 
                 } catch (Exception ex) {

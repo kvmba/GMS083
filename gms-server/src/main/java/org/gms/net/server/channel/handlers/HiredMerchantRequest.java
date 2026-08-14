@@ -76,14 +76,14 @@ public final class HiredMerchantRequest extends AbstractPacketHandler {
         }
 
         if (!GameConstants.isFreeMarketRoom(chr.getMapId())) {
-            chr.dropMessage(1, "You cannot open your hired merchant here.");
+            chr.dropMessage(1, "你无法在这里开启雇佣商店。");
             return;
         }
 
         HiredMerchant existing = c.getWorldServer().getHiredMerchant(chr.getId());
         if (existing != null) {
             if (existing.isPublished()) {
-                chr.dropMessage(1, "You already have a store open on channel " + existing.getChannel() + ".");
+                chr.dropMessage(1, "你已经在频道 " + existing.getChannel() + ".");
                 return;
             }
 
@@ -95,29 +95,29 @@ public final class HiredMerchantRequest extends AbstractPacketHandler {
             } catch (RuntimeException ex) {
                 log.error("Failed to clean up unpublished HiredMerchant for character {}, original channel {}",
                         chr.getName(), existing.getChannel(), ex);
-                chr.dropMessage(1, "Your previous unfinished store could not be cleaned up. Please contact an administrator.");
+                chr.dropMessage(1, "你之前未完成的商店无法清理。请联系管理员。");
                 chr.sendPacket(PacketCreator.enableActions());
                 return;
             }
 
             try {
                 if (!ItemFactory.MERCHANT.loadItems(chr.getId(), false).isEmpty() || chr.getMerchantMeso() != 0) {
-                    chr.dropMessage(5, "Your unfinished store was closed. Please retrieve its items from Fredrick.");
+                    chr.dropMessage(5, "你未完成的商店已关闭。请到弗雷德里克处取回物品。");
                     chr.sendPacket(PacketCreator.retrieveFirstMessage());
                 } else {
-                    chr.dropMessage(1, "Your unfinished store was closed and its items were returned. Please set it up again.");
+                    chr.dropMessage(1, "你未完成的商店已关闭，物品已归还。请重新设置。");
                     chr.sendPacket(PacketCreator.enableActions());
                 }
             } catch (SQLException ex) {
                 log.error("Failed to verify cleanup result for character {}", chr.getName(), ex);
-                chr.dropMessage(1, "Your unfinished store was closed, but its item state could not be verified.");
+                chr.dropMessage(1, "你未完成的商店已关闭，但无法核实其物品状态。");
                 chr.sendPacket(PacketCreator.enableActions());
             }
             return;
         }
 
         if (chr.hasMerchant()) {
-            chr.dropMessage(1, "Your hired merchant state has not been cleaned up. Please contact an administrator.");
+            chr.dropMessage(1, "你的雇佣商店状态未能清理。请联系管理员。");
             return;
         }
 

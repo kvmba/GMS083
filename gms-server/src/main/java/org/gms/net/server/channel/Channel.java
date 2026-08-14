@@ -777,7 +777,7 @@ public final class Channel {
         }
 
         Pair<String, String> couple = new Pair<>(Character.getNameById(coupleId.getLeft()), Character.getNameById(coupleId.getRight()));
-        wserv.dropMessage(6, couple.getLeft() + " and " + couple.getRight() + "'s wedding is going to be started at " + (cathedral ? "Cathedral" : "Chapel") + " on Channel " + channel + ".");
+        wserv.dropMessage(6, couple.getLeft() + " 和 " + couple.getRight() + " 的婚礼将于 " + (cathedral ? "大教堂" : "小教堂") + " 在频道 " + channel + " 开始。");
 
         return new Pair<>(typeGuests.getLeft(), new Pair<>(ret, typeGuests.getRight()));
     }

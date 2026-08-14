@@ -122,7 +122,7 @@ public final class MTSHandler extends AbstractPacketHandler {
                     return;
                 }
                 if (currentListings > 10) {
-                    c.getPlayer().dropMessage(1, "You already have 10 items up for auction!");
+                    c.getPlayer().dropMessage(1, "你已经有10件物品在拍卖了！");
                     c.sendPacket(getMTS(1, 0, 0));
                     c.sendPacket(PacketCreator.transferInventory(getTransfer(c.getPlayer().getId())));
                     c.sendPacket(PacketCreator.notYetSoldInv(getNotYetSold(c.getPlayer().getId())));

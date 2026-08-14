@@ -93,7 +93,7 @@ public class NPCScriptManager extends AbstractScriptManager {
             ScriptEngine engine = getInvocableScriptEngine("npc/" + filename + ".js", c);
 
             if (engine == null) {
-                c.getPlayer().dropMessage(1, "NPC " + npc + " is uncoded.");
+                c.getPlayer().dropMessage(1, "NPC " + npc + " 未编码。");
                 cm.dispose();
                 return;
             }

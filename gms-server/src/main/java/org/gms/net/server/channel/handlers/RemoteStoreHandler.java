@@ -45,7 +45,7 @@ public class RemoteStoreHandler extends AbstractPacketHandler {
             }
             return;
         } else {
-            chr.dropMessage(1, "You don't have a Merchant open.");
+            chr.dropMessage(1, "你没有开启商店。");
         }
         c.sendPacket(PacketCreator.enableActions());
     }

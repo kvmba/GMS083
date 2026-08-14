@@ -59,7 +59,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
             }
         } else {
             if (b == 4) {
-                chr.dropMessage(5, "Your guild is already registered on a guild alliance.");
+                chr.dropMessage(5, "你的公会已经注册在某个公会联盟中。");
                 c.sendPacket(PacketCreator.enableActions());
                 return;
             }
@@ -87,7 +87,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
                 String guildName = p.readString();
 
                 if (alliance.getGuilds().size() == alliance.getCapacity()) {
-                    chr.dropMessage(5, "Your alliance cannot comport any more guilds at the moment.");
+                    chr.dropMessage(5, "你的联盟目前无法容纳更多公会。");
                 } else {
                     Alliance.sendInvitation(c, guildName, alliance.getId());
                 }
@@ -112,7 +112,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
                 }
 
                 if (alliance.getGuilds().size() == alliance.getCapacity()) {
-                    chr.dropMessage(5, "Your alliance cannot comport any more guilds at the moment.");
+                    chr.dropMessage(5, "你的联盟目前无法容纳更多公会。");
                     return;
                 }
 
@@ -132,7 +132,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
                 Server.getInstance().allianceMessage(alliance.getId(), GuildPackets.addGuildToAlliance(alliance, guildid, c), -1, -1);
                 Server.getInstance().allianceMessage(alliance.getId(), GuildPackets.updateAllianceInfo(alliance, c.getWorld()), -1, -1);
                 Server.getInstance().allianceMessage(alliance.getId(), GuildPackets.allianceNotice(alliance.getId(), alliance.getNotice()), -1, -1);
-                guild.dropMessage("Your guild has joined the [" + alliance.getName() + "] union.");
+                guild.dropMessage("你的公会已加入[" + alliance.getName() + "] 已联合。");
 
                 break;
             }
@@ -193,7 +193,7 @@ public final class AllianceOperationHandler extends AbstractPacketHandler {
                 alliance.dropMessage(5, "* Alliance Notice : " + notice);
                 break;
             default:
-                chr.dropMessage("Feature not available");
+                chr.dropMessage("该功能暂不可用");
         }
 
         alliance.saveToDB();

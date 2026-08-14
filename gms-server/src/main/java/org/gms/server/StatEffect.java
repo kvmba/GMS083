@@ -1079,11 +1079,11 @@ public class StatEffect {
                 InventoryManipulator.addFromDrop(applyto.getClient(), new Item(ItemId.MAGIC_ROCK, (short) 0, (short) 1), false);
 
                 if (door.getOwnerId() == -3) {
-                    applyto.dropMessage(5, "Mystic Door cannot be cast far from a spawn point. Nearest one is at " + door.getDoorStatus().getRight() + "pts " + door.getDoorStatus().getLeft());
+                    applyto.dropMessage(5, "魔法之门不能施放在远离出生点的位置。最近的位置在 " + door.getDoorStatus().getRight() + "pts " + door.getDoorStatus().getLeft());
                 } else if (door.getOwnerId() == -2) {
-                    applyto.dropMessage(5, "Mystic Door cannot be cast on a slope, try elsewhere.");
+                    applyto.dropMessage(5, "魔法之门不能施放在斜坡上，请换个地方。");
                 } else {
-                    applyto.dropMessage(5, "There are no door portals available for the town at this moment. Try again later.");
+                    applyto.dropMessage(5, "该城镇目前没有可用的传送门。请稍后再试。");
                 }
 
                 applyto.cancelBuffStats(BuffStat.SOULARROW);  // cancel door buff

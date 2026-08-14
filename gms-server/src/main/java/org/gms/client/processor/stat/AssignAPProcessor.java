@@ -172,8 +172,8 @@ public class AssignAPProcessor {
                 int eqpLuk = getNthHighestStat(eqpLukList, (short) 0) + getNthHighestStat(eqpLukList, (short) 1); // 计算前两高LUK装备的总和
 
                 //c.getPlayer().message("----------------------------------------");
-                //c.getPlayer().message("SDL: s" + eqpStr + " d" + eqpDex + " l" + eqpLuk + " BASE STATS --> STR: " + chr.getStr() + " DEX: " + chr.getDex() + " INT: " + chr.getInt() + " LUK: " + chr.getLuk());
-                //c.getPlayer().message("SUM EQUIP STATS -> STR: " + str + " DEX: " + dex + " LUK: " + luk + " INT: " + int_);
+                //c.getPlayer().message("SDL: s" + eqpStr + " d" + eqpDex + " l" + eqpLuk + " 基础属性 --> 力量: " + chr.getStr() + " 敏捷: " + chr.getDex() + " 智力: " + chr.getInt() + " 运气: " + chr.getLuk());
+                //c.getPlayer().message("装备属性总和 --> 力量: " + str + " 敏捷: " + dex + " 运气: " + luk + " 智力: " + int_);
 
                 Job stance = c.getPlayer().getJobStyle(opt); // 根据选项获取玩家的职业类型
                 int prStat = 0, scStat = 0, trStat = 0, temp, tempAp = remainingAp, CAP; // 初始化主属性、副属性、第三属性、临时变量和上限值

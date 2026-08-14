@@ -83,30 +83,30 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                 matchPlayers.remove(leader);
 
                 if (leader.getGuildId() > 0) {
-                    leader.dropMessage(1, "You cannot create a new Guild while in one.");
+                    leader.dropMessage(1, "你已经在公会中，无法创建新公会。");
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
                 int partyid = leader.getPartyId();
                 if (partyid == -1 || !leader.isPartyLeader()) {
-                    leader.dropMessage(1, "You cannot establish the creation of a new Guild without leading a party.");
+                    leader.dropMessage(1, "没有带领队伍时，无法创建新公会。");
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
                 if (leader.getMapId() != MapId.GUILD_HQ) {
-                    leader.dropMessage(1, "You cannot establish the creation of a new Guild outside of the Guild Headquarters.");
+                    leader.dropMessage(1, "在公会总部以外的地方无法创建新公会。");
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
                 for (Character chr : matchPlayers) {
                     if (leader.getMap().getCharacterById(chr.getId()) == null) {
-                        leader.dropMessage(1, "You cannot establish the creation of a new Guild if one of the members is not present here.");
+                        leader.dropMessage(1, "如果有成员不在此处，就无法创建新公会。");
                         broadcastGuildCreationDismiss(matchPlayers);
                         return;
                     }
                 }
                 if (leader.getMeso() < GameConfig.getServerInt("create_guild_cost")) {
-                    leader.dropMessage(1, "You do not have " + GameConstants.numberWithCommas(GameConfig.getServerInt("create_guild_cost")) + " mesos to create a Guild.");
+                    leader.dropMessage(1, "你没有 " + GameConstants.numberWithCommas(GameConfig.getServerInt("create_guild_cost")) + " 金币来创建公会。");
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
@@ -124,7 +124,7 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                 Server.getInstance().changeRank(gid, leader.getId(), 1);
 
                 leader.sendPacket(GuildPackets.showGuildInfo(leader));
-                leader.dropMessage(1, "You have successfully created a Guild.");
+                leader.dropMessage(1, "你已成功创建公会。");
 
                 for (Character chr : matchPlayers) {
                     boolean cofounder = chr.getPartyId() == partyid;
@@ -140,9 +140,9 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                         chr.sendPacket(GuildPackets.showGuildInfo(chr));
 
                         if (cofounder) {
-                            chr.dropMessage(1, "You have successfully cofounded a Guild.");
+                            chr.dropMessage(1, "你已成功共同创建公会。");
                         } else {
-                            chr.dropMessage(1, "You have successfully joined the new Guild.");
+                            chr.dropMessage(1, "你已成功加入新公会。");
                         }
                     }
 

@@ -535,7 +535,7 @@ public class AbstractPlayerInteraction {
 
         target = getPlayer().getPet(slot);
         if (target == null) {
-            getPlayer().message("Pet could not be evolved...");
+            getPlayer().message("宠物无法进化……");
             return (null);
         }
 
@@ -546,11 +546,11 @@ public class AbstractPlayerInteraction {
             
             evolved = tmp.getPet();
             if(evolved == null) {
-                getPlayer().message("Pet structure non-existent for " + tmp.getItemId() + "...");
+                getPlayer().message("宠物的数据结构不存在：" + tmp.getItemId() + "...");
                 return(null);
             }
             else if(tmp.getPetId() == -1) {
-                getPlayer().message("Pet id -1");
+                getPlayer().message("宠物ID无效(-1)");
                 return(null);
             }
             

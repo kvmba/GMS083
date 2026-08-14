@@ -89,7 +89,7 @@ public class MakerProcessor {
                             return;
                         }
                     } else {
-                        c.sendPacket(PacketCreator.serverNotice(1, "An unknown error occurred when trying to apply that item for disassembly."));
+                        c.sendPacket(PacketCreator.serverNotice(1, "尝试对该物品进行分解时发生了未知错误。"));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         return;
                     }
@@ -137,7 +137,7 @@ public class MakerProcessor {
 
                         if (!reagentids.isEmpty()) {
                             if (!removeOddMakerReagents(toCreate, reagentids)) {
-                                c.sendPacket(PacketCreator.serverNotice(1, "You can only use WATK and MATK Strengthening Gems on weapon items."));
+                                c.sendPacket(PacketCreator.serverNotice(1, "物理攻击和魔法攻击强化宝石只能用于武器。"));
                                 c.sendPacket(PacketCreator.makerEnableActions());
                                 return;
                             }
@@ -152,32 +152,32 @@ public class MakerProcessor {
                 switch (createStatus) {
                     case -1:// non-available for Maker itemid has been tried to forge
                         log.warn("Chr {} tried to craft itemid {} using the Maker skill.", c.getPlayer().getName(), toCreate);
-                        c.sendPacket(PacketCreator.serverNotice(1, "The requested item could not be crafted on this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, "本次操作无法制作所请求的物品。"));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 1: // no items
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have all required items in your inventory to make " + ii.getName(toCreate) + "."));
+                        c.sendPacket(PacketCreator.serverNotice(1, "你的背包中没有制作 " + ii.getName(toCreate) + "."));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 2: // no meso
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have enough mesos (" + GameConstants.numberWithCommas(recipe.getCost()) + ") to complete this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, "你没有足够的金币 (" + GameConstants.numberWithCommas(recipe.getCost()) + ") 才能完成本次操作。"));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 3: // no req level
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have enough level to complete this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, "你的等级不足以完成本次操作。"));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 4: // no req skill level
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have enough Maker level to complete this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, "你的制作技能等级不足以完成本次操作。"));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 5: // inventory full
-                        c.sendPacket(PacketCreator.serverNotice(1, "Your inventory is full."));
+                        c.sendPacket(PacketCreator.serverNotice(1, "你的背包已满。"));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 

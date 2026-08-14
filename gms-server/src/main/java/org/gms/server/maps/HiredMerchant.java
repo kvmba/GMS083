@@ -253,7 +253,7 @@ public class HiredMerchant extends AbstractMapObject {
                     iitem.setQuantity((short) Math.min(totalQuantity, Short.MAX_VALUE));
 
                     if (!Inventory.checkSpot(chr, iitem)) {
-                        chr.sendPacket(PacketCreator.serverNotice(1, "Have a slot available on your inventory to claim back the item."));
+                        chr.sendPacket(PacketCreator.serverNotice(1, "请在你的背包中空出一个位置再取回物品。"));
                         chr.sendPacket(PacketCreator.enableActions());
                         return;
                     }
@@ -363,12 +363,12 @@ public class HiredMerchant extends AbstractMapObject {
                         }
                     }
                 } else {
-                    c.getPlayer().dropMessage(1, "Your inventory is full. Please clear a slot before buying this item.");
+                    c.getPlayer().dropMessage(1, "你的背包已满。请在购买此物品前空出一个位置。");
                     c.sendPacket(PacketCreator.enableActions());
                     return;
                 }
             } else {
-                c.getPlayer().dropMessage(1, "You don't have enough mesos to purchase this item.");
+                c.getPlayer().dropMessage(1, "你没有足够的金币来购买此物品。");
                 c.sendPacket(PacketCreator.enableActions());
                 return;
             }

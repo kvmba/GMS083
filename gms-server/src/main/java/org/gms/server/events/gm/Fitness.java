@@ -56,7 +56,7 @@ public class Fitness {
         checkAndMessage();
 
         chr.getMap().getPortal("join00").setPortalStatus(true);
-        chr.sendPacket(PacketCreator.serverNotice(0, "The portal has now opened. Press the up arrow key at the portal to enter."));
+        chr.sendPacket(PacketCreator.serverNotice(0, "传送门现已开启。在传送门处按上方向键即可进入。"));
     }
 
     public boolean isTimerStarted() {
@@ -85,45 +85,45 @@ public class Fitness {
             }
             if (MapId.isPhysicalFitness(chr.getMapId())) {
                 if (getTimeLeft() > 9000 && getTimeLeft() < 11000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "You have 10 sec left. Those of you unable to beat the game, we hope you beat it next time! Great job everyone!! See you later~"));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "还剩10秒。没有完成游戏的朋友，希望你们下次能成功！大家都很棒！！回头见~"));
                 } else if (getTimeLeft() > 99000 && getTimeLeft() < 101000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "Alright, you don't have much time remaining. Please hurry up a little!"));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "好了，剩下的时间不多了。请稍微抓紧一点！"));
                 } else if (getTimeLeft() > 239000 && getTimeLeft() < 241000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "The 4th stage is the last one for [The Maple Physical Fitness Test]. Please don't give up at the last minute and try your best. The reward is waiting for you at the very top!"));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "第4阶段是[冒险岛体能测试]的最后一关。请不要在最后关头放弃，全力以赴。奖励就在最顶端等着你！"));
                 } else if (getTimeLeft() > 299000 && getTimeLeft() < 301000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "The 3rd stage offers traps where you may see them, but you won't be able to step on them. Please be careful of them as you make your way up."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "第3阶段有陷阱，你能看到它们，但不能踩上去。向上前进时请小心。"));
                 } else if (getTimeLeft() > 359000 && getTimeLeft() < 361000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "For those who have heavy lags, please make sure to move slowly to avoid falling all the way down because of lags."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "网络延迟较高的玩家请注意缓慢移动，避免因延迟而一路跌落。"));
                 } else if (getTimeLeft() > 499000 && getTimeLeft() < 501000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "Please remember that if you die during the event, you'll be eliminated from the game. If you're running out of HP, either take a potion or recover HP first before moving on."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "请记住，如果你在活动中死亡，将被淘汰出局。如果HP不足，请先使用药水或恢复HP再继续前进。"));
                 } else if (getTimeLeft() > 599000 && getTimeLeft() < 601000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "The most important thing you'll need to know to avoid the bananas thrown by the monkeys is *Timing* Timing is everything in this!"));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "躲避猴子扔香蕉的关键就是*时机*，时机决定一切！"));
                 } else if (getTimeLeft() > 659000 && getTimeLeft() < 661000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "The 2nd stage offers monkeys throwing bananas. Please make sure to avoid them by moving along at just the right timing."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "第2阶段有猴子扔香蕉。请注意掌握好时机移动来躲避它们。"));
                 } else if (getTimeLeft() > 699000 && getTimeLeft() < 701000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "Please remember that if you die during the event, you'll be eliminated from the game. You still have plenty of time left, so either take a potion or recover HP first before moving on."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "请记住，如果你在活动中死亡，将被淘汰出局。时间还很充裕，请先使用药水或恢复HP再继续前进。"));
                 } else if (getTimeLeft() > 779000 && getTimeLeft() < 781000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "Everyone that clears [The Maple Physical Fitness Test] on time will be given an item, regardless of the order of finish, so just relax, take your time, and clear the 4 stages."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "所有按时通过[冒险岛体能测试]的玩家都将获得物品奖励，与完成顺序无关，所以放轻松，慢慢来，通过这4个阶段吧。"));
                 } else if (getTimeLeft() > 839000 && getTimeLeft() < 841000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "There may be a heavy lag due to many users at stage 1 all at once. It won't be difficult, so please make sure not to fall down because of heavy lag."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "由于第1阶段玩家众多，可能会有严重的延迟。这一关并不难，请注意不要因为延迟而跌落。"));
                 } else if (getTimeLeft() > 869000 && getTimeLeft() < 871000) {
-                    chr.sendPacket(PacketCreator.serverNotice(0, "[MapleStory Physical Fitness Test] consists of 4 stages, and if you happen to die during the game, you'll be eliminated from the game, so please be careful of that."));
+                    chr.sendPacket(PacketCreator.serverNotice(0, "[冒险岛体能测试]由4个阶段组成，如果在游戏中死亡将被淘汰，请注意。"));
                 }
             } else {
                 resetTimes();
             }
         }, 5000, 29500);
     }
-    // 14:30 [Notice][MapleStory Physical Fitness Test] consists of 4 stages, and if you happen to die during the game, you'll be eliminated from the game, so please be careful of that.
-    // 14:00 [Notice]There may be a heavy lag due to many users at stage 1 all at once. It won't be difficult, so please make sure not to fall down because of heavy lag.
-    // 13:00 [Notice]Everyone that clears [The Maple Physical Fitness Test] on time will be given an item, regardless of the order of finish, so just relax, take your time, and clear the 4 stages.
-    // 11:40 [Notice]Please remember that if you die during the event, you'll be eliminated from the game. You still have plenty of time left, so either take a potion or recover HP first before moving on.
-    // 11:00 [Notice]The 2nd stage offers monkeys throwing bananas. Please make sure to avoid them by moving along at just the right timing.
-    // 10:00 [Notice]The most important thing you'll need to know to avoid the bananas thrown by the monkeys is *Timing* Timing is everything in this!
-    // 8:20 [Notice]Please remember that if you die during the event, you'll be eliminated from the game. If you're running out of HP, either take a potion or recover HP first before moving on.
-    // 6:00 [Notice]For those who have heavy lags, please make sure to move slowly to avoid falling all the way down because of lags.
-    // 5:00 [Notice]The 3rd stage offers traps where you may see them, but you won't be able to step on them. Please be careful of them as you make your way up.
-    // 4:00 [Notice]The 4th stage is the last one for [The Maple Physical Fitness Test]. Please don't give up at the last minute and try your best. The reward is waiting for you at the very top!
-    // 1:40 [Notice]Alright, you don't have much time remaining. Please hurry up a little!
-    // 0:10 [Notice]You have 10 sec left. Those of you unable to beat the game, we hope you beat it next time! Great job everyone!! See you later~
+    // 14:30 [Notice][冒险岛体能测试]由4个阶段组成，如果在游戏中死亡将被淘汰，请注意。
+    // 14:00 [Notice]由于第1阶段玩家众多，可能会有严重的延迟。这一关并不难，请注意不要因为延迟而跌落。
+    // 13:00 [Notice]所有按时通过[冒险岛体能测试]的玩家都将获得物品奖励，与完成顺序无关，所以放轻松，慢慢来，通过这4个阶段吧。
+    // 11:40 [Notice]请记住，如果你在活动中死亡，将被淘汰出局。时间还很充裕，请先使用药水或恢复HP再继续前进。
+    // 11:00 [Notice]第2阶段有猴子扔香蕉。请注意掌握好时机移动来躲避它们。
+    // 10:00 [Notice]躲避猴子扔香蕉的关键就是*时机*，时机决定一切！
+    // 8:20 [Notice]请记住，如果你在活动中死亡，将被淘汰出局。如果HP不足，请先使用药水或恢复HP再继续前进。
+    // 6:00 [Notice]网络延迟较高的玩家请注意缓慢移动，避免因延迟而一路跌落。
+    // 5:00 [Notice]第3阶段有陷阱，你能看到它们，但不能踩上去。向上前进时请小心。
+    // 4:00 [Notice]第4阶段是[冒险岛体能测试]的最后一关。请不要在最后关头放弃，全力以赴。奖励就在最顶端等着你！
+    // 1:40 [Notice]好了，剩下的时间不多了。请稍微抓紧一点！
+    // 0:10 [Notice]还剩10秒。没有完成游戏的朋友，希望你们下次能成功！大家都很棒！！回头见~
 }

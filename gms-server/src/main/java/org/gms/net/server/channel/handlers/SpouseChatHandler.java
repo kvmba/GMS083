@@ -42,10 +42,10 @@ public final class SpouseChatHandler extends AbstractPacketHandler {
                 c.sendPacket(PacketCreator.OnCoupleMessage(c.getPlayer().getName(), msg, true));
                 ChatLogger.log(c, "Spouse", msg);
             } else {
-                c.getPlayer().dropMessage(5, "Your spouse is currently offline.");
+                c.getPlayer().dropMessage(5, "你的伴侣目前不在线。");
             }
         } else {
-            c.getPlayer().dropMessage(5, "You don't have a spouse.");
+            c.getPlayer().dropMessage(5, "你没有伴侣。");
         }
     }
 }

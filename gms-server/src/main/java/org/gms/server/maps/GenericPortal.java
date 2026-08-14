@@ -154,7 +154,7 @@ public class GenericPortal implements Portal {
                 chr.changeMap(to, pto); //late resolving makes this harder but prevents us from loading the whole world at once
                 changed = true;
             } else {
-                chr.dropMessage(5, "You cannot enter this map with the chalkboard opened.");
+                chr.dropMessage(5, "开启写字板时无法进入这张地图。");
             }
         }
         if (!changed) {

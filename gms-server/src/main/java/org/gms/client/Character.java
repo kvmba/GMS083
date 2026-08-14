@@ -7954,7 +7954,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void sendPolice(String text) {
-        final String message = getName() + " received this - " + text;
+        final String message = getName() + " 收到了这个 - " + text;
         if (Server.getInstance().isGmOnline(this.getWorld())) { //Alert and log if a GM is online
             Server.getInstance().broadcastGMMessage(this.getWorld(), PacketCreator.sendYellowTip(message));
         } else { //Auto DC and log if no GM is online
@@ -8524,7 +8524,7 @@ public class Character extends AbstractCharacterObject {
                 }
             }
 
-            dropMessage(6, "EQUIPMENT MERGE operation results:");
+            dropMessage(6, "装备融合操作结果：");
             for (Entry<Equip, List<Pair<StatUpgrade, Integer>>> eqpUpg : equipUpgrades.entrySet()) {
                 List<Pair<StatUpgrade, Integer>> eqpStatups = eqpUpg.getValue();
                 if (!eqpStatups.isEmpty()) {
@@ -9322,7 +9322,7 @@ public class Character extends AbstractCharacterObject {
         sendPacket(PacketCreator.sendPolice(I18nUtil.getMessage("Character.autoBan.message1")));  //发送自动封禁提示
         TimerManager.getInstance().schedule(() -> client.disconnect(false, false), 5000);
 
-        Server.getInstance().broadcastGMMessage(this.getWorld(), PacketCreator.serverNotice(6, Character.makeMapleReadable(this.name) + " was autobanned for " + reason));
+        Server.getInstance().broadcastGMMessage(this.getWorld(), PacketCreator.serverNotice(6, Character.makeMapleReadable(this.name) + " 因以下原因被自动封禁: " + reason));
     }
 
     public void block(int reason, int days, String desc) {

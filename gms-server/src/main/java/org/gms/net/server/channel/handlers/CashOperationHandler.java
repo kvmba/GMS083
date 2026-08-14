@@ -289,7 +289,7 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                         return;
                     }
                     if (!c.canGainCharacterSlot()) {
-                        chr.dropMessage(1, "You have already used up all 12 extra character slots.");
+                        chr.dropMessage(1, "你已经用完了全部12个额外的角色槽位。");
                         c.enableCSActions();
                         return;
                     }
@@ -368,7 +368,7 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                         } else {
 
                           /*  if (partner.getGender() == chr.getGender()) {
-                                chr.dropMessage(5, "You and your partner are the same gender, please buy a friendship ring.");
+                                chr.dropMessage(5, "你和你的伴侣性别相同，请购买友情戒指。");
                                 c.enableCSActions();
                                 return;
                             }*/ //Gotta let them faggots marry too, hence why this is commented out <3 

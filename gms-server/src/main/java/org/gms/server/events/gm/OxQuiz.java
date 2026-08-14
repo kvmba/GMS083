@@ -55,7 +55,7 @@ public final class OxQuiz {
         double x = chr.getPosition().getX();
         double y = chr.getPosition().getY();
         if ((x > -234 && y > -26 && answer == 0) || (x < -234 && y > -26 && answer == 1)) {
-            chr.dropMessage("Correct!");
+            chr.dropMessage("正确！");
             return true;
         }
         return false;
@@ -92,7 +92,7 @@ public final class OxQuiz {
             }
             //send question
             if (question >= 100 || map.getCharacters().size() - number <= 2) {
-                map.broadcastMessage(PacketCreator.serverNotice(6, "The event has ended"));
+                map.broadcastMessage(PacketCreator.serverNotice(6, "活动已结束"));
                 map.getPortal("join00").setPortalStatus(true);
                 map.setOx(null);
                 map.setOxQuiz(false);

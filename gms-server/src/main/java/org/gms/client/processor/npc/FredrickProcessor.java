@@ -284,7 +284,7 @@ public class FredrickProcessor {
                 // (HiredMerchantRequest) closes the store first and sets hasMerchant=false, so it is unaffected.
                 HiredMerchant active = c.getWorldServer().getHiredMerchant(chr.getId());
                 if (chr.hasMerchant() || (active != null && active.isOwner(chr))) {
-                    chr.dropMessage(1, "Please close your hired merchant before retrieving stored items.");
+                    chr.dropMessage(1, "取回存放物品前，请先关闭你的雇佣商店。");
                     chr.sendPacket(PacketCreator.enableActions());
                     return;
                 }
@@ -300,7 +300,7 @@ public class FredrickProcessor {
                     }
 
                     if (!deleteFredrickItems(chr.getId())) {
-                        chr.message("An unknown error has occured.");
+                        chr.message("发生了未知错误。");
                         return;
                     }
 

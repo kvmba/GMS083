@@ -91,9 +91,9 @@ public class BuddylistModifyHandler extends AbstractPacketHandler {
             }
             BuddylistEntry ble = buddylist.get(addName);
             if (ble != null && !ble.isVisible() && group.equals(ble.getGroup())) {
-                c.sendPacket(PacketCreator.serverNotice(1, "You already have \"" + ble.getName() + "\" on your Buddylist"));
+                c.sendPacket(PacketCreator.serverNotice(1, "你已经拥有 \"" + ble.getName() + "\" 在你的好友列表上"));
             } else if (buddylist.isFull() && ble == null) {
-                c.sendPacket(PacketCreator.serverNotice(1, "Your buddylist is already full"));
+                c.sendPacket(PacketCreator.serverNotice(1, "你的好友列表已满"));
             } else if (ble == null) {
                 try {
                     World world = c.getWorldServer();
@@ -138,7 +138,7 @@ public class BuddylistModifyHandler extends AbstractPacketHandler {
                             }
                         }
                         if (buddyAddResult == BuddyAddResult.BUDDYLIST_FULL) {
-                            c.sendPacket(PacketCreator.serverNotice(1, "\"" + addName + "\"'s Buddylist is full"));
+                            c.sendPacket(PacketCreator.serverNotice(1, "\"" + addName + "\" 的好友列表已满"));
                         } else {
                             int displayChannel;
                             displayChannel = -1;
@@ -159,7 +159,7 @@ public class BuddylistModifyHandler extends AbstractPacketHandler {
                             c.sendPacket(PacketCreator.updateBuddylist(buddylist.getBuddies()));
                         }
                     } else {
-                        c.sendPacket(PacketCreator.serverNotice(1, "A character called \"" + addName + "\" does not exist"));
+                        c.sendPacket(PacketCreator.serverNotice(1, "没有找到名为 \"" + addName + "\" 的角色"));
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();

@@ -52,7 +52,7 @@ public class SpawnPetProcessor {
                 int petid = pet.getItemId();
                 if (petid == ItemId.DRAGON_PET || petid == ItemId.ROBO_PET) {
                     if (chr.haveItem(petid + 1)) {
-                        chr.dropMessage(5, "You can't hatch your " + (petid == ItemId.DRAGON_PET ? "Dragon egg" : "Robo egg") + " if you already have a Baby " + (petid == ItemId.DRAGON_PET ? "Dragon." : "Robo."));
+                        chr.dropMessage(5, "如果你已经有一个 " + (petid == ItemId.DRAGON_PET ? "龙" : "罗伯") + "，就无法孵化你的 " + (petid == ItemId.DRAGON_PET ? "龙蛋" : "罗伯蛋") + "。");
                         c.sendPacket(PacketCreator.enableActions());
                         return;
                     } else {

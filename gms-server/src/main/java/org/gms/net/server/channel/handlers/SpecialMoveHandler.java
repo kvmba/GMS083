@@ -148,7 +148,7 @@ public final class SpecialMoveHandler extends AbstractPacketHandler {
                             chr.cancelMagicDoor();
                             skill.getEffect(skillLevel).applyTo(chr, pos);
                         } else {
-                            chr.message("Please wait 5 seconds before casting Mystic Door again.");
+                            chr.message("请等待5秒后再施放魔法之门。");
                         }
                     } finally {
                         c.releaseClient();

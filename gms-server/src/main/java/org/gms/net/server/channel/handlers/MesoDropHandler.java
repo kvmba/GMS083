@@ -44,7 +44,7 @@ public final class MesoDropHandler extends AbstractPacketHandler {
         int meso = p.readInt();
 
         if (player.isGM() && player.gmLevel() < GameConfig.getServerInt("minimum_gm_level_to_drop")) {
-            player.message("You cannot drop mesos at your GM level.");
+            player.message("你的GM等级不允许丢弃金币。");
             return;
         }
 

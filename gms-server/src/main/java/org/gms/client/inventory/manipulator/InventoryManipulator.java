@@ -764,7 +764,7 @@ public class InventoryManipulator {
         }
 
         if (chr.isGM() && chr.gmLevel() < GameConfig.getServerInt("minimum_gm_level_to_drop")) {
-            chr.message("You cannot drop items at your GM level.");
+            chr.message("你的GM等级不允许丢弃物品。");
             log.info("GM {} tried to drop item id {}", chr.getName(), source.getItemId());
             return;
         }

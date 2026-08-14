@@ -78,7 +78,7 @@ public final class AdminCommandHandler extends AbstractPacketHandler {
                 c.getPlayer().setExp(p.readInt());
                 break;
             case 0x03: // /ban <name>
-                c.getPlayer().yellowMessage("Please use !ban <IGN> <Reason>");
+                c.getPlayer().yellowMessage("请使用 !ban <角色名> <原因>");
                 break;
             case 0x04: // /block <name> <duration (in days)> <HACK/BOT/AD/HARASS/CURSE/SCAM/MISCONDUCT/SELL/ICASH/TEMP/GM/IPROGRAM/MEGAPHONE>
                 victim = p.readString();
@@ -149,7 +149,7 @@ public final class AdminCommandHandler extends AbstractPacketHandler {
                 break;
             case 0x18: // Maple & Mobhp
                 int mobHp = p.readInt();
-                c.getPlayer().dropMessage("Monsters HP");
+                c.getPlayer().dropMessage("怪物HP");
                 List<MapObject> monsters = c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapObjectType.MONSTER));
                 for (MapObject mobs : monsters) {
                     Monster monster = (Monster) mobs;

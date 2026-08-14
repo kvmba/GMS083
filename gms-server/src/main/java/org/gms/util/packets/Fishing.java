@@ -62,8 +62,8 @@ public class Fishing {
 
         if (GameConfig.getServerBoolean("use_debug") && chr.isGM()) {
             chr.dropMessage(5, "----- FISHING RESULT -----");
-            chr.dropMessage(5, "Likelihoods - Year: " + yearLikelihood + " Time: " + timeLikelihood + " Meso: " + baitLikelihood);
-            chr.dropMessage(5, "Score rolls - Year: " + (0.23 * yearLikelihood) + " Time: " + (0.77 * timeLikelihood) + " Meso: " + baitLikelihood);
+            chr.dropMessage(5, "概率 - 年: " + yearLikelihood + " 时间: " + timeLikelihood + " 金币: " + baitLikelihood);
+            chr.dropMessage(5, "积分统计 - 年: " + (0.23 * yearLikelihood) + " 时间: " + (0.77 * timeLikelihood) + " 金币: " + baitLikelihood);
         }
 
         return (0.23 * yearLikelihood) + (0.77 * timeLikelihood) + (baitLikelihood) > 57.777;
@@ -77,12 +77,12 @@ public class Fishing {
         }
 
         if (!MapId.isFishingArea(chr.getMapId())) {
-            chr.dropMessage("You are not in a fishing area!");
+            chr.dropMessage("你不在钓鱼区域！");
             return;
         }
 
         if (chr.getLevel() < 30) {
-            chr.dropMessage(5, "You must be above level 30 to fish!");
+            chr.dropMessage(5, "你必须达到30级以上才能钓鱼！");
             return;
         }
 
@@ -120,7 +120,7 @@ public class Fishing {
                     break;
             }
 
-            chr.getMap().dropMessage(6, chr.getName() + " found " + rewardStr);
+            chr.getMap().dropMessage(6, chr.getName() + " 找到了 " + rewardStr);
         }
 
         chr.sendPacket(PacketCreator.showInfo(fishingEffect));

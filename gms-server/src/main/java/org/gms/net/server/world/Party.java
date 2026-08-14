@@ -312,7 +312,7 @@ public class Party {
                 player.sendPacket(PacketCreator.partyStatusMessage(10));
                 return false;
             } else if (player.getAriantColiseum() != null) {
-                player.dropMessage(5, "You cannot request a party creation while participating the Ariant Battle Arena.");
+                player.dropMessage(5, "参加阿里安特竞技场时无法请求创建队伍。");
                 return false;
             }
 
@@ -363,11 +363,11 @@ public class Party {
                     }
                 }
             } else {
-                player.sendPacket(PacketCreator.serverNotice(5, "You couldn't join the party since it had already been disbanded."));
+                player.sendPacket(PacketCreator.serverNotice(5, "由于队伍已解散，你无法加入。"));
             }
         } else {
             if (!silentCheck) {
-                player.sendPacket(PacketCreator.serverNotice(5, "You can't join the party as you are already in one."));
+                player.sendPacket(PacketCreator.serverNotice(5, "你已经在队伍中了，无法再加入。"));
             }
         }
 

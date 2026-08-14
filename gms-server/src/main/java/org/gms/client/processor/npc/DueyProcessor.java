@@ -215,7 +215,7 @@ public class DueyProcessor {
 
             int updateRows = ps.executeUpdate();
             if (updateRows < 1) {
-                log.error("Error trying to create package [mesos: {}, sender: {}, quick: {}, receiver chrId: {}]", mesos, sender, quick, toCid);
+                log.error("Error trying to create package [mesos: {}, sender: {}, quick: {}, receiver chrID: {}]", mesos, sender, quick, toCid);
                 return -1;
             }
 
@@ -224,7 +224,7 @@ public class DueyProcessor {
                 if (rs.next()) {
                     packageId = rs.getInt(1);
                 } else {
-                    log.error("Failed inserting package [mesos: {}, sender: {}, quick: {}, receiver chrId: {}]", mesos, sender, quick, toCid);
+                    log.error("Failed inserting package [mesos: {}, sender: {}, quick: {}, receiver chrID: {}]", mesos, sender, quick, toCid);
                     return -1;
                 }
             }
@@ -294,7 +294,7 @@ public class DueyProcessor {
         if (c.tryacquireClient()) {
             try {
                 if (c.getPlayer().isGM() && c.getPlayer().gmLevel() < GameConfig.getServerInt("minimum_gm_level_to_use_duey")) {
-                    c.getPlayer().message("You cannot use Duey to send items at your GM level.");
+                    c.getPlayer().message("你的GM等级不允许使用快递发送物品。");
                     log.info(String.format("GM %s tried to send a package to %s", c.getPlayer().getName(), recipient));
                     c.sendPacket(PacketCreator.sendDueyMSG(DueyProcessor.Actions.TOCLIENT_SEND_INCORRECT_REQUEST.getCode()));
                     return;

@@ -69,7 +69,7 @@ public final class MessengerHandler extends AbstractPacketHandler {
                                             world.joinMessenger(messenger.getId(), messengerplayer, player.getName(), messengerplayer.getChannel());
                                         }
                                     } else {
-                                        player.message("Could not verify your Maple Messenger accept since the invitation rescinded.");
+                                        player.message("由于邀请已被撤回，无法确认你的好友聊天接受请求。");
                                     }
                                 }
                             }

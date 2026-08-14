@@ -93,7 +93,7 @@ public class IntervalRequirement extends AbstractQuestRequirement {
         if (check || check2) {
             return true;
         } else {
-            chr.message("This quest will become available again in approximately " + getIntervalTimeLeft(chr, this) + ".");
+            chr.message("此任务大约在 " + getIntervalTimeLeft(chr, this) + ".");
             return false;
         }
     }

@@ -44,13 +44,13 @@ public class EnterCashShopHandler extends AbstractPacketHandler {
             }
 
             if (mc.getEventInstance() != null) {
-                c.sendPacket(PacketCreator.serverNotice(5, "Entering Cash Shop or MTS are disabled when registered on an event."));
+                c.sendPacket(PacketCreator.serverNotice(5, "注册活动期间，进入现金商店或拍卖行将被禁用。"));
                 c.sendPacket(PacketCreator.enableActions());
                 return;
             }
 
             if (MiniDungeonInfo.isDungeonMap(mc.getMapId())) {
-                c.sendPacket(PacketCreator.serverNotice(5, "Changing channels or entering Cash Shop or MTS are disabled when inside a Mini-Dungeon."));
+                c.sendPacket(PacketCreator.serverNotice(5, "在迷你地牢内时，更改频道或进入现金商店或拍卖行将被禁用。"));
                 c.sendPacket(PacketCreator.enableActions());
                 return;
             }

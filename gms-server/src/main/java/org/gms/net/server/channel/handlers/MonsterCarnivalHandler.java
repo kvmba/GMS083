@@ -90,7 +90,7 @@ public final class MonsterCarnivalHandler extends AbstractPacketHandler {
                     } else if (tab == 1) { //debuffs
                         final List<Integer> skillid = c.getPlayer().getMap().getSkillIds();
                         if (num >= skillid.size()) {
-                            c.getPlayer().dropMessage(5, "An unexpected error has occurred.");
+                            c.getPlayer().dropMessage(5, "发生了意外错误。");
                             c.sendPacket(PacketCreator.enableActions());
                             return;
                         }

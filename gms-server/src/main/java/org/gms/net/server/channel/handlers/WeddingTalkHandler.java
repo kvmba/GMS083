@@ -49,7 +49,7 @@ public final class WeddingTalkHandler extends AbstractPacketHandler {
             // 无负载:宾客祝福(TALK_MORE),非新人将祝福计入爱的积分
             if (!isGroomOrBride) {
                 eim.gridInsert(c.getPlayer(), 1);
-                c.getPlayer().dropMessage(5, "High Priest John: Your blessings have been added to their love. What a noble act for a lovely couple!");
+                c.getPlayer().dropMessage(5, "约翰大祭司：你的祝福已融入他们的爱中。对这对可爱的夫妇来说，这是多么高尚的举动！");
             }
         }
 

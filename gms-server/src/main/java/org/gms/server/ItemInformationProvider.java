@@ -1844,7 +1844,7 @@ public class ItemInformationProvider {
         int id = equip.getItemId();
 
         if (ItemId.isWeddingRing(id) && chr.hasJustMarried()) {
-            chr.dropMessage(5, "The Wedding Ring cannot be equipped on this map.");  // will dc everyone due to doubled couple effect
+            chr.dropMessage(5, "这张地图上无法佩戴结婚戒指。");  // will dc everyone due to doubled couple effect
             return false;
         }
 
