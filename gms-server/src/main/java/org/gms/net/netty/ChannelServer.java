@@ -2,6 +2,7 @@ package org.gms.net.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -26,6 +27,7 @@ public class ChannelServer extends AbstractServer {
         ServerBootstrap bootstrap = new ServerBootstrap()
                 .group(parentGroup, childGroup)
                 .channel(NioServerSocketChannel.class)
+                .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new ChannelServerInitializer(world, channel));
 
         this.nettyChannel = bootstrap.bind(port).syncUninterruptibly().channel();
