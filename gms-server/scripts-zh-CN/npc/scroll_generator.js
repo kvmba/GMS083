@@ -116,7 +116,7 @@ function action(mode, type, selection) {
 
                 curItemSel = selection;
                 if (curItemQty > 0) {
-                    cm.sendGetText("How many " + tickSel + " do you want to provide? (#r" + curItemQty + "#k available)#k");
+                    cm.sendGetText("你想提供多少 " + tickSel + "？(#r可用 " + curItemQty + "#k)#k");
                 } else {
                     cm.sendPrev("你没有提供#r任何#k" + tickSel + "用于卷轴生成。点击'#r返回#k'回到主界面。");
                 }
