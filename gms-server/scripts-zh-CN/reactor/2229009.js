@@ -20,5 +20,5 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 function act() {
-    rm.weakenAreaBoss(6090003, "The grieving Scholar Ghost has been slightly appeased. You may be able to defeat the Scholar Ghost.");
+    rm.weakenAreaBoss(6090003, "悲伤的学者鬼魂得到了些许安抚。你现在也许能够击败学者鬼魂了。");
 }

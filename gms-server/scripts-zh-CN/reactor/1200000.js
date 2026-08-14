@@ -24,6 +24,6 @@
 */
 
 function act() {    // string visibility thanks to ProXAIMeRx & Glvelturall
-    rm.message("Failed to find Bart. Returning to the original location.");
+    rm.message("找不到巴特。返回原来的位置。");
     rm.warp(120000102);
 }

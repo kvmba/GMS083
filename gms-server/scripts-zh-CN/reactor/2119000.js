@@ -28,7 +28,7 @@ function hit() {
         return
     }
 
-    rm.weakenAreaBoss(6090000, "As the tombstone lit up and vanished, Lich lost all his magic abilities.")
+    rm.weakenAreaBoss(6090000, "随着墓碑亮起并消失，巫妖失去了所有的魔法能力。")
 }
 
 function act() {
