@@ -653,8 +653,8 @@ public class Client extends ChannelInboundHandlerAdapter {
     public int login(String login, String pwd, Hwid hwid) {
         int loginok = 5;
         long loginStart = System.currentTimeMillis();
-        long loginDbTime;
-        long loginBcryptTime;
+        long loginDbTime = 0;
+        long loginBcryptTime = 0;
         long loginSessTime;
 
         loginattempt++;
