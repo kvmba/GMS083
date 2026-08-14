@@ -1546,9 +1546,14 @@ public class Monster extends AbstractLoadedLife {
             monsterLock.unlock();
         }
 
-        // 动画结束后技能效果实际生效,从那时起算 interval 整体停歇
+        // 动画结束后技能效果实际生效,从那时起算 interval 整体停歇;
+        // WZ 间隔缺失/为0时(如怪物竞技场SPEED),最低停歇5秒
+        long coolTime = skill.getCoolTime();
+        if (coolTime <= 0) {
+            coolTime = 5000;
+        }
         long animationTime = MonsterInformationProvider.getInstance().getMobSkillAnimationTime(skill);
-        nextSkillAllowedTime.set(Server.getInstance().getCurrentTime() + animationTime + skill.getCoolTime());
+        nextSkillAllowedTime.set(Server.getInstance().getCurrentTime() + animationTime + coolTime);
 
         final Monster mons = this;
         MapleMap mmap = mons.getMap();
