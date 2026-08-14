@@ -7872,35 +7872,45 @@ public class Character extends AbstractCharacterObject {
                      PreparedStatement psMedal = con.prepareStatement("INSERT INTO medalmaps VALUES (DEFAULT, ?, ?, ?)")) {
                     psStatus.setInt(1, id);
 
-                    for (QuestStatus qs : getQuestValues()) {
+                    // 任务量多时逐条 executeUpdate 会产生上千次网络往返(见保存耗时问题),
+                    // 改为整批插入:驱动对批量执行后 getGeneratedKeys() 按插入顺序返回全部自增ID。
+                    List<QuestStatus> questValues = new ArrayList<>(getQuestValues());
+                    for (QuestStatus qs : questValues) {
                         psStatus.setInt(2, qs.getQuest().getId());
                         psStatus.setInt(3, qs.getStatus().getId());
                         psStatus.setInt(4, (int) (qs.getCompletionTime() / 1000));
                         psStatus.setLong(5, qs.getExpirationTime());
                         psStatus.setInt(6, qs.getForfeited());
                         psStatus.setInt(7, qs.getCompleted());
-                        psStatus.executeUpdate();
+                        psStatus.addBatch();
+                    }
+                    psStatus.executeBatch();
 
-                        try (ResultSet rs = psStatus.getGeneratedKeys()) {
-                            rs.next();
+                    try (ResultSet rs = psStatus.getGeneratedKeys()) {
+                        for (QuestStatus qs : questValues) {
+                            if (!rs.next()) {
+                                throw new SQLException("批量插入任务状态后未返回自增ID");
+                            }
+                            int questStatusId = rs.getInt(1);
+
                             for (int mob : qs.getProgress().keySet()) {
                                 psProgress.setInt(1, id);
-                                psProgress.setInt(2, rs.getInt(1));
+                                psProgress.setInt(2, questStatusId);
                                 psProgress.setInt(3, mob);
                                 psProgress.setString(4, qs.getProgress(mob));
                                 psProgress.addBatch();
                             }
-                            psProgress.executeBatch();
 
                             for (int i = 0; i < qs.getMedalMaps().size(); i++) {
                                 psMedal.setInt(1, id);
-                                psMedal.setInt(2, rs.getInt(1));
+                                psMedal.setInt(2, questStatusId);
                                 psMedal.setInt(3, qs.getMedalMaps().get(i));
                                 psMedal.addBatch();
                             }
-                            psMedal.executeBatch();
                         }
                     }
+                    psProgress.executeBatch();
+                    psMedal.executeBatch();
                 }
 
                 FamilyEntry familyEntry = getFamilyEntry(); //save family rep
