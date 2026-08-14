@@ -93,7 +93,7 @@ function action(mode, type, selection) {
                 cm.sendOk("你的组队搜索状态现在是：#b" + (psState ? "enabled" : "disabled") + "#k。想要改变状态时随时找我。");
                 cm.dispose();
             } else {
-                cm.sendOk("#e#b<组队任务：元素死神>#k#n\r\n在进入舞台之前，与另一位具有#rdifferent elemental affinity#k的法师组队。这个团队合作对于克服内部的元素非常关键。");
+                cm.sendOk("#e#b<组队任务：元素死神>#k#n\r\n在进入舞台之前，与另一位具有#r不同元素属性#k的法师组队。这个团队合作对于克服内部的元素非常关键。");
                 cm.dispose();
             }
         }

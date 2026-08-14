@@ -214,7 +214,7 @@ function action(mode, type, selection) {
 }
 
 function makeChoices(a) {
-    var result = "Ok! First you need to choose the item that you'll trade with. The better the item, the more likely the chance that I'll give you something much nicer in return.\r\n";
+    var result = "好的！首先你需要选择要用来交易的物品。物品越好，我回赠给你更好东西的几率就越大。\r\n";
     for (var x = 0; x < a.length; x++) {
         result += " #L" + x + "##v" + a[x] + "#  #t" + a[x] + "##l\r\n";
     }
