@@ -150,7 +150,7 @@ public class World {
     private final List<Channel> channels = new ArrayList<>();
     private final Map<Integer, Byte> pnpcStep = new HashMap<>();
     private final Map<Integer, Short> pnpcPodium = new HashMap<>();
-    private final Map<Integer, Messenger> messengers = new HashMap<>();
+    private final Map<Integer, Messenger> messengers = new ConcurrentHashMap<>();
     private final AtomicInteger runningMessengerId = new AtomicInteger();
     private final Map<Integer, Family> families = new LinkedHashMap<>();
     private final Map<Integer, Integer> relationships = new HashMap<>();
