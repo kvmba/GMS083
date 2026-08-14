@@ -126,7 +126,6 @@ public class Client extends ChannelInboundHandlerAdapter {
     private volatile long lastPong;
     private int gmlevel;
     private Set<String> macs = new HashSet<>();
-    private final Object enginesLock = new Object();
     private Map<String, ScriptEngine> engines = new LinkedHashMap<String, ScriptEngine>(16, 0.75f, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<String, ScriptEngine> eldest) {
@@ -1218,22 +1217,16 @@ public class Client extends ChannelInboundHandlerAdapter {
         gmlevel = level;
     }
 
-    public void setScriptEngine(String name, ScriptEngine e) {
-        synchronized (enginesLock) {
-            engines.put(name, e);
-        }
+    public synchronized void setScriptEngine(String name, ScriptEngine e) {
+        engines.put(name, e);
     }
 
-    public ScriptEngine getScriptEngine(String name) {
-        synchronized (enginesLock) {
-            return engines.get(name);
-        }
+    public synchronized ScriptEngine getScriptEngine(String name) {
+        return engines.get(name);
     }
 
-    public void removeScriptEngine(String name) {
-        synchronized (enginesLock) {
-            engines.remove(name);
-        }
+    public synchronized void removeScriptEngine(String name) {
+        engines.remove(name);
     }
 
     public NPCConversationManager getCM() {
