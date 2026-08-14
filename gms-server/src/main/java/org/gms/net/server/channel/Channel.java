@@ -968,15 +968,15 @@ public final class Channel {
         switch (mode) {
             case 2:
                 int hours = (int) ((leftTime / (HOURS.toMillis(1))));
-                str.append(hours + " hours, ");
+                str.append(hours).append(I18nUtil.getMessage("Channel.getTimeLeft.hours"));
 
             case 1:
                 int minutes = (int) ((leftTime / (MINUTES.toMillis(1))) % 60);
-                str.append(minutes + " minutes, ");
+                str.append(minutes).append(I18nUtil.getMessage("Channel.getTimeLeft.minutes"));
 
             default:
                 int seconds = (int) (leftTime / SECONDS.toMillis(1)) % 60;
-                str.append(seconds + " seconds");
+                str.append(seconds).append(I18nUtil.getMessage("Channel.getTimeLeft.seconds"));
         }
 
         return str.toString();
@@ -1010,12 +1010,12 @@ public final class Channel {
                 }
             }
 
-            String venue = (cathedral ? "Cathedral" : "Chapel");
+            String venue = (cathedral ? I18nUtil.getMessage("Channel.weddingReservation.venue.cathedral") : I18nUtil.getMessage("Channel.weddingReservation.venue.chapel"));
             if (resStatus == 0) {
-                return venue + " - RIGHT NOW";
+                return venue + " - " + I18nUtil.getMessage("Channel.weddingReservation.rightNow");
             }
 
-            return venue + " - " + getTimeLeft(ongoingStartTime + MINUTES.toMillis((long) resStatus * GameConfig.getServerLong("wedding_reservation_interval"))) + " from now";
+            return venue + " - " + getTimeLeft(ongoingStartTime + MINUTES.toMillis((long) resStatus * GameConfig.getServerLong("wedding_reservation_interval"))) + I18nUtil.getMessage("Channel.weddingReservation.fromNow");
         } finally {
             lock.unlock();
         }

@@ -184,7 +184,7 @@ function action(mode, type, selection) {
 
                                             var placeTime = cserv.getWeddingReservationTimeLeft(weddingId);
 
-                                            var wedType = weddingType ? "Premium" : "Regular";
+                                            var wedType = weddingType ? "豪华" : "普通";
                                             cm.sendOk("你们两个都收到了15张婚礼邀请函，可以发给你们的客人。#b双击邀请函#k 将其发送给某人。邀请只能在婚礼开始时间之前发送。你们的#b" + wedType + " 婚礼#k 定于#r" + placeTime + "#k开始。穿得正式一点，不要迟到！");
 
                                             player.dropMessage(6, "婚礼助理：你们都收到了15张婚礼门票。请柬只能在婚礼开始前发出。您的 " + wedType + " 婚礼将从 " + placeTime + " 开始。穿好衣服，别迟到！");
