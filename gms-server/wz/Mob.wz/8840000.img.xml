@@ -32,12 +32,12 @@
             <imgdir name="1">
                 <int name="skill" value="129"/>
                 <int name="action" value="2"/>
-                <int name="level" value="12"/>
+                <int name="level" value="11"/>
                 <int name="effectAfter" value="0"/>
                 <int name="skillAfter" value="1200"/>
             </imgdir>
             <imgdir name="2">
-                <int name="skill" value="170"/>
+                <int name="skill" value="200"/>
                 <int name="action" value="3"/>
                 <int name="level" value="1"/>
                 <int name="effectAfter" value="0"/>
@@ -47,7 +47,7 @@
             <imgdir name="3">
                 <int name="skill" value="200"/>
                 <int name="action" value="4"/>
-                <int name="level" value="212"/>
+                <int name="level" value="176"/>
                 <int name="effectAfter" value="0"/>
                 <int name="skillAfter" value="1200"/>
             </imgdir>
@@ -74,7 +74,7 @@
                 <int name="onlyFsm" value="1"/>
             </imgdir>
             <imgdir name="7">
-                <int name="skill" value="170"/>
+                <int name="skill" value="200"/>
                 <int name="action" value="3"/>
                 <int name="level" value="3"/>
                 <int name="effectAfter" value="0"/>
@@ -84,7 +84,7 @@
             <imgdir name="8">
                 <int name="skill" value="200"/>
                 <int name="action" value="4"/>
-                <int name="level" value="213"/>
+                <int name="level" value="176"/>
                 <int name="effectAfter" value="0"/>
                 <int name="skillAfter" value="1200"/>
             </imgdir>
