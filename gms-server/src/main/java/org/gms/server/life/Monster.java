@@ -105,6 +105,8 @@ public class Monster extends AbstractLoadedLife {
     private boolean fake = false;
     private boolean dropsDisabled = false;
     private final Set<MobSkillId> usedSkills = new HashSet<>();
+    // 技能释放的全局节奏:释放后 interval 内不放行任何技能(官方"放完停歇"),防止多技能怪交替连发
+    private final AtomicLong nextSkillAllowedTime = new AtomicLong(0);
     private final Set<Integer> usedAttacks = new HashSet<>();
     private Set<Integer> calledMobOids = null;
     private WeakReference<Monster> callerMob = new WeakReference<>(null);
@@ -1489,6 +1491,10 @@ public class Monster extends AbstractLoadedLife {
             return false;
         }
 
+        if (Server.getInstance().getCurrentTime() < nextSkillAllowedTime.get()) {
+            return false;
+        }
+
         if (isReflectSkill(toUse)) {
             if (this.isBuffed(MonsterStatus.WEAPON_REFLECT) || this.isBuffed(MonsterStatus.MAGIC_REFLECT)) {
                 return false;
@@ -1539,6 +1545,9 @@ public class Monster extends AbstractLoadedLife {
         } finally {
             monsterLock.unlock();
         }
+
+        // 释放后按该技能的 interval(秒)整体停歇
+        nextSkillAllowedTime.set(Server.getInstance().getCurrentTime() + skill.getCoolTime());
 
         final Monster mons = this;
         MapleMap mmap = mons.getMap();

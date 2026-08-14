@@ -131,6 +131,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
                 nextSkillId = 0;
                 nextSkillLevel = 0;
                 nextUse = null;
+                nextMovementCouldBeSkill = false;   // 广播给其他玩家的"下一步可能放技能"标志与许可保持一致
             }
         }
 
