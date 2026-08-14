@@ -422,12 +422,8 @@ public class Equip extends Item {
             baseCandidates.add(StatUpgrade.incLUK);
         }
         if (!baseCandidates.isEmpty()) {
-            switch (baseCandidates.get(Randomizer.nextInt(baseCandidates.size()))) {
-                case incDEX -> getUnitStatUpgrade(stats, StatUpgrade.incDEX, dex, true);
-                case incSTR -> getUnitStatUpgrade(stats, StatUpgrade.incSTR, str, true);
-                case incINT -> getUnitStatUpgrade(stats, StatUpgrade.incINT, _int, true);
-                default -> getUnitStatUpgrade(stats, StatUpgrade.incLUK, luk, true);
-            }
+            // 普通装备:4种基础属性只随机提升一种,数值固定1~2
+            stats.add(new Pair<>(baseCandidates.get(Randomizer.nextInt(baseCandidates.size())), Randomizer.rand(1, 2)));
         }
         if (hp > 0) {
             getUnitStatUpgrade(stats, StatUpgrade.incMHP, hp, false);
