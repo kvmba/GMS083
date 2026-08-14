@@ -3449,28 +3449,64 @@ public class MapleMap {
     public void movePlayer(Character player, Point newPosition) {
         player.setPosition(newPosition);
 
-        try {
-            MapObject[] visibleObjects = player.getVisibleMapObjects();
+        // 原实现每次移动:全图 mapobjects 拷贝 + 全图范围扫描(两次全图操作、多次集合分配)。
+        // 重构为单次读锁内遍历:身份校验与距离判断在锁内完成,发包在锁外,语义与原实现一致。
+        double rangedDistance = getRangedDistance();
+        Point playerPos = player.getPosition();
+        List<MapObject> toSpawn = new ArrayList<>();
+        List<MapObject> toRemove = new ArrayList<>();
 
-            Map<Integer, MapObject> mapObjects = getCopyMapObjects();
-            for (MapObject mo : visibleObjects) {
-                if (mo != null) {
-                    if (mapObjects.get(mo.getObjectId()) == mo) {
-                        updateMapObjectVisibility(player, mo);
-                    } else {
+        objectRLock.lock();
+        try {
+            try {
+                for (MapObject mo : player.getVisibleMapObjects()) {
+                    if (mo == null) {
+                        continue;
+                    }
+                    if (mapobjects.get(mo.getObjectId()) != mo) {
                         player.removeVisibleMapObject(mo);
+                        continue;
+                    }
+
+                    if (!player.isMapObjectVisible(mo)) {
+                        // 对应原 updateMapObjectVisibility 分支1:可见集被并发移除后的重入范围补发
+                        if (mo.getType() == MapObjectType.SUMMON || mo.getPosition().distanceSq(playerPos) <= rangedDistance) {
+                            if (mo.getType() != MapObjectType.REACTOR || ((Reactor) mo).isAlive()) {
+                                toSpawn.add(mo);
+                            }
+                        }
+                    } else if (mo.getType() != MapObjectType.SUMMON && mo.getPosition().distanceSq(playerPos) > rangedDistance) {
+                        toRemove.add(mo);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            for (MapObject mo : mapobjects.values()) {
+                if (!rangedMapobjectTypes.contains(mo.getType())) {
+                    continue;
+                }
+                if (mo.getPosition().distanceSq(playerPos) > rangedDistance) {
+                    continue;
+                }
+                if (!player.isMapObjectVisible(mo) && !toSpawn.contains(mo)) {
+                    if (mo.getType() != MapObjectType.REACTOR || ((Reactor) mo).isAlive()) {
+                        toSpawn.add(mo);
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            objectRLock.unlock();
         }
 
-        for (MapObject mo : getMapObjectsInRange(player.getPosition(), getRangedDistance(), rangedMapobjectTypes)) {
-            if (!player.isMapObjectVisible(mo) && (mo.getType() != MapObjectType.REACTOR || ((Reactor) mo).isAlive())) {
-                mo.sendSpawnData(player.getClient());
-                player.addVisibleMapObject(mo);
-            }
+        for (MapObject mo : toRemove) {
+            player.removeVisibleMapObject(mo);
+            mo.sendDestroyData(player.getClient());
+        }
+        for (MapObject mo : toSpawn) {
+            mo.sendSpawnData(player.getClient());
+            player.addVisibleMapObject(mo);
         }
     }
 
