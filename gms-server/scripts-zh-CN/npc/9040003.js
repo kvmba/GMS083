@@ -56,7 +56,7 @@ function action(mode, type, selection) {
         var eim = cm.getPlayer().getEventInstance();
 
         if (eim.getProperty("stage4clear") != null && eim.getProperty("stage4clear") === "true") {
-"After what I thought would be an immortal sleep, I have finally found someone that will save Sharenian. I can truly rest in peace now."
+"在我以为是不朽的睡眠之后，我终于发现有人能救他。我现在可以真正休息了。"
             cm.dispose();
             return;
         }

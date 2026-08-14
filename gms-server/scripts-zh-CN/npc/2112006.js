@@ -56,7 +56,7 @@ function action(mode, type, selection) {
                     eim.setIntProperty("npcShocked", 1);
 
                     cm.sendNext("哦？你给我信？像这样的时候，应该是什么…… 哇！伙计们，有大事发生了。集合起来，从现在开始，事情会比以往更加艰难！");
-                    eim.dropMessage(6, "Romeo seemed very much in shock after reading Juliet's Letter.");
+                    eim.dropMessage(6, "罗密欧读了朱丽叶的信后，似乎非常震惊。");
 
                     cm.dispose();
 
