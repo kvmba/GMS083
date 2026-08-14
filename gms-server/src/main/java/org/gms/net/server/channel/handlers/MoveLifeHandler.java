@@ -196,6 +196,12 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
             return;
         }
 
+        p.readByte(); // pNibbles
+        p.readByte(); // rawActivity
+        p.readByte(); // skillId
+        p.readByte(); // skillLv
+        p.readShort(); // pOption
+        p.skip(8);
         p.readByte();
         p.readInt();
         p.readShort(); // start x
