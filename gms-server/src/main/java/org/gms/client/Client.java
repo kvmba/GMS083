@@ -1381,7 +1381,11 @@ public class Client extends ChannelInboundHandlerAdapter {
         try {
             MessageDigest digester = MessageDigest.getInstance(type);
             digester.update(password.getBytes(StandardCharsets.UTF_8), 0, password.length());
-            return HexTool.toHexString(digester.digest()).replace(" ", "").toLowerCase().equals(hash);
+            String hex = HexTool.toHexString(digester.digest()).replace(" ", "").toLowerCase();
+            if ("SHA-512".equals(type)) {   // 与注册格式一致:去掉末尾1位
+                hex = hex.substring(0, hex.length() - 1);
+            }
+            return hex.equals(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("对字符串进行编码失败", e);
         }

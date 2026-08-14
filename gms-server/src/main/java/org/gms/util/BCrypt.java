@@ -974,6 +974,7 @@ public class BCrypt {
     public static String hashpwSHA512(String pwd) throws NoSuchAlgorithmException {
         MessageDigest digester = MessageDigest.getInstance("SHA-512");
         digester.update(pwd.getBytes(StandardCharsets.UTF_8), 0, pwd.length());
-        return HexTool.toHexString(digester.digest()).replace(" ", "").toLowerCase();
+        String hex = HexTool.toHexString(digester.digest()).replace(" ", "").toLowerCase();
+        return hex.substring(0, hex.length() - 1);
     }
 }
