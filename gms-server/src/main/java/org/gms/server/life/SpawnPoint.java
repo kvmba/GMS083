@@ -78,7 +78,9 @@ public class SpawnPoint {
     }
 
     public Monster getMonster() {
-        Monster mob = new Monster(LifeFactory.getMonster(monster));
+        // LifeFactory.getMonster 返回全新怪物(独立 stats 拷贝),原实现再套一层拷贝构造,
+        // 多一次对象分配与一次 MonsterStats 反射拷贝;直接使用首个实例,状态完全一致。
+        Monster mob = LifeFactory.getMonster(monster);
         mob.setPosition(new Point(pos));
         mob.setTeam(team);
         mob.setFh(fh);
