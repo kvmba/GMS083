@@ -38,6 +38,7 @@ import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Matze
@@ -46,8 +47,8 @@ public class NPCScriptManager extends AbstractScriptManager {
     private static final Logger log = LoggerFactory.getLogger(NPCScriptManager.class);
     private static final NPCScriptManager instance = new NPCScriptManager();
 
-    private final Map<Client, NPCConversationManager> cms = new HashMap<>();
-    private final Map<Client, Invocable> scripts = new HashMap<>();
+    private final Map<Client, NPCConversationManager> cms = new ConcurrentHashMap<>();
+    private final Map<Client, Invocable> scripts = new ConcurrentHashMap<>();
 
     public static NPCScriptManager getInstance() {
         return instance;
