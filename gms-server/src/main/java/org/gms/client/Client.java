@@ -126,7 +126,7 @@ public class Client extends ChannelInboundHandlerAdapter {
     private volatile long lastPong;
     private int gmlevel;
     private Set<String> macs = new HashSet<>();
-    private final Map<String, ScriptEngine> engines = new ConcurrentHashMap<>();
+    private Map<String, ScriptEngine> engines = new ConcurrentHashMap<>();
     private byte characterSlots = 3;
     private byte loginattempt = 0;
     private String pin = "";

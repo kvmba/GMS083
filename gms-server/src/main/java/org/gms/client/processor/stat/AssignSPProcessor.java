@@ -87,12 +87,12 @@ public class AssignSPProcessor {
                 }
                 if (skill.getId() == Aran.FULL_SWING) {
                     player.changeSkillLevel(skill, (byte) (curLevel + 1), player.getMasterLevel(skill), player.getSkillExpiration(skill));
-                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_FULL_DOUBLE), player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
-                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_FULL_TRIPLE), player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
+                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_FULL_DOUBLE), (byte) player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
+                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_FULL_TRIPLE), (byte) player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
                 } else if (skill.getId() == Aran.OVER_SWING) {
                     player.changeSkillLevel(skill, (byte) (curLevel + 1), player.getMasterLevel(skill), player.getSkillExpiration(skill));
-                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_OVER_DOUBLE), player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
-                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_OVER_TRIPLE), player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
+                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_OVER_DOUBLE), (byte) player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
+                    player.changeSkillLevel(SkillFactory.getSkill(Aran.HIDDEN_OVER_TRIPLE), (byte) player.getBaseSkillLevel(skill), player.getMasterLevel(skill), player.getSkillExpiration(skill));
                 } else {
                     player.changeSkillLevel(skill, (byte) (curLevel + 1), player.getMasterLevel(skill), player.getSkillExpiration(skill));
                 }

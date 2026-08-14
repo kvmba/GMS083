@@ -1826,7 +1826,7 @@ public class Character extends AbstractCharacterObject {
             // 入参为基础等级,叠加装备技能加成后存储;获取时按最大等级封顶
             int bonus = equipSkillBonus.getOrDefault(skill.getId(), 0);
             int effective = newLevel + bonus;
-            skills.put(skill, new SkillEntry(effective, newMasterlevel, expiration));
+            skills.put(skill, new SkillEntry((byte) effective, newMasterlevel, expiration));
             if (!GameConstants.isHiddenSkills(skill.getId())) {
                 sendPacket(PacketCreator.updateSkill(skill.getId(), Math.min(effective, skill.getMaxLevel()), newMasterlevel, expiration));
             }
@@ -1883,7 +1883,7 @@ public class Character extends AbstractCharacterObject {
             }
 
             int effective = Math.max(0, entry.skillLevel - oldB) + newB;
-            skills.put(skill, new SkillEntry(effective, entry.masterLevel, entry.expiration));
+            skills.put(skill, new SkillEntry((byte) effective, entry.masterLevel, entry.expiration));
             if (!GameConstants.isHiddenSkills(skillId)) {
                 sendPacket(PacketCreator.updateSkill(skillId, Math.min(effective, skill.getMaxLevel()), entry.masterLevel, entry.expiration));
             }
