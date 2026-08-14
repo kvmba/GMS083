@@ -30,7 +30,7 @@ function start() {
     status = -1;
     dList = cm.getDriedPets();
     if (dList.size() == 0) {
-        cm.playerMessage(5, "You currently do not own a pet that needs to be treated with Water of Life.");
+        cm.playerMessage(5, "你目前没有需要生命之水治疗的宠物。");
         cm.dispose();
         return;
     }
@@ -56,7 +56,7 @@ function action(mode, type, selection) {
             cm.sendYesNo("我是仙子玛尔。你有#b生命之水#k...有了这个，我可以用我的魔法让玩偶复活。你觉得怎么样？你想要使用这个物品来唤醒你的宠物吗...？");
 
         } else if (status == 1) {
-            var talkStr = "So which pet you want to reawaken? Please choose the pet you'd most like to reawaken...\r\n\r\n";
+            var talkStr = "你想唤醒哪只宠物？请选择你最想唤醒的宠物...\r\n\r\n";
 
             var listStr = "";
             var i = 0;

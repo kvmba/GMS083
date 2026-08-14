@@ -74,9 +74,9 @@ function action(mode, type, selection) {
             //print("Book: " + sgBookBuckets + " Item: " + sgItemBuckets);
 
             if (sgItemBuckets > 0.0) {
-                sendStr = "With the items you have currently placed, you have #r" + sgBuckets + "#k buckets (#r" + (sgItemBuckets < 1.0 ? sgItemBuckets.toFixed(2) : Math.floor(sgItemBuckets)) + "#k supply buckets) for claiming a prize. Place supplies:";
+                sendStr = "根据你目前放置的物品，你有#r" + sgBuckets + "#k个桶（#r" + (sgItemBuckets < 1.0 ? sgItemBuckets.toFixed(2) : Math.floor(sgItemBuckets)) + "#k个补给桶）可以领取奖品。放置补给品：";
             } else {
-                sendStr = "You have placed no supplies yet. Place supplies:";
+                sendStr = "你还没有放置任何补给品。放置补给品：";
             }
 
             var listStr = "";
@@ -99,7 +99,7 @@ function action(mode, type, selection) {
         } else if (status == 2) {
             if (selection == (sgItems.length + 2)) {
                 if (sgItemBuckets < 1.0) {
-                    cm.sendPrev("You have set not enough supplies. Insert at least one bucket of #bsupplies#k to claim a prize.");
+                    cm.sendPrev("你放置的补给品不足。至少放置一桶#b补给品#k才能领取奖品。");
                 } else {
                     generateRandomScroll();
                     cm.dispose();
@@ -118,7 +118,7 @@ function action(mode, type, selection) {
                 if (curItemQty > 0) {
                     cm.sendGetText("How many " + tickSel + " do you want to provide? (#r" + curItemQty + "#k available)#k");
                 } else {
-                    cm.sendPrev("You have got #rnone#k " + tickSel + " to provide for Scroll Generation. Click '#rBack#k' to return to the main interface.");
+                    cm.sendPrev("你没有提供#r任何#k" + tickSel + "用于卷轴生成。点击'#r返回#k'回到主界面。");
                 }
             }
         } else if (status == 3) {
@@ -131,7 +131,7 @@ function action(mode, type, selection) {
                 }
 
                 if (placedQty > curItemQty) {
-                    cm.sendPrev("You cannot insert the given amount of #r" + (curItemSel < sgItems.length ? "#t" + sgItems[curItemSel] + "#" : "mesos") + "#k (#r" + curItemQty + "#k available). Click '#rBack#k' to return to the main interface.");
+                    cm.sendPrev("你无法插入指定数量的#r" + (curItemSel < sgItems.length ? "#t" + sgItems[curItemSel] + "#" : "金币") + "#k（可用#r" + curItemQty + "#k）。点击'#r返回#k'回到主界面。");
                 } else {
                     if (curItemSel < sgItems.length) {
                         sgApplyItem(curItemSel, placedQty);
@@ -139,10 +139,10 @@ function action(mode, type, selection) {
                         sgApplyMeso(placedQty);
                     }
 
-                    cm.sendPrev("Operation succeeded. Click '#rBack#k' to return to the main interface.");
+                    cm.sendPrev("操作成功。点击'#r返回#k'回到主界面。");
                 }
             } catch (err) {
-                cm.sendPrev("You must enter a positive number of supplies to insert. Click '#rBack#k' to return to the main interface.");
+                cm.sendPrev("你必须输入正数的补给品数量。点击'#r返回#k'回到主界面。");
             }
 
             status = 2;
