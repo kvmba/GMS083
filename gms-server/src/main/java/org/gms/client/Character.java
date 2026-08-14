@@ -1830,6 +1830,7 @@ public class Character extends AbstractCharacterObject {
             if (!GameConstants.isHiddenSkills(skill.getId())) {
                 sendPacket(PacketCreator.updateSkill(skill.getId(), Math.min(effective, skill.getMaxLevel()), newMasterlevel, expiration));
             }
+            updateLocalStats();   // 技能等级变化会联动本地属性(如武器专家攻击力),重算一次
         } else {
             skills.remove(skill);
             sendPacket(PacketCreator.updateSkill(skill.getId(), newLevel, newMasterlevel, -1)); //Shouldn't use expiration anymore :)
