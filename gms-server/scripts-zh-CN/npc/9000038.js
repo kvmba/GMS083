@@ -67,7 +67,7 @@ function action(mode, type, selection) {
         }
 
         if (status == 0) {
-            var sendStr = "The #bBoss Rush Party Quest#k rewards players accordingly to how far the team went on the boss huntings. Take note that each player #bcan only claim a reward if they leave through a portal inside a Resting Spot#k. Challenging stronger bosses will require the team to commit to more fightings until the next Resting Spot is reached, or until the final boss is defeated.\r\n\r\nThe possible rewards for those leaving in the selected Resting Spot are depicted here:\r\n\r\n#b";
+            var sendStr = "这里是 #b挑战BOSS 组队任务#k 根据团队在boss狩猎中走了多远来奖励玩家。注意每个玩家 #b只有通过休息点的传送门才能获得奖励#k。挑战更强的boss需要团队投入更多的战斗，直到到达下一个休息点，或者直到最后的boss被击败。对那些在所选休息点离开的玩家，可能的奖励如下:\r\n\r\n#b";
             for (var i = 0; i < 6; i++) {
                 sendStr += "#L" + i + "#" + levels[i] + "#l\r\n";
             }
@@ -96,7 +96,7 @@ function action(mode, type, selection) {
                 lvQty = itemQty_lv6;
             }
 
-            var sendStr = "The following items are being awarded at #b" + levels[selection] + "#k:\r\n\r\n";
+            var sendStr = "在#b" + levels[selection] + "#k等级获得的奖励如下:\r\n\r\n";
             for (var i = 0; i < lvTarget.length; i++) {
                 sendStr += "  #L" + i + "# #i" + lvTarget[i] + "#  #t" + lvTarget[i] + "#";
                 if (lvQty[i] > 1) {

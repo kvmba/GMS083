@@ -85,7 +85,7 @@ function action(mode, type, selection) {
                         cm.dispose();
                     } else {
                         var qsize = em.getQueueSize();
-                        cm.sendYesNo(((qsize > 0) ? "There is currently #r" + qsize + "#k guilds queued on. " : "") + "Do you wish for your guild to join this queue?");
+                        cm.sendYesNo(((qsize > 0) ? "目前有#r" + qsize + "#k个公会在此排队。 " : "") + "你希望你的公会加入这个队列吗？");
                     }
                 }
             } else if (selection == 1) {

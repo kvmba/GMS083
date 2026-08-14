@@ -29,13 +29,13 @@ function action(mode, type, selection) {
             } else if (cm.getMapId() >= 922240000 && cm.getMapId() <= 922240019) {
                 cm.sendYesNo("如果你失败了也不要担心。你还有3次机会。你还想放弃吗？");
             } else if (cm.getMapId() >= 922240100 && cm.getMapId() <= 922240119) {
-                var text = "You went through so much trouble to rescue Gaga, but it looks like we're back to square one. ";
+                var text = "你费尽周折才救了佳佳，但看来我们又回到原点了。 ";
                 var rgaga = cm.getPlayer().getEvents().get("rescueGaga");
                 if (rgaga.getCompleted() > 10) {
-                    text += "Please don't give up until Gaga is rescued. To show you my appreciation for what you've accomplished thus far, I've given you a Spaceship. It's rather worn out, but it should still be operational. Check your #bSkill Window#k.";
+                    text += "在佳佳获救之前，请不要放弃。为了感谢你迄今取得的成就，我给了你一艘宇宙飞船。它已经很破旧了，但应该还能使用。请查看你的#b技能栏#k。";
                     rgaga.giveSkill(cm.getPlayer());
                 } else {
-                    text += "Let's go back now.";
+                    text += "我们现在回去吧。";
                 }
 
                 cm.sendNext(text);

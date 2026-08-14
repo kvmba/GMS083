@@ -49,14 +49,14 @@ function action(mode, type, selection) {
             return;
         }
 
-        var selStr = "Hello, I am the #bBazaar NPC#k! Sell to me any item on your inventory you don't need. #rWARNING#b: Make sure you have your items ready to sell at the slots #rAFTER#b the item you have selected to sell.#k Any items #bunder#k the item selected will be sold thoroughly.";
+        var selStr = "你好，我是#b集市NPC#k！把你背包里不需要的物品卖给我吧。#r警告#b：请确保你要出售的物品放在所选物品#r之后#b的槽位。#k所选物品#b之前#k的所有物品都将被全部出售。";
         for (var i = 0; i < options.length; i++) {
             selStr += "\r\n#L" + i + "# " + options[i] + "#l";
         }
         cm.sendSimple(selStr);
     } else if (status == 1) {
         selectedType = selection;
-        cm.sendGetText("From what item on your #r" + options[selectedType] + "#k inventory do you want to start the transaction?");
+        cm.sendGetText("你想从你#r" + options[selectedType] + "#k栏中的哪一件物品开始交易？");
     } else if (status == 2) {
         name = cm.getText();
         var res = cm.getPlayer().sellAllItemsFromName(selectedType + 1, name);

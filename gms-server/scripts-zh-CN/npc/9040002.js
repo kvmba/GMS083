@@ -55,9 +55,9 @@ function action(mode, type, selection) {
         if (status == 0) {
             var prompt = "\r\n#b#L0# What's Sharenian?#l\r\n#b#L1# #t4001024#? What's that?#l\r\n#b#L2# Guild Quest?#l\r\n#b#L3# No, I'm fine now.#l";
             if (selectedOption == -1) {
-                prompt = "We, the Union of Guilds, have been trying to decipher 'Emerald Tablet,' a treasured old relic, for a long time. As a result, we have found out that Sharenian, the mysterious country from the past, lay asleep here. We also found out that clues of #t4001024#, a legendary, mythical jewelry, may be here at the remains of Sharenian. This is why the Union of Guilds have opened Guild Quest to ultimately find #t4001024#." + prompt;
+                prompt = "我们的公会联盟，一直试图破译'翡翠石板'这件珍贵的古代遗物，已经很长一段时间了。因此，我们发现了锡安列——那个来自过去的神秘国度，沉睡在这里。我们还发现，传说中神秘的宝石#t4001024#的线索可能就在锡安列的遗迹中。这就是公会联盟开启公会任务、最终寻找#t4001024#的原因。" + prompt;
             } else {
-                prompt = "Do you have any other questions?" + prompt;
+                prompt = "你还有其他问题吗？" + prompt;
             }
             cm.sendSimple(prompt);
         } else if (status == 1) {

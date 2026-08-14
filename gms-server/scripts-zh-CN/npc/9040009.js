@@ -86,13 +86,13 @@ function action(mode, type, selection) {
                             } else {
                                 cm.sendOk("很好。不过你还有更多任务要完成。当你准备好的时候再和我交谈。");
                                 eim.setProperty("stage1phase", stage + 1);
-                                cm.mapMessage(5, "You have completed part " + stage + " of the Gatekeeper Test.");
+                                cm.mapMessage(5, "你已完成守门人试炼的第 " + stage + " 部分。");
                             }
 
                         } else {
                             eim.showWrongEffect();
                             cm.sendOk("你已经失败了这次测试。");
-                            cm.mapMessage(5, "You have failed the Gatekeeper Test.");
+                            cm.mapMessage(5, "你未能通过守门人试炼。");
                             eim.setProperty("stage1phase", "1");
                         }
                         eim.setProperty("stage1status", "waiting");
@@ -104,7 +104,7 @@ function action(mode, type, selection) {
                 } else if (status == 1) {
                     var reactors = getReactors();
                     var combo = makeCombo(reactors);
-                    cm.mapMessage(5, "Please wait while the combination is revealed.");
+                    cm.mapMessage(5, "请稍候，正在揭晓组合。");
                     var delay = 5000;
                     for (var i = 0; i < combo.length; i++) {
                         cm.getPlayer().getMap().getReactorByOid(combo[i]).delayedHitReactor(cm.getClient(), delay + 3500 * i);

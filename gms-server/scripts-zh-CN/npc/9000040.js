@@ -56,23 +56,23 @@ function action(mode, type, selection) {
             }
 
             var levelLimit = !cm.getPlayer().isCygnus() ? 160 : 110;
-            var selStr = "The medal ranking system is currently unavailable... Therefore, I am providing the #bEquipment Merge#k service! ";
+            'var selStr = "勋章排名系统目前不可用……因此，我来提供#b装备融合#k服务！ ";'
 
             const MakerProcessor = Java.type('org.gms.client.processor.action.MakerProcessor');
             if (!GameConfig.getServerBoolean("use_starter_merge") && (cm.getPlayer().getLevel() < levelLimit || MakerProcessor.getMakerSkillLevel(cm.getPlayer()) < 3)) {
-                selStr += "However, you must have #rMaker level 3#k and at least #rlevel 110#k (Cygnus Knight), #rlevel 160#k (other classes) and a fund of #r" + cm.numberWithCommas(mergeFee) + " mesos#k to use the service.";
+                selStr += "不过，你必须拥有#r制作技能3级#k并且至少达到#r110级#k（女皇骑士团）、#r160级#k（其他职业），同时携带#r" + cm.numberWithCommas(mergeFee) + " 金币#k才能使用这项服务。";
                 cm.sendOk(selStr);
                 cm.dispose();
             } else if (cm.getMeso() < mergeFee) {
-                selStr += "I'm sorry, but this service tax is of #r" + cm.numberWithCommas(mergeFee) + " mesos#k, which it seems you unfortunately don't have right now... Please, stop by again later.";
+                selStr += "很抱歉，这项服务需要支付#r" + cm.numberWithCommas(mergeFee) + " 金币#k的手续费，看起来你目前没有足够的金币……请改天再来。";
                 cm.sendOk(selStr);
                 cm.dispose();
             } else {
-                selStr += "For the fee of #r" + cm.numberWithCommas(mergeFee) + "#k mesos, merge unnecessary equipments in your inventory into your currently equipped gears to get stat boosts into them, statups based on the attributes of the items used on the merge!";
+                selStr += "只需支付#r" + cm.numberWithCommas(mergeFee) + "#k金币，就可以将你背包中多余的装备融合到你当前装备的武器/防具上，根据所融合装备的属性获得属性加成！";
                 cm.sendNext(selStr);
             }
         } else if (status == 1) {
-            selStr = "#rWARNING#b: Make sure you have your items ready to merge at the slots #rAFTER#b the item you have selected to merge.#k Any items #bunder#k the item selected will be merged thoroughly.\r\n\r\nNote that equipments receiving bonuses from merge are going to become #rUntradeable#k thereon, and equipments that already received the merge bonus #rcannot be used for merge#k.\r\n\r\n";
+            selStr = "#r警告#b：请确保你要融合的物品放在所选物品#r之后#b的槽位。#k所选物品#b之前#k的所有物品都将被彻底融合。\r\n\r\n请注意，获得融合加成的装备将变为#r不可交易#k，而已获得融合加成的装备#r不能再次用于融合#k。\r\n\r\n";
             cm.sendGetText(selStr);
         } else if (status == 2) {
             name = cm.getText();
