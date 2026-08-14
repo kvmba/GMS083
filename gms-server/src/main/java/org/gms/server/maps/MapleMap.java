@@ -993,6 +993,34 @@ public class MapleMap {
         }
     }
 
+    public Point getMonsterLootPosition(int mobOid) {
+        lootLock.lock();
+        try {
+            for (MobLootEntry mle : mobLootEntries.keySet()) {
+                if (mle.mob != null && mle.mob.getObjectId() == mobOid) {
+                    return mle.mob.getPosition();
+                }
+            }
+        } finally {
+            lootLock.unlock();
+        }
+        return null;
+    }
+
+    public void updateMonsterLootPosition(int mobOid, Point latestPos) {
+        lootLock.lock();
+        try {
+            for (MobLootEntry mle : mobLootEntries.keySet()) {
+                if (mle.mob != null && mle.mob.getObjectId() == mobOid) {
+                    mle.mob.setPosition(latestPos);
+                    return;
+                }
+            }
+        } finally {
+            lootLock.unlock();
+        }
+    }
+
     private void spawnMobItemDrops() {
         Set<Entry<MobLootEntry, Long>> mleList;
 
@@ -3696,15 +3724,29 @@ public class MapleMap {
         public void run() {
             byte d = 1;
 
+            // 死亡动画期间客户端仍会持续发送怪物坐标,按最后接收到的坐标与死亡判定位置的差值修正实际掉落位置
+            int dx;
+            int dy;
+            lootLock.lock();
+            try {
+                Point latestPos = mob.getPosition();
+                dx = latestPos.x - mobpos;
+                dy = latestPos.y - pos.y;
+            } finally {
+                lootLock.unlock();
+            }
+            int shiftedMobpos = mobpos + dx;
+            Point shiftedPos = new Point(pos.x + dx, pos.y + dy);
+
             // Normal Drops
-            d = dropItemsFromMonsterOnMap(dropEntry, pos, d, chRate, droptype, mobpos, chr, mob);
+            d = dropItemsFromMonsterOnMap(dropEntry, shiftedPos, d, chRate, droptype, shiftedMobpos, chr, mob);
 
             // Global Drops
-            d = dropGlobalItemsFromMonsterOnMap(globalEntry, pos, d, droptype, mobpos, chr, mob);
+            d = dropGlobalItemsFromMonsterOnMap(globalEntry, shiftedPos, d, droptype, shiftedMobpos, chr, mob);
 
             // Quest Drops
-            d = dropItemsFromMonsterOnMap(visibleQuestEntry, pos, d, chRate, droptype, mobpos, chr, mob);
-            dropItemsFromMonsterOnMap(otherQuestEntry, pos, d, chRate, droptype, mobpos, chr, mob);
+            d = dropItemsFromMonsterOnMap(visibleQuestEntry, shiftedPos, d, chRate, droptype, shiftedMobpos, chr, mob);
+            dropItemsFromMonsterOnMap(otherQuestEntry, shiftedPos, d, chRate, droptype, shiftedMobpos, chr, mob);
         }
     }
 
