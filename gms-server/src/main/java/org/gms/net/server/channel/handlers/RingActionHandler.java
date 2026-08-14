@@ -450,7 +450,7 @@ public final class RingActionHandler extends AbstractPacketHandler {
                                 c.getPlayer().dropMessage(5, "婚礼已经开始了。你不能再邀请更多宾客参加活动。");
                             }
                         } else {
-                            c.getPlayer().dropMessage(5, "'" + name + "' is already invited for your marriage.");
+                            c.getPlayer().dropMessage(5, "'" + name + "' 已经被邀请参加你的婚礼了。");
                         }
                     } else {
                         c.getPlayer().dropMessage(5, "邀请未能发送给 '" + name + "'。要么你的婚礼预约时间已到，要么预约不存在。");
