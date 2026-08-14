@@ -207,6 +207,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
             updatePosition(p, tracker, -2);
             map.updateMonsterLootPosition(objectid, tracker.getPosition());
         } catch (EmptyMovementException e) {
+            log.warn("解析死亡怪物[{}]移动包失败,掉落位置不做修正", objectid, e);
         }
     }
 
