@@ -48,8 +48,8 @@ function action(mode, type, selection) {
         cm.dispose();
     }
     if (status == 0 && mode == 1) {
-        var selStr = "Hello there. I'm Orbis' number one glove maker. Would you like me to make you something?#b"
-        var options = ["Create or upgrade a Warrior glove", "Create or upgrade a Bowman glove", "Create or upgrade a Magician glove", "Create or upgrade a Thief glove"];
+        var selStr = "你好啊。我是天空之城首屈一指的手套工匠。需要我为你制作些什么吗？#b"
+        var options = ["制作或升级战士手套", "制作或升级弓箭手手套", "制作或升级法师手套", "制作或升级飞侠手套"];
         for (var i = 0; i < options.length; i++) {
             selStr += "\r\n#L" + i + "# " + options[i] + "#l";
         }
@@ -58,7 +58,7 @@ function action(mode, type, selection) {
     } else if (status == 1 && mode == 1) {
         selectedType = selection;
         if (selectedType == 0) { //warrior glove
-            var selStr = "Warrior glove? Okay, then which one?#b";
+            var selStr = "战士手套？好的，那你想要哪一款？#b";
             var gloves = ["Bronze Husk#k - Warrior Lv. 70#b", "Mithril Husk#k - Warrior Lv. 70#b", "Dark Husk#k - Warrior Lv. 70#b",
                 "Sapphire Emperor#k - Warrior Lv. 80#b", "Emerald Emperor#k - Warrior Lv. 80#b", "Blood Emperor#k - Warrior Lv. 80#b", "Dark Emperor#k - Warrior Lv. 80#b"];
             for (var i = 0; i < gloves.length; i++) {
@@ -66,7 +66,7 @@ function action(mode, type, selection) {
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 1) { //bowman glove
-            var selStr = "Bowman glove? Okay, then which one?#b";
+            var selStr = "弓箭手手套？好的，那你想要哪一款？#b";
             var gloves = ["Blue Eyes#k - Bowman Lv. 70#b", "Gold Eyes#k - Bowman Lv. 70#b", "Dark Eyes#k - Bowman Lv. 70#b",
                 "Red Cordon#k - Bowman Lv. 80#b", "Blue Cordon#k - Bowman Lv. 80#b", "Green Cordon#k - Bowman Lv. 80#b", "Dark Cordon#k - Bowman Lv. 80#b"];
             for (var i = 0; i < gloves.length; i++) {
@@ -74,7 +74,7 @@ function action(mode, type, selection) {
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 2) { //mage glove
-            var selStr = "Magician glove? Okay, then which one?#b";
+            var selStr = "法师手套？好的，那你想要哪一款？#b";
             var gloves = ["Brown Lorin#k - Magician Lv. 70#b", "Blue Lorin#k - Magician Lv. 70#b", "Dark Lorin#k - Magician Lv. 70#b",
                 "Green Clarity#k - Magician Lv. 80#b", "Blue Clarity#k - Magician Lv. 80#b", "Dark Clarity#k - Magician Lv. 80#b"];
             for (var i = 0; i < gloves.length; i++) {
@@ -82,7 +82,7 @@ function action(mode, type, selection) {
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 3) { //thief glove
-            var selStr = "Thief glove? Okay, then which one?#b";
+            var selStr = "飞侠手套？好的，那你想要哪一款？#b";
             var gloves = ["Bronze Rover#k - Thief Lv. 70#b", "Silver Rover#k - Thief Lv. 70#b", "Gold Rover#k - Thief Lv. 70#b",
                 "Green Larceny#k - Thief Lv. 80#b", "Purple Larceny#k - Thief Lv. 80#b", "Dark Larceny#k - Thief Lv. 80#b"];
             for (var i = 0; i < gloves.length; i++) {

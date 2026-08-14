@@ -9,7 +9,7 @@ function start() {
     if (parseInt(cm.getJobId() / 100) == jobType && cm.canSpawnPlayerNpc(GameConstants.getHallOfFameMapid(cm.getJob()))) {
         spawnPnpc = true;
 
-        var sendStr = "You have walked a long way to reach the power, wisdom and courage you hold today, haven't you? What do you say about having right now #ra NPC on the Hall of Fame holding the current image of your character#k? Do you like it?";
+        var sendStr = "你已经走了很长的路，才拥有今天的实力、智慧与勇气。你觉得现在就在名人堂里立一个以你当前形象为原型的NPC怎么样？你喜欢吗？";
         if (spawnPnpcFee > 0) {
             sendStr += " I can do it for you, for the fee of #b " + cm.numberWithCommas(spawnPnpcFee) + " mesos.#k";
         }

@@ -117,9 +117,9 @@ function action(mode, type, selection) {
                 cm.dispose();
 
             } else {
-                cm.sendSimple("Hi there. I am #b#nMu Young#n#k, the temple Keeper. This temple is currently under siege by the Balrog troops. We currently do not know who gave the orders. " +
-                    "For a few weeks now, the #e#b Order of the Altair#n#k has been sending mercenaries, but they were eliminated every time." +
-                    " So, traveler, would you like to try your luck at defeating this unspeakable horror?\r\n  #L1#What is the #eOrder of the Altair?");
+                cm.sendSimple("你好。我是#b#n无影#n#k，寺庙的看守人。这座寺庙目前正被蝙蝠怪包围。我们目前不知道是谁下的命令。 " +
+                    "几个星期以来#e#b特利斯坦#n#k一直派遣雇佣军阻止蝙蝠怪复活，但每次都被蝙蝠怪消灭了。" +
+                    "所以，冒险者，你想试试你的运气来战胜这无法形容的恐怖吗？\r\n  #L1#什么是#e特利斯坦?");
 
                 status = 10;
             }
