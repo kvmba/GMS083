@@ -142,8 +142,7 @@ public enum RecvOpcode implements Opcode {
     RPS_ACTION(0x88), // 石头剪刀布操作
     RING_ACTION(0x89), // 戒指操作
     WEDDING_ACTION(0x8A), // 结婚操作
-    WEDDING_TALK(0x8B), // 结婚对话
-    WEDDING_TALK_MORE(0x8B), // 继续结婚对话
+    WEDDING_TALK(0x8B), // 结婚对话(含继续对话)
     ALLIANCE_OPERATION(0x8F), // 联盟操作
     DENY_ALLIANCE_REQUEST(0x90), // 拒绝联盟请求
     OPEN_FAMILY_PEDIGREE(0x91), // 打开家族谱系

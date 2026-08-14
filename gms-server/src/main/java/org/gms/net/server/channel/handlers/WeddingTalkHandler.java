@@ -34,19 +34,26 @@ public final class WeddingTalkHandler extends AbstractPacketHandler {
 
     @Override
     public final void handlePacket(InPacket p, Client c) {
-        byte action = p.readByte();
-        if (action == 1) {
-            EventInstanceManager eim = c.getPlayer().getEventInstance();
+        EventInstanceManager eim = c.getPlayer().getEventInstance();
+        boolean isGroomOrBride = eim != null && (c.getPlayer().getId() == eim.getIntProperty("groomId") || c.getPlayer().getId() == eim.getIntProperty("brideId"));
 
-            if (eim != null && !(c.getPlayer().getId() == eim.getIntProperty("groomId") || c.getPlayer().getId() == eim.getIntProperty("brideId"))) {
+        if (p.available() > 0) {
+            // 带负载:神父对话/进度校验(TALK)。action==1 为进度校验,其余为通用进度响应。
+            byte action = p.readByte();
+            if (action == 1 && !isGroomOrBride) {
                 c.sendPacket(WeddingPackets.OnWeddingProgress(false, 0, 0, (byte) 2));
-            } else {
-                c.sendPacket(WeddingPackets.OnWeddingProgress(true, 0, 0, (byte) 3));
+                c.sendPacket(PacketCreator.enableActions());
+                return;
             }
         } else {
-            c.sendPacket(WeddingPackets.OnWeddingProgress(true, 0, 0, (byte) 3));
+            // 无负载:宾客祝福(TALK_MORE),非新人将祝福计入爱的积分
+            if (!isGroomOrBride) {
+                eim.gridInsert(c.getPlayer(), 1);
+                c.getPlayer().dropMessage(5, "High Priest John: Your blessings have been added to their love. What a noble act for a lovely couple!");
+            }
         }
 
+        c.sendPacket(WeddingPackets.OnWeddingProgress(true, 0, 0, (byte) 3));
         c.sendPacket(PacketCreator.enableActions());
     }
 }
