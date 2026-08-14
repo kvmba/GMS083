@@ -1,6 +1,6 @@
 function start() {
     if (cm.c.getPlayer().getMapId() == 103000100 || cm.c.getPlayer().getMapId() == 600010001) {
-        cm.sendYesNo("每分钟都有前往" + (cm.c.getPlayer().getMapId() == 103000100 ? "新叶城（Masteria）" : "金银岛（维多利亚岛）的废弃都市（废都）") + "的地铁出发，票价为#b5000金币#k。您确定要购买#b#t" + (4031711 + parseInt(cm.c.getPlayer().getMapId() / 300000000)) + "##k吗？");
+        cm.sendYesNo("每分钟都有前往" + (cm.c.getPlayer().getMapId() == 103000100 ? "新叶城" : "金银岛的废弃都市") + "的地铁出发，票价为#b5000金币#k。您确定要购买#b#t" + (4031711 + parseInt(cm.c.getPlayer().getMapId() / 300000000)) + "##k吗？");
     } else if (cm.c.getPlayer().getMapId() == 600010002 || cm.c.getPlayer().getMapId() == 600010004) {
         cm.sendYesNo("列车启动前你想离开吗？车票将不会退款。");
     }

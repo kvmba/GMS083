@@ -78,7 +78,7 @@ function action(mode, type, selection) {
                     }
                 }
 
-                cm.sendStyle("您可以选择您的发型将成为。选择最能给你带来愉悦的发型…", hairnew);
+                cm.sendStyle("您可以选择您想要的发型。选择一款最能让你心动的发型…", hairnew);
             }
         } else if (status == 2) {
             if (beauty == 1) {

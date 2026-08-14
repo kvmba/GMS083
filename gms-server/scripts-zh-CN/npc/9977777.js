@@ -29,14 +29,15 @@ var ambientSong = "Bgm04/Shinin'Harbor";
 var feature_tree = [];
 var feature_cursor;
 
-var tabs = ["组队任务", "技能", "任务", "玩家社交", "现金与物品", "怪物、地图与反应堆", "组队任务潜力", "玩家潜力", "服务器潜力", "命令", "自定义NPC", "本地修改", "项目"];
+var tabs = ["PQs", "Skills", "Quests", "Player Social Network", "Cash & Items", "Monsters, Maps & Reactors", "PQ potentials", "Player potentials", "Server potentials", "Commands", "Custom NPCs", "Localhost edits", "Project"];
+var tabNames = ["组队任务", "技能", "任务", "玩家社交", "现金与物品", "怪物、地图与反应堆", "组队任务潜力", "玩家潜力", "服务器潜力", "命令", "自定义NPC", "本地修改", "项目"];
 
 function addFeature(feature) {
     feature_cursor.push(feature);
 }
 
 function writeFeatureTab_PQs() {
-    addFeature("冒险家组队任务/玩具城组队任务/等各类组队任务。");
+    addFeature("射手村/废弃都市/玩具城/玩具城迷宫/天空之城/阿里安特/艾琳森林/海盗组队任务。");
     addFeature("罗密欧与朱丽叶组队任务/暗黑龙王组队任务/宝物组队任务等。");
     addFeature("玩具城组队任务作为远征队实例运行。");
     addFeature("斯卡加/暗黑龙王/昭和/蝙蝠怪/扎昆/品克缤。");
@@ -287,7 +288,7 @@ function writeFeatureTab_Project() {
     addFeature("重构物品脚本，正确使用NPC对话框。");
     addFeature("线程追踪器：死锁检测的运行时工具。");
     addFeature("频道、世界与全服范围的定时器管理。");
-    addFeature("将服务开发为先发制人的任务调度器。");
+    addFeature("将服务实现为抢占式任务调度器。");
     addFeature("全面复查了玩家属性的封装。");
     addFeature("重点复查了未来任务管理，减少线程创建并减轻TimerManager的任务过载。");
 }
@@ -331,7 +332,7 @@ function action(mode, type, selection) {
         if (status == 0) {
             var sendStr = "HeavenMS的开发历时4年，建立在Solaxia的成果之上。我很高兴地说，这项开发本身不断得到数十位贡献者与支持者的鼓舞（真心感谢你们的信任之约，朋友们！）。\r\n\r\n谈到成果：涌现了许多优秀的功能，开发目标是重现旧版GMS的体验。如今这些久违的功能以本服务器的形式优雅地呈现在你面前。枫叶物语万岁！！\r\n\r\n以下是来自#bHeavenMS#k的功能：\r\n\r\n";
             for (var i = 0; i < tabs.length; i++) {
-                sendStr += "#L" + i + "##b" + tabs[i] + "#k#l\r\n";
+                sendStr += "#L" + i + "##b" + tabNames[i] + "#k#l\r\n";
             }
 
             cm.sendSimple(sendStr);
@@ -345,7 +346,7 @@ function action(mode, type, selection) {
                 }
             }
 
-            var sendStr = "#b" + tabs[selection] + "#k:\r\n\r\n";
+            var sendStr = "#b" + tabNames[selection] + "#k:\r\n\r\n";
             for (var i = 0; i < tabName.length; i++) {
                 sendStr += "  #L" + i + "# " + tabName[i];
                 sendStr += "#l\r\n";

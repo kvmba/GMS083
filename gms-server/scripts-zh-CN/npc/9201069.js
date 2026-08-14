@@ -64,7 +64,7 @@ function action(mode, type, selection) {
                         pushIfItemExists(facenew, fface_v[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
-                cm.sendStyle("让我们看看。。。我完全可以把你的脸变成新的。你不想试试吗？ 为了 #b#t5152034##k, 你可以得到你喜欢的面孔。花点时间选择你喜欢的面孔。", facenew);
+                cm.sendStyle("让我们看看……我完全可以把你的脸变成全新的。你不想试试吗？使用#b#t5152034##k，你就可以得到喜欢的新面孔。花点时间挑选你喜欢的吧。", facenew);
             }
         } else if (status == 2) {
             if (cm.haveItem(5152034)) {

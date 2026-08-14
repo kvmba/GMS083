@@ -50,7 +50,7 @@ function action(mode, type, selection) {
                 cm.dispose();
                 return;
             }
-            cm.sendStyle("通过我们的专业服务，您可以提前看到您对治疗的照顾方式。你想做什么样的皮肤护理？去选择你喜欢的风格吧。。。", skin);
+            cm.sendStyle("通过我们的专业服务，您可以提前预览护理后的效果。您想做什么样的皮肤护理？请选择您喜欢的风格……", skin);
         } else {
             cm.gainItem(5153010, -1);
             cm.setSkin(selection);

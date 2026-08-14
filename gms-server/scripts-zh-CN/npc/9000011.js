@@ -59,7 +59,7 @@ function action(mode, type, selection) {
                 }
                 cm.dispose();
             } else if (selection == 3) {
-                var selStr = "你想交换哪一个直接赢的证书?";
+                var selStr = "你想兑换哪一种连胜证书？";
                 for (var i = 0; i < quantities.length; i++) {
                     selStr += "\r\n#b#L" + i + "##t" + (4031332 + i) + "# Exchange(" + quantities[i] + ")#l";
                 }

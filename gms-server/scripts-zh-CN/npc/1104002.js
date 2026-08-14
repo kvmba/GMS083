@@ -32,7 +32,7 @@ function action(mode, type, selection) {
         var mapobj = cm.getMap();
 
         if (mode == 0 && type > 0) {
-            cm.getPlayer().dropMessage(5, "埃雷奥诺尔:哦，失去了女皇，还还想挑战我们？现在你做到了！做好准备吧！！！");
+            cm.getPlayer().dropMessage(5, "埃雷奥诺尔:哦，失去了女皇，还想挑战我们？现在你做到了！做好准备吧！！！");
 
             const LifeFactory = Java.type('org.gms.server.life.LifeFactory');
             const Point = Java.type('java.awt.Point');

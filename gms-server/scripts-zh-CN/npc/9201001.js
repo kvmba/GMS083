@@ -115,7 +115,7 @@ function action(mode, type, selection) {
             if (!cm.haveItem(4031367 + nanaLoc, 1)) {
                 if (cm.isQuestCompleted(100401 + nanaLoc)) {
                     state = 1;
-                    cm.sendAcceptDecline("我给了你#k#t4031367##k 你是不是丢了 ? 好吧，我可以再和你分享一个，但你需要重做我上次问你的那件事，可以吗？我需要你带我来 #r50 #t" + questItems[nanaLoc] + "#'s.#k");
+                    cm.sendAcceptDecline("我给你的#k#t4031367##k是不是弄丢了？好吧，我可以再和你分享一个，但你需要重做我上次拜托你的那件事，可以吗？我需要你带给我#r50个#t" + questItems[nanaLoc] + "#。#k");
                 } else if (cm.isQuestStarted(100401 + nanaLoc)) {
                     if (processNanaQuest()) {
                         cm.gainExp(questExp[nanaLoc] * cm.getPlayer().getExpRate());

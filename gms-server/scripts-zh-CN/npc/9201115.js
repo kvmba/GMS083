@@ -80,7 +80,7 @@ function action(mode, type, selection) {
         } else if (eim.getIntProperty("glpq6") == 2) {
             if (cm.getMap().countMonsters() == 0) {
                 cm.sendOk("什么？呃...这不可能发生。");
-                cm.mapMessage(5, "通往下一阶段的门户已经打开！")
+                cm.mapMessage(5, "通往下一阶段的传送门已经打开！")
                 eim.setIntProperty("glpq6", 3);
 
                 eim.showClearEffect(true);

@@ -82,16 +82,16 @@ function start() {
                             }
                             if (incorrect != 0) {
                                 if (incorrect == 1) {
-                                    string += "1位宗臣收到了不正确的供品。\r\n";
+                                    string += "1位臣属收到了不正确的供品。\r\n";
                                 } else {
-                                    string += incorrect + "位宗臣收到了不正确的供品。\r\n";
+                                    string += incorrect + "位臣属收到了不正确的供品。\r\n";
                                 }
                             }
                             if (unknown != 0) {
                                 if (unknown == 1) {
-                                    string += "1位宗臣收到了未知的供品。\r\n";
+                                    string += "1位臣属收到了未知的供品。\r\n";
                                 } else {
-                                    string += unknown + "位宗臣收到了未知的供品。\r\n";
+                                    string += unknown + "位臣属收到了未知的供品。\r\n";
                                 }
                             }
                             string += "这是你的 ";
