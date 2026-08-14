@@ -45,7 +45,7 @@ var costSet = [10000, 25000, 25000, 25000, 25000, 25000, 25000];
 
 function start() {
     cm.getPlayer().setCS(true);
-    var selStr = "Hey there! My name is #p2040014#, and I am a specialist in mini-games. What kind of mini-game you want me to make? #b"
+    var selStr = "你好，我是#p2040014#,我是迷你游戏的专家。你要我做什么样的迷你游戏？#b"
     var options = ["#i4080100# #t4080100#", "#i4080006# #t4080006#", "#i4080007# #t4080007#", "#i4080008# #t4080008#", "#i4080009# #t4080009#", "#i4080010# #t4080010#", "#i4080011# #t4080011#"];
     for (var i = 0; i < options.length; i++) {
         selStr += "\r\n#L" + i + "# " + options[i] + "#l";
@@ -68,13 +68,13 @@ function action(mode, type, selection) {
         cost = costSet[selectedItem];
         qty = 1;
 
-        var prompt = "So we are going for ";
+        var prompt = "那么我们要做的是 ";
         if (qty == 1) {
             prompt += "a #t" + item + "#";
         } else {
             prompt += qty + " #t" + item + "#";
         }
-        prompt += ", right? In that case, I'm going to need specific items from you in order to make it. Make sure you have room in your inventory, though!#b";
+        prompt += "，对吗？那样的话，我需要你提供特定的材料才能制作。不过请确保你的背包里有足够的空间！#b";
         if (mats instanceof Array) {
             for (var i = 0; i < mats.length; i++) {
                 prompt += "\r\n#i" + mats[i] + "# " + (matQty[i] * qty) + " #t" + mats[i] + "#";
