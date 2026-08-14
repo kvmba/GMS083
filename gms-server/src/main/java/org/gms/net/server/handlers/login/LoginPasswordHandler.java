@@ -21,6 +21,8 @@
  */
 package org.gms.net.server.handlers.login;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.gms.client.Client;
 import org.gms.client.DefaultDates;
 import org.gms.config.GameConfig;
@@ -31,12 +33,14 @@ import org.gms.net.server.coordinator.session.Hwid;
 import org.gms.util.BCrypt;
 import org.gms.util.DatabaseConnection;
 import org.gms.util.HexTool;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.Calendar;
 
+@Slf4j
 public final class LoginPasswordHandler implements PacketHandler {
 
     @Override
@@ -59,7 +63,9 @@ public final class LoginPasswordHandler implements PacketHandler {
         p.skip(6);   // localhost masked the initial part with zeroes...
         byte[] hwidNibbles = p.readBytes(4);
         Hwid hwid = new Hwid(HexTool.toCompactHexString(hwidNibbles));
+        long loginStart = System.currentTimeMillis();
         int loginok = c.login(login, pwd, hwid);
+        long authEnd = System.currentTimeMillis();
 
         if (GameConfig.getServerBoolean("automatic_register") && loginok == 5) {
             try (Connection con = DatabaseConnection.getConnection();
@@ -100,6 +106,7 @@ public final class LoginPasswordHandler implements PacketHandler {
             return;
         }
         Calendar tempban = c.getTempBanCalendarFromDB();
+        long banCheckEnd = System.currentTimeMillis();
         if (tempban != null) {
             if (tempban.getTimeInMillis() > Calendar.getInstance().getTimeInMillis()) {
                 c.sendPacket(PacketCreator.getTempBan(tempban.getTimeInMillis(), c.getGReason()));
@@ -116,6 +123,7 @@ public final class LoginPasswordHandler implements PacketHandler {
         if (c.finishLogin() == 0) {
             c.checkChar(c.getAccID());
             login(c);
+            log.info(I18nUtil.getLogMessage("LoginPasswordHandler.timing.info1"), login, authEnd - loginStart, banCheckEnd - authEnd, System.currentTimeMillis() - banCheckEnd);
         } else {
             c.sendPacket(PacketCreator.getLoginFailed(7));
         }
