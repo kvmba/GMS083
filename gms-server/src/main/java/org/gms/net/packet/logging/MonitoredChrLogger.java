@@ -22,26 +22,25 @@ package org.gms.net.packet.logging;
 
 import org.gms.client.Character;
 import org.gms.client.Client;
-import net.jcip.annotations.NotThreadSafe;
 import org.gms.net.opcodes.RecvOpcode;
+import org.gms.net.packet.InPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gms.util.HexTool;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Logs packets from monitored characters to a file.
  *
  * @author Alan (SharpAceX)
  */
-@NotThreadSafe
 public class MonitoredChrLogger {
     private static final Logger log = LoggerFactory.getLogger(MonitoredChrLogger.class);
-    private static final Set<Integer> monitoredChrIds = new HashSet<>();
+    private static final Set<Integer> monitoredChrIds = ConcurrentHashMap.newKeySet();
 
     /**
      * Toggle monitored status for a character id
@@ -62,7 +61,7 @@ public class MonitoredChrLogger {
         return monitoredChrIds;
     }
 
-    public static void logPacketIfMonitored(Client c, short packetId, byte[] packetContent) {
+    public static void logPacketIfMonitored(Client c, short packetId, InPacket packet) {
         Character chr = c.getPlayer();
         if (chr == null) {
             return;
@@ -75,8 +74,9 @@ public class MonitoredChrLogger {
             return;
         }
 
-        String packet = packetContent.length > 0 ? HexTool.toHexString(packetContent) : "<empty>";
-        log.info("{}-{} {}-{}", c.getAccountName(), chr.getName(), packetId, packet);
+        byte[] packetContent = packet.getBytes();
+        String packetStr = packetContent.length > 0 ? HexTool.toHexString(packetContent) : "<empty>";
+        log.info("{}-{} {}-{}", c.getAccountName(), chr.getName(), packetId, packetStr);
     }
 
     private static boolean isRecvBlocked(RecvOpcode op) {

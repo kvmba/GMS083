@@ -220,7 +220,7 @@ public class Client extends ChannelInboundHandlerAdapter {
         if (handler != null && handler.validateState(this)) {
             try {
                 ThreadLocalUtil.setCurrentClient(this);
-                MonitoredChrLogger.logPacketIfMonitored(this, opcode, packet.getBytes());
+                MonitoredChrLogger.logPacketIfMonitored(this, opcode, packet);
                 handler.handlePacket(packet, this);
             } catch (final Throwable t) {
                 final String chrInfo = player != null ? player.getName() + " 地图 [" + player.getMap().getMapName() + "] (" + player.getMapId() + ")" : "?";
