@@ -429,7 +429,7 @@
                 <string name="_outlink" value="Item/Consume/_Canvas/0243.img/02432343/info/iconRaw"/>
             </canvas>
             <int name="price" value="1"/>
-            <int name="slotMax" value="99"/>
+            <int name="slotMax" value="9999"/>
             <int name="tradeBlock" value="1"/>
         </imgdir>
         <imgdir name="spec">
