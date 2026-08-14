@@ -25,14 +25,14 @@ function action(mode, type, selection) {
 
         if (status == 0) {
             if (cm.getMapId() == 922240200) {
-                cm.sendSimple("你有什么要说的吗...? #b\b\r\n#L0#我想要救出嘎嘎。#l\r\n");    //#L1#I want to go to the Space Mine.#l
+                cm.sendSimple("你有什么要说的吗...? #b\b\r\n#L0#我想要救出佳佳。#l\r\n");    //#L1#I want to go to the Space Mine.#l
             } else if (cm.getMapId() >= 922240000 && cm.getMapId() <= 922240019) {
                 cm.sendYesNo("如果你失败了也不要担心。你还有3次机会。你还想放弃吗？");
             } else if (cm.getMapId() >= 922240100 && cm.getMapId() <= 922240119) {
-                var text = "你费尽周折才救了嘎嘎，但看来我们又回到原点了。 ";
+                var text = "你费尽周折才救了佳佳，但看来我们又回到原点了。 ";
                 var rgaga = cm.getPlayer().getEvents().get("rescueGaga");
                 if (rgaga.getCompleted() > 10) {
-                    text += "在嘎嘎获救之前，请不要放弃。为了感谢你迄今取得的成就，我给了你一艘宇宙飞船。它已经很破旧了，但应该还能使用。请查看你的#b技能栏#k。";
+                    text += "在佳佳获救之前，请不要放弃。为了感谢你迄今取得的成就，我给了你一艘宇宙飞船。它已经很破旧了，但应该还能使用。请查看你的#b技能栏#k。";
                     rgaga.giveSkill(cm.getPlayer());
                 } else {
                     text += "我们现在回去吧。";
@@ -52,7 +52,7 @@ function action(mode, type, selection) {
                     }
                 } else if (status == 2) {
                     if (selected == 1) {
-                        cm.sendYesNo("如果我们把嘎嘎留给外星人，他会遭遇可怕的事情！我会让你借用一艘月兔用来旅行的太空飞船，这样你就可以救出嘎嘎。虽然他有时看起来有点犹豫不决、慢吞吞和不成熟，但他其实是一个很好的年轻人。你现在想去救他吗？");
+                        cm.sendYesNo("如果我们把佳佳留给外星人，他会遭遇可怕的事情！我会让你借用一艘月兔用来旅行的太空飞船，这样你就可以救出佳佳。虽然他有时看起来有点犹豫不决、慢吞吞和不成熟，但他其实是一个很好的年轻人。你现在想去救他吗？");
                     } else if (selected == 2) {
                         cm.sendOk("尚未编码，f4。");
                         cm.dispose();
