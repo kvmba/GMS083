@@ -794,7 +794,14 @@ public class Monster extends AbstractLoadedLife {
     public Character killBy(final Character killer) {
         distributeExperience(killer != null ? killer.getId() : 0);
 
-        final Pair<Character, Boolean> lastController = aggroRemoveController();
+        final Pair<Character, Boolean> lastController = aggroRemoveController(false);
+        // 击杀不再向控制器客户端发送 REMOVE_CONTROLLER(会使怪物在攻击特效期间僵住),
+        // 对死亡广播范围外的控制器直接补发死亡包,避免其客户端残留怪物
+        Character lastChrController = lastController.getLeft();
+        if (lastChrController != null && lastChrController.getClient() != null && lastChrController.getMap() == map
+                && lastChrController.getPosition().distanceSq(getPosition()) > MapleMap.getRangedDistance()) {
+            lastChrController.sendPacket(PacketCreator.killMonster(getObjectId(), 1));
+        }
         final List<Integer> toSpawn = this.getRevives();
         if (toSpawn != null) {
             final MapleMap reviveMap = map;
@@ -1890,6 +1897,16 @@ public class Monster extends AbstractLoadedLife {
      * Removes controllability status from the current controller of this mob.
      */
     public Pair<Character, Boolean> aggroRemoveController() {
+        return aggroRemoveController(true);
+    }
+
+    /**
+     * 移除怪物控制器。击杀路径应传 false,不向控制器客户端发送 REMOVE_CONTROLLER:
+     * 该包会使客户端怪物在攻击特效期间僵住,死亡表现交由 KILL_MONSTER 包处理。
+     * @param announceToController 是否向控制器客户端发送停止控制包
+     * @return 旧控制器及其仇恨状态
+     */
+    public Pair<Character, Boolean> aggroRemoveController(boolean announceToController) {
         Character chrController;
         boolean hadAggro;
 
@@ -1906,7 +1923,7 @@ public class Monster extends AbstractLoadedLife {
         }
 
         if (chrController != null) { // this can/should only happen when a hidden gm attacks the monster
-            if (!this.isFake()) {
+            if (announceToController && !this.isFake()) {
                 chrController.sendPacket(PacketCreator.stopControllingMonster(this.getObjectId()));
             }
             chrController.stopControllingMonster(this);

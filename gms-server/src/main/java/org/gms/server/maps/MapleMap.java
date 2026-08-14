@@ -256,7 +256,7 @@ public class MapleMap {
         this.dropsOn = !dropsOn;
     }
 
-    private static double getRangedDistance() {
+    public static double getRangedDistance() {
         return GameConfig.getServerBoolean("use_max_range") ? Double.POSITIVE_INFINITY : 722500;
     }
 
@@ -1434,6 +1434,7 @@ public class MapleMap {
             }
         } else {
             if (removeKilledMonsterObject(monster)) {
+                broadcastMessage(PacketCreator.killMonster(monster.getObjectId(), animation), monster.getPosition());  // 先广播死亡包,客户端即刻播放死亡,避免怪物僵住或死亡表现滞后
                 try {
                     if (monster.getStats().getLevel() >= chr.getLevel() + 30 && !chr.isGM()) {
                         AutobanFactory.GENERAL.alert(chr, "因击杀超过自身30级的怪物[" + monster.getName() + "]被系统警告");
@@ -1510,7 +1511,6 @@ public class MapleMap {
                     e.printStackTrace();
                 } finally {     // thanks resinate for pointing out a memory leak possibly from an exception thrown
                     monster.dispatchMonsterKilled(true);
-                    broadcastMessage(PacketCreator.killMonster(monster.getObjectId(), animation), monster.getPosition());
                 }
             }
         }
