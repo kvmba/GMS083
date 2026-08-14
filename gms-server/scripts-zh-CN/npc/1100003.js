@@ -8,7 +8,7 @@
  ----------------------------------------------------------------------------------
  **/
 
-var menu = new Array("Victoria Island");
+var menu = new Array("金银岛");
 var method;
 
 function start() {

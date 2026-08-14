@@ -125,7 +125,7 @@ function ellinMapMessage(mapid) {
             return "森林所有问题的根源！把得到的魔法石放在祭坛上，做好准备！";
 
         case 930000700:
-            return "This is it, you guys did it! Thank you so much for purifying the forest!!";
+            return "就是这里，你们做到了！非常感谢你们净化了森林！！";
 
     }
 }

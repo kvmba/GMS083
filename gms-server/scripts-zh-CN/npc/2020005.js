@@ -70,7 +70,7 @@ function action(mode, type, selection) {
         cm.sendSimple("多亏了你，#b#t4031056##k 已经安全封印了。当然，作为结果，我用掉了我在过去大约800年中积累的一半能量...但现在我可以安心地死去了。哦，顺便问一下... 你是不是在寻找稀有物品？作为对你辛勤工作的感激，我会向你出售一些我拥有的物品，而且只有你可以购买。挑选出你想要的吧！" + selStr);
     } else if (status == 1) {
         selected = selection;
-        cm.sendGetNumber("Is #b#t" + item[selected] + "##k really the item that you need? It's the item " + msg[selected] + ". It may not be the easiest item to acquire, but I'll give you a good deal on it. It'll cost you #b" + cost[selected] + " mesos#k per item. How many would you like to purchase?", 0, 1, 100);
+        cm.sendGetNumber("这#b#t" + item[selected] + "##k真的是你需要的物品吗？这是" + msg[selected] + "。它可能不是最容易获得的物品，但我会给你个好价钱。每件需要#b" + cost[selected] + " 金币#k。你想购买多少个？", 0, 1, 100);
     } else if (status == 2) {
         amount = selection;
         totalcost = cost[selected] * amount;

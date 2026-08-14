@@ -74,25 +74,25 @@ function action(mode, type, selection) {
             selStr = "战士鞋？没问题，想要哪一款呀？#b";
 			
 			
-            //shoes = ["Emerald Battle Grieve#k - Warrior Lv. 30#b", "Mithril Battle Grieve#k - Warrior Lv. 30#b", "Silver Battle Grieve#k - Warrior Lv. 30#b", "Blood Battle Grieve#k - Warrior Lv. 30#b", "Steel Trigger#k - Warrior Lv. 35#b", "Mithril Trigger#k - Warrior Lv. 35#b", "Dark Trigger#k - Warrior Lv. 35#b", "Brown Jangoon Boots#k - Warrior Lv. 40#b", "Maroon Jangoon Boots#k - Warrior Lv. 40#b", "Blue Jangoon Boots#k - Warrior Lv. 40#b", "Emerald Hildon Boots#k - Warrior Lv. 50#b", "Mithril Hildon Boots#k - Warrior Lv. 50#b", "Orihalcon Hildon Boots#k - Warrior Lv. 50#b", "Gold Hildon Boots#k - Warrior Lv. 50#b"];
+            //shoes = ["绿斗士鞋#k - 需要30级#b", "蓝斗士鞋#k - 需要30级#b", "银斗士鞋#k - 需要30级#b", "红斗士鞋#k - 需要30级#b", "铁头皮鞋#k - 需要35级#b", "蓝铁头鞋#k - 需要35级#b", "黑铁头鞋#k - 需要35级#b", "黄金月长靴#k - 需要40级#b", "紫金月鞋#k - 需要40级#b", "蓝金月鞋#k - 需要40级#b", "祖母绿将军靴#k - 需要50级#b", "锂矿蓝将军靴#k - 需要50级#b", "紫矿将军靴#k - 需要50级#b", "黄金将军靴#k - 需要50级#b"];
 
         } else if (selectedType == 2) { //bowman shoe
 		
 			itemSet = [1072079, 1072080, 1072081, 1072082, 1072083, 1072101, 1072102, 1072103, 1072118, 1072119, 1072120, 1072121, 1072122, 1072123, 1072124, 1072125];
             
             selStr = "弓箭手鞋？没问题，想要哪一款呢？#b";
-            //shoes = ["Red Hunter Boots#k - Bowman Lv. 30#b", "Blue Hunter Boots#k - Bowman Lv. 30#b", "Green Hunter Boots#k - Bowman Lv. 30#b", "Black Hunter Boots#k - Bowman Lv. 30#b", "Brown Hunter Boots#k - Bowman Lv. 30#b", "Blue Silky Boots#k - Bowman Lv. 35#b", "Green Silky Boots#k - Bowman Lv. 35#b", "Red Silky Boots#k - Bowman Lv. 35#b", "Red Pierre Shoes#k - Bowman Lv. 40#b", "Yellow Pierre Shoes#k - Bowman Lv. 40#b", "Brown Pierre Shoes#k - Bowman Lv. 40#b", "Blue Pierre Shoes#k - Bowman Lv. 40#b", "Brown Steel-Tipped Boots#k - Bowman Lv. 50#b", "Green Steel-Tipped Boots#k - Bowman Lv. 50#b", "Blue Steel-Tipped Boots#k - Bowman Lv. 50#b", "Purple Steel-Tipped Boots#k - Bowman Lv. 50#b"];
+            //shoes = ["红打猎鞋#k - 需要30级#b", "蓝打猎鞋#k - 需要30级#b", "绿打猎鞋#k - 需要30级#b", "黑打猎鞋#k - 需要30级#b", "褐打猎鞋#k - 需要30级#b", "蓝棉丝鞋#k - 需要35级#b", "绿棉丝鞋#k - 需要35级#b", "红棉丝鞋#k - 需要35级#b", "红精灵鞋#k - 需要40级#b", "黄精灵鞋#k - 需要40级#b", "褐精灵鞋#k - 需要40级#b", "蓝精灵鞋#k - 需要40级#b", "褐空空鞋#k - 需要50级#b", "绿空空鞋#k - 需要50级#b", "蓝空空鞋#k - 需要50级#b", "紫空空鞋#k - 需要50级#b"];
         } else if (selectedType == 3) { //magician shoe
             
 			itemSet = [1072075, 1072076, 1072077, 1072078, 1072089, 1072090, 1072091, 1072114, 1072115, 1072116, 1072117, 1072140, 1072141, 1072142, 1072143, 1072136, 1072137, 1072138, 1072139];
             
 			selStr = "魔法师鞋？没问题，想要哪一款呢？#b";
-            shoes = ["Red Magicshoes#k - Magician Lv. 30#b", "Blue Magicshoes#k - Magician Lv. 30#b", "White Magicshoes#k - Magician Lv. 30#b", "Black Magicshoes#k - Magician Lv. 30#b", "Purple Salt Shoes#k - Magician Lv. 35#b", "Red Salt Shoes#k - Magician Lv. 35#b", "Black Salt Shoes#k - Magician Lv. 35#b", "Red Moon Shoes#k - Magician Lv. 40#b", "Blue Moon Shoes#k - Magician Lv. 40#b", "Gold Moon Shoes#k - Magician Lv. 40#b", "Dark Moon Shoes#k - Magician Lv. 40#b", "Pink Goldwind Shoes#k - Magician Lv. 50#b", "Blue Goldwind Shoes#k - Magician Lv. 50#b", "Purple Goldwind Shoes#k - Magician Lv. 50#b", "Green Goldwind Shoes#k - Magician Lv. 50#b"];
+            shoes = ["红魔法鞋#k - 需要30级#b", "蓝魔法鞋#k - 需要30级#b", "白魔法鞋#k - 需要30级#b", "黑魔法鞋#k - 需要30级#b", "紫守护鞋#k - 需要35级#b", "红守护鞋#k - 需要35级#b", "黑守护鞋#k - 需要35级#b", "红月鞋#k - 需要40级#b", "蓝月鞋#k - 需要40级#b", "黄月鞋#k - 需要40级#b", "黑月鞋#k - 需要40级#b", "粉红黄金风#k - 需要50级#b", "蓝黄金风#k - 需要50级#b", "紫黄金风#k - 需要50级#b", "绿黄金风#k - 需要50级#b"];
         } else if (selectedType == 4) { //thief shoe
             itemSet = [1072032, 1072033, 1072035, 1072036, 1072104, 1072105, 1072106, 1072107, 1072108, 1072109, 1072110, 1072128, 1072130, 1072129, 1072131];
             
 			selStr = "飞侠鞋？没问题，想要哪一款呢？#b";
-            shoes = ["Bronze Chain Boots#k - Thief Lv. 30#b", "Iron Chain Boots#k - Thief Lv. 30#b", "Silver Chain Boots#k - Thief Lv. 30#b", "Gold Chain Boots#k - Thief Lv. 30#b", "Red White-Line Boots#k - Thief Lv. 35#b", "Green White-Line Boots#k - Thief Lv. 35#b", "Blue White-Line Boots#k - Thief Lv. 35#b", "Black Red-Lined Shoes#k - Thief Lv. 40#b", "Black Green-Lined Shoes#k - Thief Lv. 40#b", "Black Yellow-Lined Shoes#k - Thief Lv. 40#b", "Black Blue-Lined Shoes#k - Thief Lv. 40#b", "Blue Goni Shoes#k - Thief Lv. 50#b", "Red Goni Shoes#k - Thief Lv. 50#b", "Green Goni Shoes#k - Thief Lv. 50#b", "Purple Goni Shoes#k - Thief Lv. 50#b"];
+            shoes = ["青铜链鞋#k - 需要30级#b", "钢铁链鞋#k - 需要30级#b", "银链鞋#k - 需要30级#b", "金链鞋#k - 需要30级#b", "红杨柳鞋#k - 需要35级#b", "绿杨柳鞋#k - 需要35级#b", "蓝杨柳鞋#k - 需要35级#b", "红流星鞋#k - 需要40级#b", "绿流星鞋#k - 需要40级#b", "黄流星鞋#k - 需要40级#b", "蓝流星鞋#k - 需要40级#b", "蓝雷电鞋#k - 需要50级#b", "红雷电鞋#k - 需要50级#b", "绿雷电鞋#k - 需要50级#b", "紫雷电鞋#k - 需要50级#b"];
         }
         if (selectedType != 0) {
             for (var i = 0; i < itemSet.length; i++) {

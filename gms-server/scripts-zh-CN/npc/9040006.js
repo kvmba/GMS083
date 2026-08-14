@@ -82,34 +82,34 @@ function start() {
                             }
                             if (incorrect != 0) {
                                 if (incorrect == 1) {
-                                    string += "1 vassal has received an incorrect offering.\r\n";
+                                    string += "1位宗臣收到了不正确的供品。\r\n";
                                 } else {
-                                    string += incorrect + " vassals have received incorrect offerings.\r\n";
+                                    string += incorrect + "位宗臣收到了不正确的供品。\r\n";
                                 }
                             }
                             if (unknown != 0) {
                                 if (unknown == 1) {
-                                    string += "1 vassal has received an unknown offering.\r\n";
+                                    string += "1位宗臣收到了未知的供品。\r\n";
                                 } else {
-                                    string += unknown + " vassals have received unknown offerings.\r\n";
+                                    string += unknown + "位宗臣收到了未知的供品。\r\n";
                                 }
                             }
-                            string += "This is your ";
+                            string += "这是你的 ";
                             switch (attempt) {
                                 case 1:
-                                    string += "1st";
+                                    string += "第一次";
                                     break;
                                 case 2:
-                                    string += "2nd";
+                                    string += "第二次";
                                     break;
                                 case 3:
-                                    string += "3rd";
+                                    string += "第三次";
                                     break;
                                 default:
-                                    string += attempt + "th";
+                                    string += attempt + "次";
                                     break;
                             }
-                            string += " attempt.";
+                            string += "尝试。";
 
                             //spawn one black and one myst knight
                             spawnMob(9300036, -350, 150, cm.getPlayer().getMap());

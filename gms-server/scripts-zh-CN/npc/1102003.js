@@ -39,7 +39,7 @@ function start() {
 
         var sendStr = "你已经走了很长的路，才拥有今天的实力、智慧与勇气。你觉得现在就在名人堂里立一个以你当前形象为原型的NPC怎么样？你喜欢吗？";
         if (spawnPnpcFee > 0) {
-            sendStr += " I can do it for you, for the fee of #b " + cm.numberWithCommas(spawnPnpcFee) + " mesos.#k";
+            sendStr += " 我可以为你做到，费用是#b " + cm.numberWithCommas(spawnPnpcFee) + " 金币。#k";
         }
 
         cm.sendYesNo(sendStr);

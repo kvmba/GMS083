@@ -60,7 +60,7 @@ function action(mode, type, selection) {
         if (selectedType == 0) { //warrior glove
             var selStr = "战士手套？好的，那你想要哪一款？#b";
             var gloves = ["Bronze Husk#k - Warrior Lv. 70#b", "Mithril Husk#k - Warrior Lv. 70#b", "Dark Husk#k - Warrior Lv. 70#b",
-                "Sapphire Emperor#k - Warrior Lv. 80#b", "Emerald Emperor#k - Warrior Lv. 80#b", "Blood Emperor#k - Warrior Lv. 80#b", "Dark Emperor#k - Warrior Lv. 80#b"];
+                "蓝宝石帝王#k - 战士 Lv. 80#b", "翡翠帝王#k - 战士 Lv. 80#b", "血色帝王#k - 战士 Lv. 80#b", "黑暗帝王#k - 战士 Lv. 80#b"];
             for (var i = 0; i < gloves.length; i++) {
                 selStr += "\r\n#L" + i + "# " + gloves[i] + "#l";
             }
@@ -131,7 +131,7 @@ function action(mode, type, selection) {
             cost = costSet[selectedItem];
         }
 
-        var prompt = "You want me to make a #t" + item + "#? In that case, I'm going to need specific items from you in order to make it. Make sure you have room in your inventory, though!#b";
+        var prompt = "你想让我制作一件#t" + item + "#吗？那样的话，我需要你提供特定的材料才能制作。不过请确保你的背包里有足够的空间！#b";
 
         if (mats instanceof Array) {
             for (var i = 0; i < mats.length; i++) {

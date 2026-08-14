@@ -86,7 +86,7 @@ function action(mode, type, selection) {
             }
 
         } else if (status == 1) {
-            var sendStr = "The following books are currently available:\r\n\r\n";
+            var sendStr = "目前有以下书籍可供选择:\r\n\r\n";
             if (selected == 0) {
                 selected = selection;
             }
@@ -120,9 +120,9 @@ function action(mode, type, selection) {
                 var mobList = cm.getNamesWhoDropsItem(table[selected]);
 
                 if (mobList.length == 0) {
-                    sendStr = "No mobs drop '#b#t" + table[selected] + "##k'.\r\n\r\n";
+                    sendStr = "没有怪物掉落'#b#t" + table[selected] + "##k'。\r\n\r\n";
                 } else {
-                    sendStr = "The following mobs drop '#b#t" + table[selected] + "##k':\r\n\r\n";
+                    sendStr = "以下怪物掉落'#b#t" + table[selected] + "##k'：\r\n\r\n";
 
                     for (var i = 0; i < mobList.length; i++) {
                         sendStr += "  #L" + i + "# " + mobList[i] + "#l\r\n";
