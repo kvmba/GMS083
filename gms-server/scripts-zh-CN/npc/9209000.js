@@ -79,10 +79,10 @@ function action(mode, type, selection) {
                 cm.sendSimple(sendStr);
             } else if (skillbook.length > 0) {
                 selected = 1;
-                cm.sendNext(greeting + "New opportunities for skill improvement have been located for you to improve your skills! Only skill learns available for now.");
+                cm.sendNext(greeting + "为你找到了新的技能提升机会！目前只开放技能学习。");
             } else {
                 selected = 2;
-                cm.sendNext(greeting + "New opportunities for skill improvement have been located for you to improve your skills! Only skill upgrades available.");
+                cm.sendNext(greeting + "为你找到了新的技能提升机会！目前只开放技能强化。");
             }
 
         } else if (status == 1) {
