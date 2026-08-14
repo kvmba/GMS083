@@ -2019,17 +2019,36 @@ public class ItemInformationProvider {
         if (data != null) {
             Data data2 = data.getChildByPath(Integer.toString(level));
             if (data2 != null) {
+                // 基础属性(STR/DEX/INT/LUK)只随机提升其中一个
+                List<String> baseStats = new ArrayList<>();
                 for (Data da : data2.getChildren()) {
-                    if (Math.random() < 0.9) {
-                        if (da.getName().startsWith("incDEXMin")) {
-                            list.add(new Pair<>("incDEX", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incDEXMax")))));
-                        } else if (da.getName().startsWith("incSTRMin")) {
-                            list.add(new Pair<>("incSTR", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incSTRMax")))));
-                        } else if (da.getName().startsWith("incINTMin")) {
-                            list.add(new Pair<>("incINT", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incINTMax")))));
-                        } else if (da.getName().startsWith("incLUKMin")) {
-                            list.add(new Pair<>("incLUK", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incLUKMax")))));
-                        } else if (da.getName().startsWith("incMHPMin")) {
+                    String name = da.getName();
+                    if (name.startsWith("incDEXMin") || name.startsWith("incSTRMin") || name.startsWith("incINTMin") || name.startsWith("incLUKMin")) {
+                        baseStats.add(name);
+                    }
+                }
+                String chosenBase = baseStats.isEmpty() ? null : baseStats.get(Randomizer.nextInt(baseStats.size()));
+
+                for (Data da : data2.getChildren()) {
+                    String name = da.getName();
+                    boolean isBase = name.startsWith("incDEXMin") || name.startsWith("incSTRMin") || name.startsWith("incINTMin") || name.startsWith("incLUKMin");
+                    if (isBase) {
+                        if (!name.equals(chosenBase)) {
+                            continue;   // 基础属性只提升被选中的一个
+                        }
+                    } else if (Math.random() >= 0.9) {
+                        continue;   // 其它属性维持原有概率
+                    }
+
+                    if (name.startsWith("incDEXMin")) {
+                        list.add(new Pair<>("incDEX", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incDEXMax")))));
+                    } else if (name.startsWith("incSTRMin")) {
+                        list.add(new Pair<>("incSTR", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incSTRMax")))));
+                    } else if (name.startsWith("incINTMin")) {
+                        list.add(new Pair<>("incINT", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incINTMax")))));
+                    } else if (name.startsWith("incLUKMin")) {
+                        list.add(new Pair<>("incLUK", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incLUKMax")))));
+                    } else if (name.startsWith("incMHPMin")) {
                             list.add(new Pair<>("incMHP", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incMHPMax")))));
                         } else if (da.getName().startsWith("incMMPMin")) {
                             list.add(new Pair<>("incMMP", Randomizer.rand(DataTool.getInt(da), DataTool.getInt(data2.getChildByPath("incMMPMax")))));

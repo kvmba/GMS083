@@ -406,17 +406,27 @@ public class Equip extends Item {
         }
     }
     private void improveDefaultStats(List<Pair<StatUpgrade, Integer>> stats) {
+        // 基础属性(STR/DEX/INT/LUK)只随机提升其中一个
+        List<StatUpgrade> baseCandidates = new ArrayList<>();
         if (dex > 0) {
-            getUnitStatUpgrade(stats, StatUpgrade.incDEX, dex, true);
+            baseCandidates.add(StatUpgrade.incDEX);
         }
         if (str > 0) {
-            getUnitStatUpgrade(stats, StatUpgrade.incSTR, str, true);
+            baseCandidates.add(StatUpgrade.incSTR);
         }
         if (_int > 0) {
-            getUnitStatUpgrade(stats, StatUpgrade.incINT, _int, true);
+            baseCandidates.add(StatUpgrade.incINT);
         }
         if (luk > 0) {
-            getUnitStatUpgrade(stats, StatUpgrade.incLUK, luk, true);
+            baseCandidates.add(StatUpgrade.incLUK);
+        }
+        if (!baseCandidates.isEmpty()) {
+            switch (baseCandidates.get(Randomizer.nextInt(baseCandidates.size()))) {
+                case incDEX -> getUnitStatUpgrade(stats, StatUpgrade.incDEX, dex, true);
+                case incSTR -> getUnitStatUpgrade(stats, StatUpgrade.incSTR, str, true);
+                case incINT -> getUnitStatUpgrade(stats, StatUpgrade.incINT, _int, true);
+                default -> getUnitStatUpgrade(stats, StatUpgrade.incLUK, luk, true);
+            }
         }
         if (hp > 0) {
             getUnitStatUpgrade(stats, StatUpgrade.incMHP, hp, false);
