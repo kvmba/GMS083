@@ -76,7 +76,7 @@ function action(mode, type, selection) {
                     if (cm.isEventLeader()) {
                         cm.gainItem(4001134, -1);
                         cm.gainItem(4001135, -1);
-                        cm.sendNext("太好了！你手头上有艾尔卡德诺和泽尼玛斯特的文件。现在我们可以继续了。");
+                        cm.sendNext("太好了！你手头上有艾尔卡德诺和泽努米斯特特的文件。现在我们可以继续了。");
 
                         eim.showClearEffect();
                         eim.giveEventPlayersStageReward(4);
