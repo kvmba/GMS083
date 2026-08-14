@@ -123,7 +123,7 @@ public final class LoginPasswordHandler implements PacketHandler {
         if (c.finishLogin() == 0) {
             c.checkChar(c.getAccID());
             login(c);
-            log.info(I18nUtil.getLogMessage("LoginPasswordHandler.timing.info1"), login, authEnd - loginStart, banCheckEnd - authEnd, System.currentTimeMillis() - banCheckEnd);
+            log.info(I18nUtil.getLogMessage("LoginPasswordHandler.timing.info1", login, authEnd - loginStart, banCheckEnd - authEnd, System.currentTimeMillis() - banCheckEnd));
         } else {
             c.sendPacket(PacketCreator.getLoginFailed(7));
         }

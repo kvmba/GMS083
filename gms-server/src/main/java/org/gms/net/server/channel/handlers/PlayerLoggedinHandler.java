@@ -167,7 +167,7 @@ public final class PlayerLoggedinHandler extends AbstractPacketHandler {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                log.info(I18nUtil.getLogMessage("PlayerLoggedinHandler.timing.info1"), cid, System.currentTimeMillis() - loadStart);
+                log.info(I18nUtil.getLogMessage("PlayerLoggedinHandler.timing.info1", cid, System.currentTimeMillis() - loadStart));
 
                 if (player == null) { //If you are still getting null here then please just uninstall the game >.>, we dont need you fucking with the logs
                     c.disconnect(true, false);
