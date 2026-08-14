@@ -1614,6 +1614,18 @@ public class MapleMap {
             if (reactor.destroy()) {
                 removeMapObject(reactor);
             }
+
+            List<Character> chars;
+            chrRLock.lock();
+            try {
+                chars = new ArrayList<>(characters);
+            } finally {
+                chrRLock.unlock();
+            }
+
+            for (Character chr : chars) {
+                chr.removeVisibleMapObject(reactor);
+            }
         }
     }
 
@@ -1645,10 +1657,44 @@ public class MapleMap {
             try {
                 r.resetReactorActions(0);
                 r.setAlive(true);
-                broadcastMessage(PacketCreator.triggerReactor(r, 0));
             } finally {
                 r.unlockReactor();
             }
+
+            reactorRespawn(r);
+        }
+    }
+
+    /**
+     * 向客户端同步反应堆重生后的状态:已有精灵的玩家用 TRIGGER 复位状态,
+     * 范围内没有精灵的玩家才发 SPAWN,避免同一反应堆重复生成导致客户端残影。
+     * @param reactor 重生后的反应堆
+     */
+    public void reactorRespawn(final Reactor reactor) {
+        List<Character> triggerChars = new LinkedList<>();
+        List<Character> spawnChars = new LinkedList<>();
+
+        chrRLock.lock();
+        try {
+            for (Character chr : characters) {
+                if (chr.getClient() != null && chr.getPosition().distanceSq(reactor.getPosition()) <= getRangedDistance()) {
+                    if (chr.isMapObjectVisible(reactor)) {
+                        triggerChars.add(chr);
+                    } else {
+                        spawnChars.add(chr);
+                    }
+                }
+            }
+        } finally {
+            chrRLock.unlock();
+        }
+
+        for (Character chr : triggerChars) {
+            chr.sendPacket(PacketCreator.triggerReactor(reactor, 0));
+        }
+        for (Character chr : spawnChars) {
+            reactor.sendSpawnData(chr.getClient());
+            chr.addVisibleMapObject(reactor);
         }
     }
 
@@ -3142,7 +3188,7 @@ public class MapleMap {
         if (chr != null) {
             for (MapObject o : getMapObjectsInRange(chr.getPosition(), getRangedDistance(), rangedMapobjectTypes)) {
                 if (o.getType() == MapObjectType.REACTOR) {
-                    if (((Reactor) o).isAlive()) {
+                    if (((Reactor) o).isAlive() && !chr.isMapObjectVisible(o)) {
                         o.sendSpawnData(chr.getClient());
                         chr.addVisibleMapObject(o);
                     }
@@ -3367,8 +3413,10 @@ public class MapleMap {
     private static void updateMapObjectVisibility(Character chr, MapObject mo) {
         if (!chr.isMapObjectVisible(mo)) { // object entered view range
             if (mo.getType() == MapObjectType.SUMMON || mo.getPosition().distanceSq(chr.getPosition()) <= getRangedDistance()) {
-                chr.addVisibleMapObject(mo);
-                mo.sendSpawnData(chr.getClient());
+                if (mo.getType() != MapObjectType.REACTOR || ((Reactor) mo).isAlive()) {
+                    chr.addVisibleMapObject(mo);
+                    mo.sendSpawnData(chr.getClient());
+                }
             }
         } else if (mo.getType() != MapObjectType.SUMMON && mo.getPosition().distanceSq(chr.getPosition()) > getRangedDistance()) {
             chr.removeVisibleMapObject(mo);
@@ -3404,7 +3452,7 @@ public class MapleMap {
         }
 
         for (MapObject mo : getMapObjectsInRange(player.getPosition(), getRangedDistance(), rangedMapobjectTypes)) {
-            if (!player.isMapObjectVisible(mo)) {
+            if (!player.isMapObjectVisible(mo) && (mo.getType() != MapObjectType.REACTOR || ((Reactor) mo).isAlive())) {
                 mo.sendSpawnData(player.getClient());
                 player.addVisibleMapObject(mo);
             }

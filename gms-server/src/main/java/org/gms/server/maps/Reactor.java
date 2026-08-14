@@ -502,7 +502,7 @@ public class Reactor extends AbstractMapObject {
             this.unlockReactor();  // 解锁
         }
 
-        map.broadcastMessage(this.makeSpawnData());  // 广播生成消息
+        map.reactorRespawn(this);  // 按玩家可见状态同步重生,避免重复SPAWN导致客户端残影
     }
 
     /**

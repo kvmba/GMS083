@@ -24,6 +24,7 @@ import org.gms.net.server.Server;
 import org.gms.server.TimerManager;
 import org.gms.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -69,8 +70,9 @@ public abstract class BaseScheduler {
     }
 
     private void runBaseSchedule() {
-        List<Object> toRemove;
-        Map<Object, Pair<Runnable, Long>> registeredEntriesCopy;
+        long timeNow = Server.getInstance().getCurrentTime();
+        List<Object> toRemove = new LinkedList<>();
+        List<Runnable> toRun = new LinkedList<>();
 
         lockScheduler();
         try {
@@ -88,37 +90,28 @@ public abstract class BaseScheduler {
             }
 
             idleProcs = 0;
-            registeredEntriesCopy = new HashMap<>(registeredEntries);
+            // 锁内认领过期条目,与 interruptEntry 竞争时保证每条动作只会被一方执行一次
+            for (Entry<Object, Pair<Runnable, Long>> rmd : new ArrayList<>(registeredEntries.entrySet())) {
+                Pair<Runnable, Long> r = rmd.getValue();
+
+                if (r.getRight() < timeNow) {
+                    if (registeredEntries.remove(rmd.getKey()) != null) {
+                        toRemove.add(rmd.getKey());
+                        toRun.add(r.getLeft());
+                    }
+                }
+            }
         } finally {
             unlockScheduler();
         }
 
-        long timeNow = Server.getInstance().getCurrentTime();
-        toRemove = new LinkedList<>();
-        for (Entry<Object, Pair<Runnable, Long>> rmd : registeredEntriesCopy.entrySet()) {
-            Pair<Runnable, Long> r = rmd.getValue();
-
-            if (r.getRight() < timeNow) {
-                try {
-                    r.getLeft().run();  // runs the scheduled action
-                } finally {
-                    toRemove.add(rmd.getKey());
-                }
-            }
+        for (Runnable r : toRun) {
+            r.run();  // runs the scheduled action
         }
 
         if (!toRemove.isEmpty()) {
-            lockScheduler();
-            try {
-                for (Object o : toRemove) {
-                    registeredEntries.remove(o);
-                }
-            } finally {
-                unlockScheduler();
-            }
+            dispatchRemovedEntries(toRemove, true);
         }
-
-        dispatchRemovedEntries(toRemove, true);
     }
 
     protected void registerEntry(Object key, Runnable removalAction, long duration) {
