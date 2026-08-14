@@ -53,9 +53,9 @@ function start(mode, type, selection)
 		}
 		else if (status == 3)
 		{
-			if (qm.getLevel() < 40)
+			if (qm.getLevel() < 39)
 			{
-				qm.sendOk("还是等你40级以后再去吧，你现在去会死翘翘的。");
+				qm.sendOk("还是等你39级以后再去吧，你现在去会死翘翘的。");
 				qm.dispose();
 			}
 			else if(qm.getMapId() == 300000012) {
