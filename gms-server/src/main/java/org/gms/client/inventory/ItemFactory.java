@@ -21,6 +21,7 @@
 package org.gms.client.inventory;
 
 import org.gms.util.DatabaseConnection;
+import org.gms.server.ItemInformationProvider;
 import org.gms.util.Pair;
 
 import java.sql.Connection;
@@ -100,6 +101,8 @@ public enum ItemFactory {
 
     private static Equip loadEquipFromResultSet(ResultSet rs) throws SQLException {
         Equip equip = new Equip(rs.getInt("itemid"), (short) rs.getInt("position"));
+        Pair<Integer, Map<Integer, Integer>> skillBonus = ItemInformationProvider.getInstance().getEquipSkillBonus(rs.getInt("itemid"));
+        equip.setSkillBonus(skillBonus.getRight(), skillBonus.getLeft());
         equip.setOwner(rs.getString("owner"));
         equip.setQuantity((short) rs.getInt("quantity"));
         equip.setAcc((short) rs.getInt("acc"));

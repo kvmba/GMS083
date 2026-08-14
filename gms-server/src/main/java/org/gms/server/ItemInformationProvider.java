@@ -132,6 +132,7 @@ public class ItemInformationProvider {
     protected Map<Integer, MakerItemFactory.MakerItemCreateEntry> makerItemCache = new HashMap<>();
     protected Map<Integer, Integer> makerCatalystCache = new HashMap<>();
     protected Map<Integer, Map<String, Integer>> skillUpgradeCache = new HashMap<>();
+    protected Map<Integer, Pair<Integer, Map<Integer, Integer>>> equipSkillBonusCache = new HashMap<>();
     protected Map<Integer, Data> skillUpgradeInfoCache = new HashMap<>();
     protected Map<Integer, Pair<Integer, Set<Integer>>> cashPetFoodCache = new HashMap<>();
     protected Map<Integer, QuestConsItem> questItemConsCache = new HashMap<>();
@@ -1205,6 +1206,8 @@ public class ItemInformationProvider {
         Equip nEquip;
         nEquip = new Equip(equipId, (byte) 0, ringId);
         nEquip.setQuantity((short) 1);
+        Pair<Integer, Map<Integer, Integer>> skillBonus = getEquipSkillBonus(equipId);
+        nEquip.setSkillBonus(skillBonus.getRight(), skillBonus.getLeft());
         Map<String, Integer> stats = this.getEquipStats(equipId);
         if (stats != null) {
             for (Entry<String, Integer> stat : stats.entrySet()) {
@@ -1971,6 +1974,43 @@ public class ItemInformationProvider {
         }
 
         return eqLevel;
+    }
+
+    /**
+     * 读取永恒/重生类装备的技能加成(case/Skill 节点),返回 (触发装备等级, 技能id->加成等级)。
+     * 结果按物品缓存。
+     */
+    public Pair<Integer, Map<Integer, Integer>> getEquipSkillBonus(int itemId) {
+        Pair<Integer, Map<Integer, Integer>> cached = equipSkillBonusCache.get(itemId);
+        if (cached != null) {
+            return cached;
+        }
+
+        Pair<Integer, Map<Integer, Integer>> ret = new Pair<>(Integer.MAX_VALUE, new HashMap<>());
+        Data item = getItemData(itemId);
+        if (item != null) {
+            Data info = item.getChildByPath("info");
+            Data level = info != null ? info.getChildByPath("level") : null;
+            Data caseData = level != null ? level.getChildByPath("case") : null;
+            if (caseData != null) {
+                for (Data caseEntry : caseData) {
+                    for (Data lvNode : caseEntry) {
+                        Data skillData = lvNode.getChildByPath("Skill");
+                        if (skillData != null) {
+                            int requireLevel = Integer.parseInt(lvNode.getName());
+                            Map<Integer, Integer> bonuses = new HashMap<>();
+                            for (Data skillEntry : skillData) {
+                                bonuses.put(DataTool.getInt("id", skillEntry, 0), DataTool.getInt("level", skillEntry, 0));
+                            }
+                            ret = new Pair<>(requireLevel, bonuses);
+                        }
+                    }
+                }
+            }
+        }
+
+        equipSkillBonusCache.put(itemId, ret);
+        return ret;
     }
 
     public List<Pair<String, Integer>> getItemLevelupStats(int itemId, int level) {

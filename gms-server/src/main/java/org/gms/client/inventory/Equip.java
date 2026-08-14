@@ -79,6 +79,9 @@ public class Equip extends Item {
     private int ringid = -1;
     private boolean wear = false;
     private boolean isUpgradeable, isElemental = false;    // timeless or reverse, or any equip that could levelup on GMS for all effects
+    // 永恒/重生类装备的技能加成(技能id -> 加成等级),装备等级达到 skillBonusRequireLevel 后生效
+    private Map<Integer, Integer> skillBonus = new HashMap<>();
+    private int skillBonusRequireLevel = Integer.MAX_VALUE;
     private static ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
     public Equip(int id, short position) {
@@ -117,6 +120,8 @@ public class Equip extends Item {
         ret.upgradeSlots = upgradeSlots;
         ret.itemLevel = itemLevel;
         ret.itemExp = itemExp;
+        ret.skillBonus = new HashMap<>(skillBonus);
+        ret.skillBonusRequireLevel = skillBonusRequireLevel;
         ret.level = level;
         ret.itemLog = new LinkedList<>(itemLog);
         ret.setOwner(getOwner());
@@ -763,6 +768,25 @@ public class Equip extends Item {
 
     public void setItemLevel(byte level) {
         this.itemLevel = level;
+    }
+
+    /**
+     * 设置装备的技能加成数据(来自WZ的 case/Skill 节点)
+     */
+    public void setSkillBonus(Map<Integer, Integer> skillBonus, int requireLevel) {
+        this.skillBonus = skillBonus;
+        this.skillBonusRequireLevel = requireLevel;
+    }
+
+    public Map<Integer, Integer> getSkillBonus() {
+        return skillBonus;
+    }
+
+    /**
+     * 装备等级达到要求后技能加成生效
+     */
+    public boolean hasActiveSkillBonus() {
+        return itemLevel >= skillBonusRequireLevel && !skillBonus.isEmpty();
     }
 
     @Override

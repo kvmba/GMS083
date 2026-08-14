@@ -2689,7 +2689,11 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
+    // 装备技能加成缓存(永恒/重生类装备),null 表示需要重算
+    private volatile Map<Integer, Integer> skillBonusFromEquips = null;
+
     public void equipChanged() {
+        skillBonusFromEquips = null;   // 装备变更,技能加成缓存失效
         getMap().broadcastUpdateCharLookMessage(this, this);
         equipchanged = true;
         updateLocalStats();
@@ -5434,18 +5438,45 @@ public class Character extends AbstractCharacterObject {
     }
 
     public int getSkillLevel(int skill) {
-        SkillEntry ret = skills.get(SkillFactory.getSkill(skill));
-        if (ret == null) {
+        Skill sk = SkillFactory.getSkill(skill);
+        SkillEntry ret = skills.get(sk);
+        if (ret == null || sk == null) {
             return 0;
         }
-        return ret.skillLevel;
+        int bonus = getEquipSkillBonus().getOrDefault(skill, 0);
+        if (bonus == 0) {
+            return ret.skillLevel;
+        }
+        return Math.min(ret.skillLevel + bonus, sk.getMaxLevel());
     }
 
     public byte getSkillLevel(Skill skill) {
         if (skills.get(skill) == null) {
             return 0;
         }
-        return skills.get(skill).skillLevel;
+        byte base = skills.get(skill).skillLevel;
+        int bonus = getEquipSkillBonus().getOrDefault(skill.getId(), 0);
+        if (bonus == 0) {
+            return base;
+        }
+        return (byte) Math.min(base + bonus, skill.getMaxLevel());
+    }
+
+    /**
+     * 装备技能加成(永恒/重生类),按需计算并缓存,equipChanged 时失效
+     */
+    private Map<Integer, Integer> getEquipSkillBonus() {
+        Map<Integer, Integer> bonus = skillBonusFromEquips;
+        if (bonus == null) {
+            bonus = new HashMap<>();
+            for (Item item : getInventory(InventoryType.EQUIPPED).list()) {
+                if (item instanceof Equip equip && equip.hasActiveSkillBonus()) {
+                    equip.getSkillBonus().forEach((skillId, lv) -> bonus.merge(skillId, lv, Integer::sum));
+                }
+            }
+            skillBonusFromEquips = bonus;
+        }
+        return bonus;
     }
 
     public long getSkillExpiration(int skill) {
