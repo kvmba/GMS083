@@ -44,7 +44,7 @@ function action(mode, type, selection) {
         }
 
         if (status == 0) {
-"You don't belong to this world... Return now."
+"你不属于这个世界。。。马上回来。"
         } else if (status == 1) {
             cm.warp(220080000);
             cm.dispose();

@@ -28,7 +28,7 @@ function action(mode, type, selection) {
             if (cm.isQuestStarted(21747) && cm.getQuestProgressInt(21747, 9300351) == 0) {
                 cm.warp(925040100, 0);
             } else {
-                cm.playerMessage(5, "Although you said the right answer, some mysterious forces are blocking the way in.");
+                cm.playerMessage(5, "尽管你说出了正确答案，但某种神秘的力量挡住了道路。");
             }
 
             cm.dispose();
