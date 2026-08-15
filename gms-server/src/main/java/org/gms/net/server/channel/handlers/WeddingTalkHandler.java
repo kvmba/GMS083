@@ -47,7 +47,8 @@ public final class WeddingTalkHandler extends AbstractPacketHandler {
             }
         } else {
             // 无负载:宾客祝福(TALK_MORE),非新人将祝福计入爱的积分
-            if (!isGroomOrBride) {
+            // 玩家不在婚礼事件中(eim 为 null)时直接忽略,避免 NPE
+            if (eim != null && !isGroomOrBride) {
                 eim.gridInsert(c.getPlayer(), 1);
                 c.getPlayer().dropMessage(5, "约翰大祭司：你的祝福已融入他们的爱中。对这对可爱的夫妇来说，这是多么高尚的举动！");
             }
