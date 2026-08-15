@@ -52,14 +52,22 @@ import static org.gms.dao.entity.table.BbsThreadsDOTableDef.BBS_THREADS_D_O;
 import static org.gms.dao.entity.table.BuddiesDOTableDef.BUDDIES_D_O;
 import static org.gms.dao.entity.table.CharactersDOTableDef.CHARACTERS_D_O;
 import static org.gms.dao.entity.table.CooldownsDOTableDef.COOLDOWNS_D_O;
+import static org.gms.dao.entity.table.DueyitemsDOTableDef.DUEYITEMS_D_O;
+import static org.gms.dao.entity.table.DueypackagesDOTableDef.DUEYPACKAGES_D_O;
 import static org.gms.dao.entity.table.EventstatsDOTableDef.EVENTSTATS_D_O;
 import static org.gms.dao.entity.table.ExtendValueDOTableDef.EXTEND_VALUE_D_O;
 import static org.gms.dao.entity.table.FamelogDOTableDef.FAMELOG_D_O;
 import static org.gms.dao.entity.table.FamilyCharacterDOTableDef.FAMILY_CHARACTER_D_O;
 import static org.gms.dao.entity.table.FredstorageDOTableDef.FREDSTORAGE_D_O;
+import static org.gms.dao.entity.table.GiftsDOTableDef.GIFTS_D_O;
 import static org.gms.dao.entity.table.KeymapDOTableDef.KEYMAP_D_O;
+import static org.gms.dao.entity.table.MarriagesDOTableDef.MARRIAGES_D_O;
 import static org.gms.dao.entity.table.MonsterbookDOTableDef.MONSTERBOOK_D_O;
+import static org.gms.dao.entity.table.NotesDOTableDef.NOTES_D_O;
 import static org.gms.dao.entity.table.PlayerdiseasesDOTableDef.PLAYERDISEASES_D_O;
+import static org.gms.dao.entity.table.PlayernpcsDOTableDef.PLAYERNPCS_D_O;
+import static org.gms.dao.entity.table.PlayernpcsEquipDOTableDef.PLAYERNPCS_EQUIP_D_O;
+import static org.gms.dao.entity.table.ReportsDOTableDef.REPORTS_D_O;
 import static org.gms.dao.entity.table.SavedlocationsDOTableDef.SAVEDLOCATIONS_D_O;
 import static org.gms.dao.entity.table.ServerQueueDOTableDef.SERVER_QUEUE_D_O;
 import static org.gms.dao.entity.table.SkillmacrosDOTableDef.SKILLMACROS_D_O;
@@ -109,6 +117,14 @@ public class CharacterService {
     private final HwidaccountsMapper hwidaccountsMapper;
     private final IpbansMapper ipbansMapper;
     private final MacbansMapper macbansMapper;
+    private final PlayernpcsMapper playernpcsMapper;
+    private final PlayernpcsEquipMapper playernpcsEquipMapper;
+    private final DueypackagesMapper dueypackagesMapper;
+    private final DueyitemsMapper dueyitemsMapper;
+    private final ReportsMapper reportsMapper;
+    private final GiftsMapper giftsMapper;
+    private final MarriagesMapper marriagesMapper;
+    private final NotesMapper notesMapper;
 
     public CharactersDO findById(int id) {
         return charactersMapper.selectOneById(id);
@@ -354,104 +370,37 @@ public class CharacterService {
         nameChangeService.cancelPendingNameChange(cid, false);
         worldTransferService.cancelPendingWorldTransfer(cid, false);
 
-        // 删除玩家NPC(playernpcs 按角色名关联)
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT id FROM playernpcs WHERE name = ?")) {
-            ps.setString(1, charactersDO.getName());
-            List<Integer> playerNpcIds = new ArrayList<>();
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    playerNpcIds.add(rs.getInt("id"));
-                }
-            }
-            if (!playerNpcIds.isEmpty()) {
-                StringBuilder inClause = new StringBuilder();
-                for (int i = 0; i < playerNpcIds.size(); i++) {
-                    inClause.append(i == 0 ? "?" : ", ?");
-                }
-                try (PreparedStatement psEquip = con.prepareStatement("DELETE FROM playernpcs_equip WHERE npcid IN (" + inClause + ")")) {
-                    for (int i = 0; i < playerNpcIds.size(); i++) {
-                        psEquip.setInt(i + 1, playerNpcIds.get(i));
-                    }
-                    psEquip.executeUpdate();
-                }
-                try (PreparedStatement psNpc = con.prepareStatement("DELETE FROM playernpcs WHERE id IN (" + inClause + ")")) {
-                    for (int i = 0; i < playerNpcIds.size(); i++) {
-                        psNpc.setInt(i + 1, playerNpcIds.get(i));
-                    }
-                    psNpc.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            log.error("删除 playernpcs 失败, cid={}", cid, e);
+        // 删除玩家NPC(playernpcs 按角色名关联),走 mapper 纳入当前事务,避免独立连接绕过回滚
+        List<PlayernpcsDO> playerNpcs = playernpcsMapper.selectListByQuery(
+                QueryWrapper.create().where(PLAYERNPCS_D_O.NAME.eq(charactersDO.getName())));
+        if (!playerNpcs.isEmpty()) {
+            List<Integer> playerNpcIds = playerNpcs.stream().map(PlayernpcsDO::getId).toList();
+            playernpcsEquipMapper.deleteByQuery(QueryWrapper.create().where(PLAYERNPCS_EQUIP_D_O.NPCID.in(playerNpcIds)));
+            playernpcsMapper.deleteByQuery(QueryWrapper.create().where(PLAYERNPCS_D_O.ID.in(playerNpcIds)));
         }
         // 删除快递(duey):先删收件/发件包裹的物品,再删包裹
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT PackageId FROM dueypackages WHERE ReceiverId = ? OR SenderName = ?")) {
-            ps.setInt(1, cid);
-            ps.setString(2, charactersDO.getName());
-            List<Integer> packageIds = new ArrayList<>();
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    packageIds.add(rs.getInt("PackageId"));
-                }
-            }
-            if (!packageIds.isEmpty()) {
-                StringBuilder inClause = new StringBuilder();
-                for (int i = 0; i < packageIds.size(); i++) {
-                    inClause.append(i == 0 ? "?" : ", ?");
-                }
-                try (PreparedStatement psItems = con.prepareStatement("DELETE FROM dueyitems WHERE PackageId IN (" + inClause + ")")) {
-                    for (int i = 0; i < packageIds.size(); i++) {
-                        psItems.setInt(i + 1, packageIds.get(i));
-                    }
-                    psItems.executeUpdate();
-                }
-                try (PreparedStatement psPkg = con.prepareStatement("DELETE FROM dueypackages WHERE PackageId IN (" + inClause + ")")) {
-                    for (int i = 0; i < packageIds.size(); i++) {
-                        psPkg.setInt(i + 1, packageIds.get(i));
-                    }
-                    psPkg.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            log.error("删除 duey 快递失败, cid={}", cid, e);
+        List<DueypackagesDO> dueyPackages = dueypackagesMapper.selectListByQuery(QueryWrapper.create()
+                .where(DUEYPACKAGES_D_O.RECEIVERID.eq(cid))
+                .or(DUEYPACKAGES_D_O.SENDERNAME.eq(charactersDO.getName())));
+        if (!dueyPackages.isEmpty()) {
+            List<Long> packageIds = dueyPackages.stream().map(DueypackagesDO::getPackageid).toList();
+            dueyitemsMapper.deleteByQuery(QueryWrapper.create().where(DUEYITEMS_D_O.PACKAGEID.in(packageIds)));
+            dueypackagesMapper.deleteByQuery(QueryWrapper.create().where(DUEYPACKAGES_D_O.PACKAGEID.in(packageIds)));
         }
         // 删除举报记录
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("DELETE FROM reports WHERE reporterid = ? OR victimid = ?")) {
-            ps.setInt(1, cid);
-            ps.setInt(2, cid);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("删除 reports 失败, cid={}", cid, e);
-        }
+        reportsMapper.deleteByQuery(QueryWrapper.create()
+                .where(REPORTS_D_O.REPORTERID.eq(cid))
+                .or(REPORTS_D_O.VICTIMID.eq(cid)));
         // 删除礼物记录
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("DELETE FROM gifts WHERE `to` = ?")) {
-            ps.setInt(1, cid);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("删除 gifts 失败, cid={}", cid, e);
-        }
+        giftsMapper.deleteByQuery(QueryWrapper.create().where(GIFTS_D_O.TO.eq(cid)));
         // 删除婚姻记录(双向)
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("DELETE FROM marriages WHERE husbandid = ? OR wifeid = ?")) {
-            ps.setInt(1, cid);
-            ps.setInt(2, cid);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("删除 marriages 失败, cid={}", cid, e);
-        }
+        marriagesMapper.deleteByQuery(QueryWrapper.create()
+                .where(MARRIAGES_D_O.HUSBANDID.eq(cid))
+                .or(MARRIAGES_D_O.WIFEID.eq(cid)));
         // 删除信件
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("DELETE FROM notes WHERE `to` = ? OR `from` = ?")) {
-            ps.setString(1, charactersDO.getName());
-            ps.setString(2, charactersDO.getName());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("删除 notes 失败, cid={}", cid, e);
-        }
+        notesMapper.deleteByQuery(QueryWrapper.create()
+                .where(NOTES_D_O.TO.eq(charactersDO.getName()))
+                .or(NOTES_D_O.FROM.eq(charactersDO.getName())));
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
