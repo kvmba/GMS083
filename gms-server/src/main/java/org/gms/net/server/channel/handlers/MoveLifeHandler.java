@@ -33,8 +33,6 @@ import org.gms.server.life.MobSkillId;
 import org.gms.server.life.MobSkillType;
 import org.gms.server.life.Monster;
 import org.gms.server.life.MonsterInformationProvider;
-import org.gms.server.maps.AbstractMapObject;
-import org.gms.server.maps.AnimatedMapObject;
 import org.gms.server.maps.MapObject;
 import org.gms.server.maps.MapObjectType;
 import org.gms.server.maps.MapleMap;
@@ -65,12 +63,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         int objectid = p.readInt();
         short moveid = p.readShort();
         MapObject mmo = map.getMapObject(objectid);
-        if (mmo == null) {
-            // 怪物已死亡移出地图,但延迟掉落尚未生成:继续跟踪客户端发送的最新坐标,用于修正实际掉落位置
-            updateDeadMonsterPosition(map, objectid, p);
-            return;
-        }
-        if (mmo.getType() != MapObjectType.MONSTER) {
+        if (mmo == null || mmo.getType() != MapObjectType.MONSTER) {
             return;
         }
 
@@ -188,64 +181,5 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
 
     private static boolean inRangeInclusive(Byte pVal, Integer pMin, Integer pMax) {
         return !(pVal < pMin) || (pVal > pMax);
-    }
-
-    private void updateDeadMonsterPosition(MapleMap map, int objectid, InPacket p) {
-        Point basePos = map.getMonsterLootPosition(objectid);
-        if (basePos == null) {
-            return;
-        }
-
-        p.readByte(); // pNibbles
-        p.readByte(); // rawActivity
-        p.readByte(); // skillId
-        p.readByte(); // skillLv
-        p.readShort(); // pOption
-        p.skip(8);
-        p.readByte();
-        p.readInt();
-        p.readShort(); // start x
-        p.readShort(); // start y
-
-        try {
-            DeadMonsterPositionTracker tracker = new DeadMonsterPositionTracker();
-            tracker.setPosition(basePos);
-            updatePosition(p, tracker, -2);
-            map.updateMonsterLootPosition(objectid, tracker.getPosition());
-        } catch (EmptyMovementException e) {
-            log.warn("解析死亡怪物[{}]移动包失败,掉落位置不做修正", objectid, e);
-        }
-    }
-
-    private static class DeadMonsterPositionTracker extends AbstractMapObject implements AnimatedMapObject {
-        private int stance;
-
-        @Override
-        public MapObjectType getType() {
-            return MapObjectType.MONSTER;
-        }
-
-        @Override
-        public int getStance() {
-            return stance;
-        }
-
-        @Override
-        public void setStance(int stance) {
-            this.stance = stance;
-        }
-
-        @Override
-        public boolean isFacingLeft() {
-            return true;
-        }
-
-        @Override
-        public void sendSpawnData(Client client) {
-        }
-
-        @Override
-        public void sendDestroyData(Client client) {
-        }
     }
 }

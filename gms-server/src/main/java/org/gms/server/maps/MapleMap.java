@@ -984,40 +984,12 @@ public class MapleMap {
             try {
                 long timeNow = Server.getInstance().getCurrentTime();
                 //mobLootEntries.put(mle, timeNow + ((long) (0.42 * animationTime)));
-                mobLootEntries.put(mle, timeNow + ((long) (animationTime + 400)));
+                mobLootEntries.put(mle, timeNow + ((long) (animationTime + 300)));
             } finally {
                 lootLock.unlock();
             }
         } else {
             mle.run();
-        }
-    }
-
-    public Point getMonsterLootPosition(int mobOid) {
-        lootLock.lock();
-        try {
-            for (MobLootEntry mle : mobLootEntries.keySet()) {
-                if (mle.mob != null && mle.mob.getObjectId() == mobOid) {
-                    return mle.mob.getPosition();
-                }
-            }
-        } finally {
-            lootLock.unlock();
-        }
-        return null;
-    }
-
-    public void updateMonsterLootPosition(int mobOid, Point latestPos) {
-        lootLock.lock();
-        try {
-            for (MobLootEntry mle : mobLootEntries.keySet()) {
-                if (mle.mob != null && mle.mob.getObjectId() == mobOid) {
-                    mle.mob.setPosition(latestPos);
-                    return;
-                }
-            }
-        } finally {
-            lootLock.unlock();
         }
     }
 
@@ -3724,32 +3696,15 @@ public class MapleMap {
         public void run() {
             byte d = 1;
 
-            // 死亡动画期间客户端仍会持续发送怪物坐标,按最后接收到的坐标与死亡判定位置的差值的一半修正实际掉落位置
-            // (在途路径段会让最后坐标超前于实际死亡表现位置,取一半折中)
-            int dx;
-            int dy;
-            lootLock.lock();
-            try {
-                Point latestPos = mob.getPosition();
-                dx = (latestPos.x - mobpos) / 2;
-                dy = (latestPos.y - pos.y) / 2;
-                // 同步怪物坐标到半偏移中心,保证掉落物出现点(源点)与落点中心一致
-                mob.setPosition(new Point(mobpos + dx, pos.y + dy));
-            } finally {
-                lootLock.unlock();
-            }
-            int shiftedMobpos = mobpos + dx;
-            Point shiftedPos = new Point(pos.x + dx, pos.y + dy);
-
             // Normal Drops
-            d = dropItemsFromMonsterOnMap(dropEntry, shiftedPos, d, chRate, droptype, shiftedMobpos, chr, mob);
+            d = dropItemsFromMonsterOnMap(dropEntry, pos, d, chRate, droptype, mobpos, chr, mob);
 
             // Global Drops
-            d = dropGlobalItemsFromMonsterOnMap(globalEntry, shiftedPos, d, droptype, shiftedMobpos, chr, mob);
+            d = dropGlobalItemsFromMonsterOnMap(globalEntry, pos, d, droptype, mobpos, chr, mob);
 
             // Quest Drops
-            d = dropItemsFromMonsterOnMap(visibleQuestEntry, shiftedPos, d, chRate, droptype, shiftedMobpos, chr, mob);
-            dropItemsFromMonsterOnMap(otherQuestEntry, shiftedPos, d, chRate, droptype, shiftedMobpos, chr, mob);
+            d = dropItemsFromMonsterOnMap(visibleQuestEntry, pos, d, chRate, droptype, mobpos, chr, mob);
+            dropItemsFromMonsterOnMap(otherQuestEntry, pos, d, chRate, droptype, mobpos, chr, mob);
         }
     }
 
