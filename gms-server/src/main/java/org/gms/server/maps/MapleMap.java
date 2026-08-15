@@ -3724,14 +3724,15 @@ public class MapleMap {
         public void run() {
             byte d = 1;
 
-            // 死亡动画期间客户端仍会持续发送怪物坐标,按最后接收到的坐标与死亡判定位置的差值修正实际掉落位置
+            // 死亡动画期间客户端仍会持续发送怪物坐标,按最后接收到的坐标与死亡判定位置的差值的一半修正实际掉落位置
+            // (在途路径段会让最后坐标超前于实际死亡表现位置,取一半折中)
             int dx;
             int dy;
             lootLock.lock();
             try {
                 Point latestPos = mob.getPosition();
-                dx = latestPos.x - mobpos;
-                dy = latestPos.y - pos.y;
+                dx = (latestPos.x - mobpos) / 2;
+                dy = (latestPos.y - pos.y) / 2;
             } finally {
                 lootLock.unlock();
             }
