@@ -738,7 +738,7 @@ public class MapleMap {
     }
 
     private void dropFromMonster(final Character chr, final Monster mob, final boolean useBaseRate) {
-        if (mob.dropsDisabled() || !dropsOn) {
+        if (mob.dropsDisabled() || mob.isNoOwnDrop() || !dropsOn) {
             return;
         }
 
@@ -778,7 +778,7 @@ public class MapleMap {
     }
 
     public void dropItemsFromMonster(List<MonsterDropEntry> list, final Character chr, final Monster mob) {
-        if (mob.dropsDisabled() || !dropsOn) {
+        if (mob.dropsDisabled() || mob.isNoOwnDrop() || !dropsOn) {
             return;
         }
 

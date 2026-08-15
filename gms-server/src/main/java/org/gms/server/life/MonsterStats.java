@@ -62,6 +62,7 @@ public class MonsterStats {
     public int bboxMaxX = 0;
     public int bboxMaxY = 0;
     public boolean bboxValid = false;
+    public boolean noOwnDrop = false;
 
     public void setChange(boolean change) {
         this.changeable = change;
@@ -330,6 +331,14 @@ public class MonsterStats {
 
     public void setFriendly(boolean value) {
         this.friendly = value;
+    }
+
+    public boolean isNoOwnDrop() {
+        return noOwnDrop;
+    }
+
+    public void setNoOwnDrop(boolean noOwnDrop) {
+        this.noOwnDrop = noOwnDrop;
     }
 
     public void setPDDamage(int PDDamage) {
