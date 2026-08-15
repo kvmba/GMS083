@@ -218,7 +218,7 @@ public class CharacterService {
                     .from(CHARACTERS_D_O)
                     .leftJoin(ACCOUNTS_D_O).on(CHARACTERS_D_O.ACCOUNTID.eq(ACCOUNTS_D_O.ID))
                     .where(CHARACTERS_D_O.GM.lt(2))
-                    .and(ACCOUNTS_D_O.BANNED.eq(0)).and(ACCOUNTS_D_O.TEMPBAN.isNull())
+                    .and(ACCOUNTS_D_O.BANNED.eq(0)).and(ACCOUNTS_D_O.TEMPBAN.isNull().or(ACCOUNTS_D_O.TEMPBAN.le(now())))
                     .and(CHARACTERS_D_O.WORLD.between(0, worldSize - 1))
                     .orderBy(CHARACTERS_D_O.WORLD.asc(), CHARACTERS_D_O.LEVEL.desc(), CHARACTERS_D_O.EXP.desc(), CHARACTERS_D_O.LAST_EXP_GAIN_TIME.asc())
                     .limit(50);
@@ -240,7 +240,7 @@ public class CharacterService {
                 .from(CHARACTERS_D_O)
                 .leftJoin(ACCOUNTS_D_O).on(CHARACTERS_D_O.ACCOUNTID.eq(ACCOUNTS_D_O.ID))
                 .where(CHARACTERS_D_O.GM.lt(2))
-                .and(ACCOUNTS_D_O.BANNED.eq(0)).and(ACCOUNTS_D_O.TEMPBAN.isNull())
+                .and(ACCOUNTS_D_O.BANNED.eq(0)).and(ACCOUNTS_D_O.TEMPBAN.isNull().or(ACCOUNTS_D_O.TEMPBAN.le(now())))
                 .and(CHARACTERS_D_O.WORLD.eq(worldId))
                 .orderBy(CHARACTERS_D_O.LEVEL.desc(), CHARACTERS_D_O.EXP.desc(), CHARACTERS_D_O.LAST_EXP_GAIN_TIME.asc())
                 .limit(50);
