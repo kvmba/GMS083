@@ -984,7 +984,7 @@ public class MapleMap {
             try {
                 long timeNow = Server.getInstance().getCurrentTime();
                 //mobLootEntries.put(mle, timeNow + ((long) (0.42 * animationTime)));
-                mobLootEntries.put(mle, timeNow + ((long) (animationTime + 300)));
+                mobLootEntries.put(mle, timeNow + ((long) (animationTime + 200)));
             } finally {
                 lootLock.unlock();
             }
