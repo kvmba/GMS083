@@ -54,7 +54,7 @@ function action(mode, type, selection) {
                 rankStr += "\r\n    " + branchJobName + "职业排名: #e#b第" + rankNum(pnpc.getOverallJobRank()) + "位#k#n";
                 rankStr += "\r\n    总排名: #e#b第" + rankNum(pnpc.getOverallRank()) + "位#k#n";
 
-                cm.sendOk("排名字符串");
+                cm.sendOk(rankStr);
             } else {
                 cm.sendOk("你好，你好吗？");
             }
