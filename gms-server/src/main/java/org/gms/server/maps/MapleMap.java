@@ -3733,6 +3733,8 @@ public class MapleMap {
                 Point latestPos = mob.getPosition();
                 dx = (latestPos.x - mobpos) / 2;
                 dy = (latestPos.y - pos.y) / 2;
+                // 同步怪物坐标到半偏移中心,保证掉落物出现点(源点)与落点中心一致
+                mob.setPosition(new Point(mobpos + dx, pos.y + dy));
             } finally {
                 lootLock.unlock();
             }
