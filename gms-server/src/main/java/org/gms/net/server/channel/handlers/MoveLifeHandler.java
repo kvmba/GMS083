@@ -239,5 +239,13 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         public boolean isFacingLeft() {
             return true;
         }
+
+        @Override
+        public void sendSpawnData(Client client) {
+        }
+
+        @Override
+        public void sendDestroyData(Client client) {
+        }
     }
 }
