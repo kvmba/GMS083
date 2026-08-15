@@ -44,7 +44,7 @@
         <a-table-column title="物品ID" :width="100" align="center">
           <template #cell="{ record }">
             <span v-if="editId !== record.id"> {{ record.itemId }}</span>
-            <a-input v-else v-model="record.itemName" />
+            <a-input-number v-else v-model="record.itemId" :min="0" />
           </template>
         </a-table-column>
         <a-table-column title="物品名称" :width="140" align="center">
