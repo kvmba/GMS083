@@ -5,3 +5,6 @@ logs
 src/main/resources/static
 docker-db-data
 .idea
+# Docker 构建产物（外部配置文件与可执行 jar，仅忽略 server 根目录）
+/BeiDou.jar
+/application.yml
