@@ -1,23 +1,23 @@
 server:
-  port: 8686
+  port: ${SERVER_PORT:8686}
 
 app:
-  vue: http://localhost:8787
-  
+  vue: ${APP_VUE_URL:http://localhost:8787}
+
 jwt:
   # secret 生产环境必须通过环境变量 JWT_SECRET 注入,避免使用仓库默认值
-  secret: "${JWT_SECRET:81a5cd39-c4a1-f8a2-1832-a32e5d85c470}"
+  secret: "${JWT_SECRET:please-change-me-in-production}"
   # token 过期时间（毫秒）默认 30min
-  duration: 1800000
+  duration: ${JWT_DURATION:1800000}
 
 mybatis-flex:
   datasource:
     mysql:
       type: com.alibaba.druid.pool.DruidDataSource
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/beidou?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=5000
-      username: root
-      password: root
+      url: "${DB_URL:jdbc:mysql://localhost:3306/beidou?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=5000}"
+      username: ${DB_USERNAME:root}
+      password: ${DB_PASSWORD:root}
   global-config:
     print-banner: false
 
@@ -26,10 +26,10 @@ springdoc:
   # 生产环境需要关闭这2个参数
   api-docs:
     # 是否开启OpenApi，如果为false，则SwaggerUI也会被禁用
-    enabled: false
+    enabled: ${SWAGGER_ENABLED:false}
   swagger-ui:
     # 是否开启SwaggerUI，依赖OpenApi的开启
-    enabled: false
+    enabled: ${SWAGGER_ENABLED:false}
 
 spring:
   flyway:
@@ -40,8 +40,8 @@ spring:
   servlet:
     # 默认文件大小就是这里设置的，按需修改
     multipart:
-      max-file-size: 1MB
-      max-request-size: 10MB
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE:1MB}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:10MB}
   jackson:
     time-zone: Asia/Shanghai
     date-format: yyyy-MM-dd HH:mm:ss
@@ -49,21 +49,21 @@ spring:
 gms:
   service:
     # zh-CN en-US
-    language: zh-CN
+    language: ${GMS_LANGUAGE:zh-CN}
     rate-limit:
       # 是否开启限流
-      enabled: false
+      enabled: ${RATE_LIMIT_ENABLED:false}
       # 每ip多少时间内最大请求数
-      limit: 10
+      limit: ${RATE_LIMIT_LIMIT:10}
       # 每ip最大请求数多少时间重置，单位ms
-      duration: 1000
+      duration: ${RATE_LIMIT_DURATION:1000}
       # 是否自动封禁
-      auto-ban: false
+      auto-ban: ${RATE_LIMIT_AUTO_BAN:false}
     # 公网ip
-    wan-host: 127.0.0.1
+    wan-host: ${GMS_WAN_HOST:127.0.0.1}
     # 局域网ip
-    lan-host: 127.0.0.1
+    lan-host: ${GMS_LAN_HOST:127.0.0.1}
     # 本地ip
-    localhost: 127.0.0.1
+    localhost: ${GMS_LOCALHOST:127.0.0.1}
     # 客户端登录端口
-    login-port: 8484
+    login-port: ${GMS_LOGIN_PORT:8484}
