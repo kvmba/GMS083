@@ -19,15 +19,16 @@ cp .env.example .env
 ### 构建并启动（自动拉取远端最新代码）
 
 ```bash
-./docker/build.sh
-docker compose up -d
+git pull && GIT_COMMIT_SHA=$(git rev-parse HEAD) docker compose up -d --build
 ```
 
-`docker/build.sh` 会先通过 `git ls-remote` 获取远端最新提交 SHA，作为 `GIT_COMMIT_SHA` build arg 传入；
-该 SHA 是缓存失效键——**只要远端有新提交，编译阶段必然重新拉取并全量编译**，不会因构建上下文未变化而走旧缓存。
+一条命令完成。原理：
 
-> 直连方式编译不强制走缓存：只有远端有更新时才会重新拉取编译，否则复用缓存直接启动。
-> 如需构建指定分支：`GIT_BRANCH=bugfix/xxx ./docker/build.sh`
+1. `git pull` 先更新构建机本地 checkout——`COPY . .` 层的输入变了，后续编译层缓存全部失效；
+2. `GIT_COMMIT_SHA` 以环境变量传入 compose（优先级高于 `.env`），Dockerfile 里 `git fetch` + `git checkout <该提交>`，保证容器内代码与远端完全一致；
+3. 之后 `yarn build` → `mvn package` 全量编译，结果必然是最新分支代码。
+
+> 远端有新提交而构建机本地没更新时，`COPY` 层不会变化、后面会走旧缓存——所以第 1 步的 `git pull` 是必须的，不能省。
 
 `docker compose build` 阶段会自动完成：
 
@@ -38,7 +39,7 @@ docker compose up -d
 5. 把 `target/BeiDou.jar` 复制为镜像内 `/app/BeiDou.jar`；
 6. 把 `docker/application.docker.yml` 复制为镜像内 `/app/application.yml`。
 
-> 注意：请使用 `./docker/build.sh` 构建；直接 `docker compose build` 缺少 `GIT_COMMIT_SHA` 会构建失败，这是有意为之（避免静默走缓存构建旧代码）。
+> 注意：直接 `docker compose build`（不带 `GIT_COMMIT_SHA`）会构建失败，这是有意为之——防止静默走缓存构建旧代码。
 
 ### 只启动已有镜像（不重新编译）
 
@@ -93,7 +94,7 @@ docker compose down
 示例：
 
 ```bash
-DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' ./docker/build.sh
+DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' git pull && GIT_COMMIT_SHA=$(git rev-parse HEAD) docker compose up -d --build
 ```
 
 ## 代理配置
@@ -119,7 +120,7 @@ DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' ./docker/build.sh
 如需修改，通过环境变量传入，例如：
 
 ```bash
-SERVER_PORT=8888 GMS_LOGIN_PORT=8585 CHANNEL_PORT_RANGE=7575-7580 ./docker/build.sh
+SERVER_PORT=8888 GMS_LOGIN_PORT=8585 CHANNEL_PORT_RANGE=7575-7580 git pull && GIT_COMMIT_SHA=$(git rev-parse HEAD) docker compose up -d --build
 ```
 
 ## 注意事项
