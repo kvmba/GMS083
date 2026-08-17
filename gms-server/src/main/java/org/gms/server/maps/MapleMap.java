@@ -737,16 +737,28 @@ public class MapleMap {
         return d;
     }
 
+    /**
+     * 掉落源点:优先取玩家攻击包上报的位置(ptHit,与客户端渲染一致);
+     * 若攻击位置与服务器位置偏差过大(如毒/反射/DoT延迟死亡,怪物早已走远),回退服务器位置。
+     */
+    private Point getDropOrigin(Monster mob) {
+        Point hitPos = mob.getClientHitPosition();
+        if (hitPos != null && mob.getPosition().distanceSq(hitPos) > 250 * 250) {
+            hitPos = null;
+        }
+        return hitPos != null ? hitPos : mob.getPosition();
+    }
+
     private void dropFromMonster(final Character chr, final Monster mob, final boolean useBaseRate) {
         if (mob.dropsDisabled() || mob.isNoOwnDrop() || !dropsOn) {
             return;
         }
 
         final byte droptype = (byte) (mob.getStats().isExplosiveReward() ? 3 : mob.getStats().isFfaLoot() ? 2 : chr.getParty() != null ? 1 : 0);
-        Point hitPos = mob.getClientHitPosition();
-        final int mobpos = (hitPos != null ? hitPos.x : mob.getPosition().x);
+        Point origin = getDropOrigin(mob);
+        final int mobpos = origin.x;
         float chRate = !mob.isBoss() ? chr.getDropRate() : chr.getBossDropRate();
-        Point pos = new Point(0, (hitPos != null ? hitPos.y : mob.getPosition().y));
+        Point pos = new Point(0, origin.y);
 
         MonsterStatusEffect stati = mob.getStati(MonsterStatus.SHOWDOWN);
         if (stati != null) {
@@ -784,11 +796,11 @@ public class MapleMap {
         }
 
         final byte droptype = (byte) (chr.getParty() != null ? 1 : 0);
-        Point hitPos = mob.getClientHitPosition();
-        final int mobpos = (hitPos != null ? hitPos.x : mob.getPosition().x);
+        Point origin = getDropOrigin(mob);
+        final int mobpos = origin.x;
         int chRate = 1000000;   // guaranteed item drop
         byte d = 1;
-        Point pos = new Point(0, (hitPos != null ? hitPos.y : mob.getPosition().y));
+        Point pos = new Point(0, origin.y);
 
         dropItemsFromMonsterOnMap(list, pos, d, chRate, droptype, mobpos, chr, mob);
     }
