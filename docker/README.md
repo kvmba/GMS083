@@ -16,24 +16,31 @@ cp .env.example .env
 # 然后按需修改 .env
 ```
 
-### 构建并启动（同步到指定远端提交）
+### 构建并启动
+
+**方式一：增量构建（推荐，快）**——手动指定提交 SHA：
 
 ```bash
 docker compose up -d --build
 ```
 
-构建目标提交由 `docker-compose.yml` 中的 `GIT_COMMIT_SHA` 指定（已写入默认值）。
-
-**每次推送新代码后，构建前把该值更新为最新提交**：
+构建目标提交由 `docker-compose.yml` 中的 `GIT_COMMIT_SHA` 指定。每次推送新代码后，构建前把该值更新为最新提交：
 
 ```bash
-# 查看远端最新 SHA
-git ls-remote origin HEAD
-# 然后把 docker-compose.yml 的 GIT_COMMIT_SHA 改成这个值,再构建
+git ls-remote origin HEAD        # 查看远端最新 SHA
+# 把 docker-compose.yml 的 GIT_COMMIT_SHA 改成这个值,再构建
 docker compose up -d --build
 ```
 
-原理：`GIT_COMMIT_SHA` 是缓存失效键——值一变化，Dockerfile 中 `git fetch` + `git checkout <该SHA>` 那层缓存必然失效，代码同步到该提交后编译层全量重跑，结果必然是该提交的代码；值不变时走缓存，构建很快。
+原理：`GIT_COMMIT_SHA` 是缓存失效键——值一变化，Dockerfile 中 `git fetch` + `git checkout <该SHA>` 那层缓存必然失效，代码同步后编译层全量重跑；值不变时走缓存，构建很快。
+
+**方式二：强制全量构建（简单，慢）**——每次忽略缓存、同步远端最新：
+
+```bash
+docker compose up -d --build --no-cache
+```
+
+`--no-cache` 下所有层都重新执行，`git fetch` + `git checkout origin/HEAD`（远端默认分支最新）必然执行，无需维护 SHA；代价是每次全量编译（yarn + mvn），构建时间明显变长。
 
 `docker compose build` 阶段会自动完成：
 

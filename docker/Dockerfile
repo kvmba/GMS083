@@ -66,14 +66,13 @@ WORKDIR /workspace
 # 复制整个仓库（包含 .git，用于构建期同步到远端指定提交）
 COPY . .
 
-# 每次构建都同步到远端最新提交：
-# GIT_COMMIT_SHA 由 build.sh 通过 ls-remote 获取并传入，SHA 变化会使后续层缓存全部失效，
-# 避免 COPY . . 未变时 RUN 层走缓存、跳过拉取导致构建旧代码
+# 同步代码到指定提交：
+# - 传了 GIT_COMMIT_SHA：checkout 该提交，且 SHA 变化会使本层及后续层缓存失效（增量构建）
+# - 没传（或 --no-cache 构建）：checkout 远端默认分支最新提交（origin/HEAD）
 ARG GIT_COMMIT_SHA=
-RUN test -n "${GIT_COMMIT_SHA}" || { echo "[build] 缺少 GIT_COMMIT_SHA，请使用 docker/build.sh 构建" >&2; exit 1; }; \
-    git config --global --add safe.directory /workspace \
+RUN git config --global --add safe.directory /workspace \
     && git fetch --prune origin \
-    && git checkout -f "${GIT_COMMIT_SHA}" \
+    && git checkout -f "${GIT_COMMIT_SHA:-origin/HEAD}" \
     && git log -1 --oneline
 
 # 编译前端（install 需要 devDependencies，build 时再切 production）
