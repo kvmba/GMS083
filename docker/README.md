@@ -89,14 +89,11 @@ DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' docker compose up -d
 
 ## 代理配置
 
-默认不启用代理，可按需通过构建参数传入：
+代理地址统一在仓库根目录 `.env` 中配置（`HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY`），
+`docker compose` 构建时自动读取并作为 build args 传入：
 
-- `HTTP_PROXY`
-- `HTTPS_PROXY`
-- `http_proxy`
-- `https_proxy`
+- `HTTP_PROXY` / `HTTPS_PROXY`：构建阶段下载 Maven/Node/Git 等资源的代理地址
 - `NO_PROXY` / `no_proxy`：默认 `localhost,127.0.0.1`
-- `MAVEN_OPTS`：Maven 下载依赖走代理(未设置时直连)
 
 运行容器不注入代理，服务启动后直连网络/数据库。
 
