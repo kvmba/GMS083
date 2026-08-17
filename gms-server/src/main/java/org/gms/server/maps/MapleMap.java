@@ -743,9 +743,10 @@ public class MapleMap {
         }
 
         final byte droptype = (byte) (mob.getStats().isExplosiveReward() ? 3 : mob.getStats().isFfaLoot() ? 2 : chr.getParty() != null ? 1 : 0);
-        final int mobpos = mob.getPosition().x;
+        Point hitPos = mob.getClientHitPosition();
+        final int mobpos = (hitPos != null ? hitPos.x : mob.getPosition().x);
         float chRate = !mob.isBoss() ? chr.getDropRate() : chr.getBossDropRate();
-        Point pos = new Point(0, mob.getPosition().y);
+        Point pos = new Point(0, (hitPos != null ? hitPos.y : mob.getPosition().y));
 
         MonsterStatusEffect stati = mob.getStati(MonsterStatus.SHOWDOWN);
         if (stati != null) {
@@ -783,10 +784,11 @@ public class MapleMap {
         }
 
         final byte droptype = (byte) (chr.getParty() != null ? 1 : 0);
-        final int mobpos = mob.getPosition().x;
+        Point hitPos = mob.getClientHitPosition();
+        final int mobpos = (hitPos != null ? hitPos.x : mob.getPosition().x);
         int chRate = 1000000;   // guaranteed item drop
         byte d = 1;
-        Point pos = new Point(0, mob.getPosition().y);
+        Point pos = new Point(0, (hitPos != null ? hitPos.y : mob.getPosition().y));
 
         dropItemsFromMonsterOnMap(list, pos, d, chRate, droptype, mobpos, chr, mob);
     }
