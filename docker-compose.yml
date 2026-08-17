@@ -9,6 +9,8 @@ services:
         HTTP_PROXY: "${HTTP_PROXY:-}"
         HTTPS_PROXY: "${HTTPS_PROXY:-}"
         NO_PROXY: "${NO_PROXY:-localhost,127.0.0.1}"
+        # 由 build.sh 传入远端最新提交 SHA，作为缓存失效键
+        GIT_COMMIT_SHA: "${GIT_COMMIT_SHA:-}"
     image: beidou:latest
     container_name: GMS083
     network_mode: bridge

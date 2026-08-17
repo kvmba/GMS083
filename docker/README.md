@@ -16,20 +16,29 @@ cp .env.example .env
 # 然后按需修改 .env
 ```
 
-### 构建并启动（每次强制重新编译）
+### 构建并启动（自动拉取远端最新代码）
 
 ```bash
-docker compose up -d --build
+./docker/build.sh
+docker compose up -d
 ```
+
+`docker/build.sh` 会先通过 `git ls-remote` 获取远端最新提交 SHA，作为 `GIT_COMMIT_SHA` build arg 传入；
+该 SHA 是缓存失效键——**只要远端有新提交，编译阶段必然重新拉取并全量编译**，不会因构建上下文未变化而走旧缓存。
+
+> 直连方式编译不强制走缓存：只有远端有更新时才会重新拉取编译，否则复用缓存直接启动。
+> 如需构建指定分支：`GIT_BRANCH=bugfix/xxx ./docker/build.sh`
 
 `docker compose build` 阶段会自动完成：
 
-1. `git pull --rebase --autostash` 拉取最新代码；
+1. `git fetch` + `git checkout <远端最新提交>` 同步到最新代码；
 2. 进入 `gms-ui` 执行 `yarn install && yarn build`；
 3. 把 `gms-ui/dist` 复制到 `gms-server/src/main/resources/static`；
 4. 进入 `gms-server` 执行 `mvn clean package -DskipTests`；
 5. 把 `target/BeiDou.jar` 复制为镜像内 `/app/BeiDou.jar`；
 6. 把 `docker/application.docker.yml` 复制为镜像内 `/app/application.yml`。
+
+> 注意：请使用 `./docker/build.sh` 构建；直接 `docker compose build` 缺少 `GIT_COMMIT_SHA` 会构建失败，这是有意为之（避免静默走缓存构建旧代码）。
 
 ### 只启动已有镜像（不重新编译）
 
@@ -84,7 +93,7 @@ docker compose down
 示例：
 
 ```bash
-DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' docker compose up -d --build
+DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' ./docker/build.sh
 ```
 
 ## 代理配置
@@ -110,7 +119,7 @@ DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' docker compose up -d
 如需修改，通过环境变量传入，例如：
 
 ```bash
-SERVER_PORT=8888 GMS_LOGIN_PORT=8585 CHANNEL_PORT_RANGE=7575-7580 docker compose up -d --build
+SERVER_PORT=8888 GMS_LOGIN_PORT=8585 CHANNEL_PORT_RANGE=7575-7580 ./docker/build.sh
 ```
 
 ## 注意事项

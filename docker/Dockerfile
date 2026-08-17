@@ -63,12 +63,18 @@ ENV YARN_CACHE_FOLDER=/usr/local/share/.cache/yarn
 
 WORKDIR /workspace
 
-# 复制整个仓库（包含 .git，用于构建期 git pull 到最新）
+# 复制整个仓库（包含 .git，用于构建期同步到远端指定提交）
 COPY . .
 
-# 每次构建都拉取最新代码
-RUN git config --global --add safe.directory /workspace \
-    && git pull --rebase --autostash
+# 每次构建都同步到远端最新提交：
+# GIT_COMMIT_SHA 由 build.sh 通过 ls-remote 获取并传入，SHA 变化会使后续层缓存全部失效，
+# 避免 COPY . . 未变时 RUN 层走缓存、跳过拉取导致构建旧代码
+ARG GIT_COMMIT_SHA=
+RUN test -n "${GIT_COMMIT_SHA}" || { echo "[build] 缺少 GIT_COMMIT_SHA，请使用 docker/build.sh 构建" >&2; exit 1; }; \
+    git config --global --add safe.directory /workspace \
+    && git fetch --prune origin \
+    && git checkout -f "${GIT_COMMIT_SHA}" \
+    && git log -1 --oneline
 
 # 编译前端（install 需要 devDependencies，build 时再切 production）
 WORKDIR /workspace/gms-ui
