@@ -63,19 +63,13 @@ docker compose down
 
 ## 数据库配置
 
-默认数据库直连：
-
-```
-127.0.0.1:3308/GMS083
-```
-
 可通过环境变量覆盖：
 
 | 环境变量 | 默认值 | 说明 |
 | --- | --- | --- |
-| `DB_URL` | `jdbc:mysql://127.0.0.1:3308/GMS083?...` | JDBC 连接串 |
-| `DB_USERNAME` | `root` | 数据库用户名 |
-| `DB_PASSWORD` | `root` | 数据库密码 |
+| `DB_URL` | `jdbc:mysql://127.0.0.1:3306/GMS083?...` | JDBC 连接串 |
+| `DB_USERNAME` | `gms` | 数据库用户名 |
+| `DB_PASSWORD` | `gms` | 数据库密码 |
 | `JWT_SECRET` | `please-change-me-in-production` | JWT 密钥，生产必须修改 |
 | `SERVER_PORT` | `8686` | REST 端口 |
 | `GMS_LOGIN_PORT` | `8484` | 游戏登录端口 |
@@ -95,20 +89,14 @@ DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' docker compose up -d
 
 ## 代理配置
 
-默认 HTTP/HTTPS 代理：
-
-```
-http://127.0.0.1:10800
-```
-
-仅在**镜像构建阶段**启用，用于下载 Maven/Node/Git 等资源：
+默认不启用代理，可按需通过构建参数传入：
 
 - `HTTP_PROXY`
 - `HTTPS_PROXY`
 - `http_proxy`
 - `https_proxy`
-- `NO_PROXY` / `no_proxy`：默认 `localhost,127.0.0.1,127.0.0.1`
-- `MAVEN_OPTS`：Maven 下载依赖也走代理
+- `NO_PROXY` / `no_proxy`：默认 `localhost,127.0.0.1`
+- `MAVEN_OPTS`：Maven 下载依赖走代理(未设置时直连)
 
 运行容器不注入代理，服务启动后直连网络/数据库。
 

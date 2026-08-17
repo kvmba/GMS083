@@ -6,9 +6,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       args:
-        HTTP_PROXY: "${HTTP_PROXY:-http://127.0.0.1:10800}"
-        HTTPS_PROXY: "${HTTPS_PROXY:-http://127.0.0.1:10800}"
-        NO_PROXY: "${NO_PROXY:-localhost,127.0.0.1,127.0.0.1}"
+        HTTP_PROXY: "${HTTP_PROXY:-}"
+        HTTPS_PROXY: "${HTTPS_PROXY:-}"
+        NO_PROXY: "${NO_PROXY:-localhost,127.0.0.1}"
     image: beidou:latest
     container_name: GMS083
     network_mode: bridge
@@ -25,8 +25,8 @@ services:
       APP_VUE_URL: "${APP_VUE_URL:-http://localhost:8787}"
       JWT_SECRET: "${JWT_SECRET:-please-change-me-in-production}"
       JWT_DURATION: "${JWT_DURATION:-1800000}"
-      # 数据库默认直连 127.0.0.1:3308/GMS083
-      DB_URL: "${DB_URL:-jdbc:mysql://127.0.0.1:3308/GMS083?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=5000}"
+      # 数据库连接(通过 .env 的 DB_URL/DB_USERNAME/DB_PASSWORD 覆盖)
+      DB_URL: "${DB_URL:-jdbc:mysql://127.0.0.1:3306/GMS083?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&connectTimeout=5000}"
       DB_USERNAME: "${DB_USERNAME:-gms}"
       DB_PASSWORD: "${DB_PASSWORD:-gms}"
       GMS_LANGUAGE: "${GMS_LANGUAGE:-zh-CN}"

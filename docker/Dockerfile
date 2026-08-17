@@ -4,10 +4,10 @@
 # 使用 GraalVM JDK 21（Oracle Linux 9，兼容旧 CPU）
 FROM container-registry.oracle.com/graalvm/jdk:21-ol9 AS build
 
-# 构建时下载资源使用的 HTTP/HTTPS 代理
-ARG HTTP_PROXY=http://127.0.0.1:10800
-ARG HTTPS_PROXY=http://127.0.0.1:10800
-ARG NO_PROXY=localhost,127.0.0.1,127.0.0.1
+# 构建时下载资源使用的 HTTP/HTTPS 代理(按需通过 build args 传入)
+ARG HTTP_PROXY=
+ARG HTTPS_PROXY=
+ARG NO_PROXY=localhost,127.0.0.1
 ENV HTTP_PROXY=${HTTP_PROXY} \
     HTTPS_PROXY=${HTTPS_PROXY} \
     http_proxy=${HTTP_PROXY} \
@@ -57,8 +57,8 @@ RUN set -eux; \
     ln -sf "$(npm prefix -g)/bin/yarn" /usr/local/bin/yarn; \
     ln -sf "$(npm prefix -g)/bin/yarnpkg" /usr/local/bin/yarnpkg
 
-# Maven 仓库缓存 + Maven/JVM 代理
-ENV MAVEN_OPTS="-Dmaven.repo.local=/root/.m2/repository -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=10800 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=10800 -Dhttp.nonProxyHosts=localhost|127.0.0.1|127.0.0.1"
+# Maven 仓库缓存 + Maven/JVM 代理(代理地址通过构建参数注入,未设置时直连)
+ENV MAVEN_OPTS="-Dmaven.repo.local=/root/.m2/repository"
 ENV YARN_CACHE_FOLDER=/usr/local/share/.cache/yarn
 
 WORKDIR /workspace
