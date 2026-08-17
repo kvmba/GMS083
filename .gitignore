@@ -26,6 +26,10 @@
 database/docker-db-data
 database/docker-pg-db-data
 
+# Docker / environment
+.env
+.env.local
+
 # macOS files
 .DS_Store
 

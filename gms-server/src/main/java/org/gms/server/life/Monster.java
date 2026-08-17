@@ -105,6 +105,7 @@ public class Monster extends AbstractLoadedLife {
     private int VenomMultiplier = 0;
     private boolean fake = false;
     private boolean dropsDisabled = false;
+    private boolean noOwnDrop = false;
     private final Set<MobSkillId> usedSkills = new HashSet<>();
     // 技能释放的全局节奏:释放后 interval 内不放行任何技能(官方"放完停歇"),防止多技能怪交替连发
     private final AtomicLong nextSkillAllowedTime = new AtomicLong(0);
@@ -134,6 +135,7 @@ public class Monster extends AbstractLoadedLife {
     public Monster(Monster monster) {
         super(monster);
         initWithStats(monster.stats);
+        this.noOwnDrop = monster.noOwnDrop;
     }
 
     public void lockMonster() {
@@ -149,6 +151,7 @@ public class Monster extends AbstractLoadedLife {
         this.stats = baseStats.copy();
         hp.set(stats.getHp());
         mp = stats.getMp();
+        this.noOwnDrop = this.stats.isNoOwnDrop();
 
         maxHpPlusHeal.set(hp.get());
     }
@@ -171,6 +174,14 @@ public class Monster extends AbstractLoadedLife {
 
     public boolean dropsDisabled() {
         return dropsDisabled;
+    }
+
+    public boolean isNoOwnDrop() {
+        return noOwnDrop;
+    }
+
+    public void setNoOwnDrop(boolean noOwnDrop) {
+        this.noOwnDrop = noOwnDrop;
     }
 
     public void setMap(MapleMap map) {

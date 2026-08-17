@@ -738,7 +738,7 @@ public class MapleMap {
     }
 
     private void dropFromMonster(final Character chr, final Monster mob, final boolean useBaseRate) {
-        if (mob.dropsDisabled() || !dropsOn) {
+        if (mob.dropsDisabled() || mob.isNoOwnDrop() || !dropsOn) {
             return;
         }
 
@@ -778,7 +778,7 @@ public class MapleMap {
     }
 
     public void dropItemsFromMonster(List<MonsterDropEntry> list, final Character chr, final Monster mob) {
-        if (mob.dropsDisabled() || !dropsOn) {
+        if (mob.dropsDisabled() || mob.isNoOwnDrop() || !dropsOn) {
             return;
         }
 
@@ -984,7 +984,7 @@ public class MapleMap {
             try {
                 long timeNow = Server.getInstance().getCurrentTime();
                 //mobLootEntries.put(mle, timeNow + ((long) (0.42 * animationTime)));
-                mobLootEntries.put(mle, timeNow + ((long) (animationTime + 300)));
+                mobLootEntries.put(mle, timeNow + ((long) (animationTime + 100)));
             } finally {
                 lootLock.unlock();
             }
@@ -2986,7 +2986,10 @@ public class MapleMap {
 
     private boolean chrDisconnected(Iterator<Character> iterator, Character chr) {
         // 如果玩家已经掉线，则移除地图该玩家，但不确保频道、大区该玩家是否仍会引发异常
-        if (chr == null || chr.getClient() == null) {
+        if (chr == null) {
+            return true;   // 空条目直接跳过：ConcurrentHashMap.newKeySet() 不允许 null 值，不能写入延迟清理集合
+        }
+        if (chr.getClient() == null) {
             chrDisconnectedWhileBroadcasting.add(chr);
             return true;
         }

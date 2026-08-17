@@ -26,6 +26,7 @@ function start() {
             im.forceCompleteQuest(2324);
             im.removeAll(2430015);
             im.playerMessage(6, "Use a spike remover to remove thorns from the road.");
+            im.warp(106020501);
         } else {
             im.playerMessage(5,"Try to get closer to the thorns as much as possible to completely clear them.");
         }

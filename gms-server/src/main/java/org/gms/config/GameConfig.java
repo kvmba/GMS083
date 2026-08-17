@@ -81,23 +81,24 @@ public class GameConfig {
         if ("world".equals(gameConfigDO.getConfigType())) {
             int index = Integer.parseInt(gameConfigDO.getConfigSubType());
             World world = Server.getInstance().getWorld(index);
-            if (world == null) {
-                return;
+            if (world != null) {
+                String configCode = gameConfigDO.getConfigCode();
+                switch (configCode) {
+                    case "exp_rate":
+                    case "meso_rate":
+                    case "drop_rate":
+                    case "boss_drop_rate":
+                    case "quest_rate":
+                    case "travel_rate":
+                    case "fishing_rate":
+                        Float.parseFloat(gameConfigDO.getConfigValue());
+                        break;
+                    default:
+                        break;
+                }
             }
-            String configCode = gameConfigDO.getConfigCode();
-            switch (configCode) {
-                case "exp_rate":
-                case "meso_rate":
-                case "drop_rate":
-                case "boss_drop_rate":
-                case "quest_rate":
-                case "travel_rate":
-                case "fishing_rate":
-                    Float.parseFloat(gameConfigDO.getConfigValue());
-                    break;
-                default:
-                    break;
-            }
+            // world == null:世界不存在时不提前返回,valueProp 仍更新以保持内存与 DB 一致
+            // (调用方 ConfigService.updateConfig 已先写库);对象重载在下方跳过,避免 NPE
         }
 
         valueProp.put("value", gameConfigDO.getConfigValue());
@@ -106,7 +107,9 @@ public class GameConfig {
         if ("world".equals(gameConfigDO.getConfigType())) {
             int index = Integer.parseInt(gameConfigDO.getConfigSubType());
             World world = Server.getInstance().getWorld(index);
-            switch (gameConfigDO.getConfigCode()) {
+            // world == null:世界不存在,跳过对象重载避免 NPE,但其余重载仍需执行
+            if (world != null) {
+                switch (gameConfigDO.getConfigCode()) {
                 case "exp_rate":
                     world.setExpRate(Float.parseFloat(gameConfigDO.getConfigValue()));
                     break;
@@ -140,6 +143,7 @@ public class GameConfig {
                 case "flag":
                     world.setFlag(GameConfig.getWorldByte(index, "flag"));
                     break;
+                }
             }
         }
         // 重载其余部分

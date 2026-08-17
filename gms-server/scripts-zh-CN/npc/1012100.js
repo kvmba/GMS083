@@ -173,7 +173,7 @@ function action(mode, type, selection) {
             } else {
                 if (selection < 3) {
                     if (selection == 0) {    //hunter
-                        cm.sendNext("精通弓箭的弓箭手。\r\n\r\n在早期级别中，#b猎人#k的每分钟伤害输出更高，攻击速度更快，但略弱于弩弓手。#b猎人#k可以使用#r箭炸弹#k，这是一个略微较弱的攻击，可以使最多6个敌人被眩晕。");
+                        cm.sendNext("精通弓箭的弓箭手。\r\n\r\n在早期级别中，#b猎人#k的每分钟伤害输出更高，攻击速度更快，但单发攻击力略弱于弩弓手。#b猎人#k可以使用#r爆炸箭#k，伤害略低但最多可使6个敌人眩晕。");
                     } else if (selection == 1) {    //crossbowman 弩弓手
                         cm.sendNext("精通弓弩的弩弓手。\r\n\r\n与猎人相比，弩弓手的攻击力随等级提高而增加。弩弓手可以使用更强大的攻击技能#r铁箭#k，该技能不会自动追踪敌人，但可以穿墙。");
                     }

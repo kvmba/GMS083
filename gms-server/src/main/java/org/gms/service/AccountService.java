@@ -76,7 +76,9 @@ public class AccountService {
         if (createdAtEnd != null) queryWrapper.le(AccountsDO::getCreatedat, createdAtEnd);
 
         if (page == null) page = 1;
-        if (size == null || size > 100) size = 100;
+        // 分页参数钳制:null/非正数用默认值,超大值封顶,避免非法入参导致分页异常
+        if (size == null || size < 1) size = 100;
+        if (size > 100) size = 100;
         Page<AccountsDO> accountsPage = accountsMapper.paginateWithRelations(page, size, queryWrapper);
         Page<AccountListDTO> result = new Page<>(accountsPage.getPageNumber(), accountsPage.getPageSize(), accountsPage.getTotalRow());
         result.setRecords(accountsPage.getRecords().stream().map(account -> {

@@ -147,8 +147,11 @@ public class Shop {
                 long value = (long) amount * tokenvalue;
                 long cost = Math.min((long) item.getPrice() * quantity, Integer.MAX_VALUE);
                 if ((long) c.getPlayer().getMeso() + value >= cost) {
-                    long cardreduce = value - cost;
-                    int diff = (int) Math.min(cardreduce, Integer.MAX_VALUE);
+                    // 枫叶为消耗品:按价格向上取整消耗枫叶(封顶持有量),差额以金币找回/补足
+                    long needTokens = Math.min(amount, (cost + tokenvalue - 1L) / tokenvalue);
+                    long tokenPay = needTokens * tokenvalue;
+                    long mesoDiff = cost - tokenPay;   // >0 需补金币,<0 找回金币
+                    int diff = (int) Math.max(Integer.MIN_VALUE, Math.min(mesoDiff, Integer.MAX_VALUE));
                     if (InventoryManipulator.checkSpace(c, itemId, quantity, "")) {
                         if (ItemConstants.isPet(itemId)) {
                             int petid = Pet.createPet(itemId);
@@ -156,7 +159,10 @@ public class Shop {
                         } else {
                             InventoryManipulator.addById(c, itemId, quantity, "", -1, -1);
                         }
-                        c.getPlayer().gainMeso(diff, false);
+                        if (needTokens > 0) {
+                            InventoryManipulator.removeById(c, InventoryType.CASH, token, (int) needTokens, false, false);
+                        }
+                        c.getPlayer().gainMeso(-diff, false);
                     } else {
                         c.sendPacket(PacketCreator.shopTransaction((byte) 3));
                     }
