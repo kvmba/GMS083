@@ -9,8 +9,10 @@ services:
         HTTP_PROXY: "${HTTP_PROXY:-}"
         HTTPS_PROXY: "${HTTPS_PROXY:-}"
         NO_PROXY: "${NO_PROXY:-localhost,127.0.0.1}"
-        # 由 build.sh 传入远端最新提交 SHA，作为缓存失效键
-        GIT_COMMIT_SHA: "${GIT_COMMIT_SHA:-}"
+        # 远端最新提交 SHA——缓存失效键:每次推送新代码后,手动更新为最新提交
+        # 查看最新 SHA: git ls-remote origin HEAD
+        # 构建时容器内执行 git fetch + git checkout <该SHA>,代码必然同步到该提交
+        GIT_COMMIT_SHA: "${GIT_COMMIT_SHA:-a7f3e91d3209160f9fff9a155b6c36bb372c765c}"
     image: beidou:latest
     container_name: GMS083
     network_mode: bridge

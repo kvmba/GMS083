@@ -16,30 +16,33 @@ cp .env.example .env
 # 然后按需修改 .env
 ```
 
-### 构建并启动（自动拉取远端最新代码）
+### 构建并启动（同步到指定远端提交）
 
 ```bash
-git pull && GIT_COMMIT_SHA=$(git rev-parse HEAD) docker compose up -d --build
+docker compose up -d --build
 ```
 
-一条命令完成。原理：
+构建目标提交由 `docker-compose.yml` 中的 `GIT_COMMIT_SHA` 指定（已写入默认值）。
 
-1. `git pull` 先更新构建机本地 checkout——`COPY . .` 层的输入变了，后续编译层缓存全部失效；
-2. `GIT_COMMIT_SHA` 以环境变量传入 compose（优先级高于 `.env`），Dockerfile 里 `git fetch` + `git checkout <该提交>`，保证容器内代码与远端完全一致；
-3. 之后 `yarn build` → `mvn package` 全量编译，结果必然是最新分支代码。
+**每次推送新代码后，构建前把该值更新为最新提交**：
 
-> 远端有新提交而构建机本地没更新时，`COPY` 层不会变化、后面会走旧缓存——所以第 1 步的 `git pull` 是必须的，不能省。
+```bash
+# 查看远端最新 SHA
+git ls-remote origin HEAD
+# 然后把 docker-compose.yml 的 GIT_COMMIT_SHA 改成这个值,再构建
+docker compose up -d --build
+```
+
+原理：`GIT_COMMIT_SHA` 是缓存失效键——值一变化，Dockerfile 中 `git fetch` + `git checkout <该SHA>` 那层缓存必然失效，代码同步到该提交后编译层全量重跑，结果必然是该提交的代码；值不变时走缓存，构建很快。
 
 `docker compose build` 阶段会自动完成：
 
-1. `git fetch` + `git checkout <远端最新提交>` 同步到最新代码；
+1. `git fetch` + `git checkout <GIT_COMMIT_SHA>` 同步代码到指定提交；
 2. 进入 `gms-ui` 执行 `yarn install && yarn build`；
 3. 把 `gms-ui/dist` 复制到 `gms-server/src/main/resources/static`；
 4. 进入 `gms-server` 执行 `mvn clean package -DskipTests`；
 5. 把 `target/BeiDou.jar` 复制为镜像内 `/app/BeiDou.jar`；
 6. 把 `docker/application.docker.yml` 复制为镜像内 `/app/application.yml`。
-
-> 注意：直接 `docker compose build`（不带 `GIT_COMMIT_SHA`）会构建失败，这是有意为之——防止静默走缓存构建旧代码。
 
 ### 只启动已有镜像（不重新编译）
 
@@ -94,7 +97,7 @@ docker compose down
 示例：
 
 ```bash
-DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' git pull && GIT_COMMIT_SHA=$(git rev-parse HEAD) docker compose up -d --build
+DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' docker compose up -d --build
 ```
 
 ## 代理配置
@@ -120,7 +123,7 @@ DB_PASSWORD='your-db-password' JWT_SECRET='your-jwt-secret' git pull && GIT_COMM
 如需修改，通过环境变量传入，例如：
 
 ```bash
-SERVER_PORT=8888 GMS_LOGIN_PORT=8585 CHANNEL_PORT_RANGE=7575-7580 git pull && GIT_COMMIT_SHA=$(git rev-parse HEAD) docker compose up -d --build
+SERVER_PORT=8888 GMS_LOGIN_PORT=8585 CHANNEL_PORT_RANGE=7575-7580 docker compose up -d --build
 ```
 
 ## 注意事项
