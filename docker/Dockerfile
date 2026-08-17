@@ -63,16 +63,18 @@ ENV YARN_CACHE_FOLDER=/usr/local/share/.cache/yarn
 
 WORKDIR /workspace
 
-# 复制整个仓库（包含 .git，用于构建期同步到远端指定提交）
+# 复制整个仓库（包含 .git，用于构建期同步代码）
 COPY . .
 
-# 同步代码到指定提交：
-# - 传了 GIT_COMMIT_SHA：checkout 该提交，且 SHA 变化会使本层及后续层缓存失效（增量构建）
-# - 没传（或 --no-cache 构建）：checkout 远端默认分支最新提交（origin/HEAD）
+# 同步代码（配合 --no-cache 全量构建时必然执行）：
+# 默认 checkout 当前分支的远端最新版本（origin/<构建上下文当前分支>）
+# 可选覆盖：GIT_BRANCH=分支名 → checkout 远端该分支最新；GIT_COMMIT_SHA=提交 → checkout 指定提交
+ARG GIT_BRANCH=
 ARG GIT_COMMIT_SHA=
 RUN git config --global --add safe.directory /workspace \
     && git fetch --prune origin \
-    && git checkout -f "${GIT_COMMIT_SHA:-origin/HEAD}" \
+    && BRANCH="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}" \
+    && git checkout -f "${GIT_COMMIT_SHA:-origin/${BRANCH}}" \
     && git log -1 --oneline
 
 # 编译前端（install 需要 devDependencies，build 时再切 production）

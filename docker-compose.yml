@@ -9,9 +9,8 @@ services:
         HTTP_PROXY: "${HTTP_PROXY:-}"
         HTTPS_PROXY: "${HTTPS_PROXY:-}"
         NO_PROXY: "${NO_PROXY:-localhost,127.0.0.1}"
-        # 可选:远端指定提交 SHA(缓存失效键)。
-        # 填了:构建代码同步到该提交,SHA变化时增量重编;
-        # 留空:配合 --no-cache 构建,每次全量构建并同步远端默认分支最新代码
+        # 可选：默认 checkout 当前分支的远端最新；需要覆盖时指定
+        GIT_BRANCH: "${GIT_BRANCH:-}"
         GIT_COMMIT_SHA: "${GIT_COMMIT_SHA:-}"
     image: beidou:latest
     container_name: GMS083

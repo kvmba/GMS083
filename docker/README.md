@@ -16,35 +16,23 @@ cp .env.example .env
 # 然后按需修改 .env
 ```
 
-### 构建并启动
-
-**方式一：增量构建（推荐，快）**——手动指定提交 SHA：
-
-```bash
-docker compose up -d --build
-```
-
-构建目标提交由 `docker-compose.yml` 中的 `GIT_COMMIT_SHA` 指定。每次推送新代码后，构建前把该值更新为最新提交：
-
-```bash
-git ls-remote origin HEAD        # 查看远端最新 SHA
-# 把 docker-compose.yml 的 GIT_COMMIT_SHA 改成这个值,再构建
-docker compose up -d --build
-```
-
-原理：`GIT_COMMIT_SHA` 是缓存失效键——值一变化，Dockerfile 中 `git fetch` + `git checkout <该SHA>` 那层缓存必然失效，代码同步后编译层全量重跑；值不变时走缓存，构建很快。
-
-**方式二：强制全量构建（简单，慢）**——每次忽略缓存、同步远端最新：
+### 构建并启动（默认方式，绝对编译最新代码）
 
 ```bash
 docker compose up -d --build --no-cache
 ```
 
-`--no-cache` 下所有层都重新执行，`git fetch` + `git checkout origin/HEAD`（远端默认分支最新）必然执行，无需维护 SHA；代价是每次全量编译（yarn + mvn），构建时间明显变长。
+每次构建：
+- `--no-cache` 忽略所有层缓存，`git fetch` + `git checkout origin/<当前分支>` 必然执行；
+- 代码同步到**构建上下文当前分支的远端最新版本**后全量编译（yarn + mvn）；
+- 代价：每次全量编译，构建时间较长，但结果必然是最新分支代码，无需任何手动维护。
+
+> 需要构建指定分支/提交时，在 `.env` 或 shell 环境覆盖：
+> `GIT_BRANCH=bugfix/xxx` → 远端该分支最新；`GIT_COMMIT_SHA=<提交>` → 指定提交。
 
 `docker compose build` 阶段会自动完成：
 
-1. `git fetch` + `git checkout <GIT_COMMIT_SHA>` 同步代码到指定提交；
+1. `git fetch` + `git checkout origin/<当前分支>` 同步代码到该分支远端最新；
 2. 进入 `gms-ui` 执行 `yarn install && yarn build`；
 3. 把 `gms-ui/dist` 复制到 `gms-server/src/main/resources/static`；
 4. 进入 `gms-server` 执行 `mvn clean package -DskipTests`；
