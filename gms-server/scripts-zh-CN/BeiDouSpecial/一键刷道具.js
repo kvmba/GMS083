@@ -8,6 +8,11 @@ var status;
 //Start
 function start() 
 {
+  if (!cm.getPlayer().isGM()) {
+    cm.sendOk("该功能仅限GM使用！");
+    cm.dispose();
+    return;
+  }
   status = -1;
   action(1, 0, 0);
 }
@@ -24,7 +29,7 @@ function action(mode, type, selection)
 		else if (status == 1 )
 		{
 			//第二层对话
-		    if (1)
+		    if (selection > 0)
 		    {
 		    	cm.gainItem(selection,1);
 		    	var text = "恭喜你，Get到了！" + "#i" + selection + "#";
