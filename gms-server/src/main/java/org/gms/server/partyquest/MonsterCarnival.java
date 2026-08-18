@@ -36,6 +36,7 @@ public class MonsterCarnival {
     private Character leader1, leader2, team1, team2;
     private int redCP, blueCP, redTotalCP, blueTotalCP, redTimeupCP, blueTimeupCP;
     private boolean cpq1;
+    private volatile boolean disposed = false;
 
     public MonsterCarnival(Party p1, Party p2, int mapid, boolean cpq1, int room) {
         try {
@@ -195,6 +196,10 @@ public class MonsterCarnival {
     }
 
     protected void dispose(boolean warpout) {
+        if (disposed) {
+            return;
+        }
+        disposed = true;
         Channel cs = map.getChannelServer();
         MapleMap out;
         if (!cpq1) { // cpq2
@@ -353,6 +358,12 @@ public class MonsterCarnival {
     }
 
     private void extendTime() {
+        if (this.timer != null) {
+            this.timer.cancel(true);
+        }
+        if (this.effectTimer != null) {
+            this.effectTimer.cancel(true);
+        }
         for (Character chrMap : map.getAllPlayers()) {
             chrMap.dropMessage(5, LanguageConstants.getMessage(chrMap, LanguageConstants.CPQExtendTime));
         }
