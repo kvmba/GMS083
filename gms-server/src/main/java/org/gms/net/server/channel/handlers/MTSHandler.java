@@ -797,7 +797,7 @@ public final class MTSHandler extends AbstractPacketHandler {
                 listaitems += " itemid=0 )";
             }
         } else {
-            listaitems = " AND sellername LIKE CONCAT('%','" + search + "', '%')";
+            listaitems = " AND sellername LIKE ?";
         }
         int pages = 0;
         try (Connection con = DatabaseConnection.getConnection()){
@@ -808,13 +808,15 @@ public final class MTSHandler extends AbstractPacketHandler {
                 sql = "SELECT * FROM mts_items WHERE tab = ? " + listaitems + " AND transfer = 0 ORDER BY id DESC LIMIT ?, 16";
             }
             try (PreparedStatement ps = con.prepareStatement(sql)) {
-                ps.setInt(1, tab);
+                int idx = 1;
+                ps.setInt(idx++, tab);
                 if (type != 0) {
-                    ps.setInt(2, type);
-                    ps.setInt(3, page * 16);
-                } else {
-                    ps.setInt(2, page * 16);
+                    ps.setInt(idx++, type);
                 }
+                if (cOi == 0) {
+                    ps.setString(idx++, "%" + search + "%");
+                }
+                ps.setInt(idx, page * 16);
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     if (rs.getInt("type") != 1) {
