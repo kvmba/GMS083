@@ -549,7 +549,7 @@ public class MapleMap {
         int awayx = fallback.x;
         int homex = initial.x;
 
-        int y = initial.y - 85;
+        int y = fallback.y - 85;
 
         do {
             int distx = awayx - homex;
@@ -574,7 +574,10 @@ public class MapleMap {
             initial.x = xLimits.right;
         }
 
-        Point ret = calcPointBelow(new Point(initial.x, initial.y - 85));   // actual drop ranges: default - 120, explosive - 360
+        // 垂直搜索基准用 fallback 的 y(怪物/反应堆脚底权威位置)而不是 initial.y:
+        // initial.y 可能是攻击包 ptHit(命中点,偏高),起点偏高会在多层平台图上跳过脚下平台落到下层,
+        // 导致结束点与客户端渲染不一致
+        Point ret = calcPointBelow(new Point(initial.x, fallback.y - 85));   // actual drop ranges: default - 120, explosive - 360
         if (ret == null) {
             ret = bsearchDropPos(initial, fallback);
         }
