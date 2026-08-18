@@ -120,6 +120,11 @@ function start()
  * @description 如果是sendSelectLevel，那么会根据玩家的选项自动路由到对应的level+selection方法
  */
 function levelStart() {
+    if (!cm.getPlayer().isGM()) {
+        cm.sendOk("该功能仅限GM使用！");
+        cm.dispose();
+        return;
+    }
     let text = "尊贵的GM大人，您想去哪里呢？\r\n";
     text += "#L0#BOSS地图#l\r\n";
     text += "#L1#练级地图#l\r\n";
