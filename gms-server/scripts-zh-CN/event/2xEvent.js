@@ -53,6 +53,7 @@ var timer1;
 var timer2;
 var timer3;
 var timer4;
+var originalRate = -1;
 
 function init() {
     /*
@@ -88,8 +89,10 @@ function start() {
     const Server = Java.type('org.gms.net.server.Server');
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
     let world = Server.getInstance().getWorld(em.getChannelServer().getWorld());
-    let ExpRate = world.getExpRate();   //获取当前经验倍率
-    world.setExpRate(ExpRate * 2); // 将经验倍率调整为双倍经验
+    if (originalRate < 0) {
+        originalRate = world.getExpRate();   //记录活动开始前的原倍率
+    }
+    world.setExpRate(originalRate * 2); // 将经验倍率调整为双倍经验
     world.broadcastPacket(PacketCreator.serverNotice(6, "BOSS扫描器检测到即将到来的复活节兔子袭击！GM团队已激活紧急经验池，在接下来的两小时内获得的经验值将翻倍！"));
 }
 /**
@@ -99,7 +102,10 @@ function stop() {
     const Server = Java.type('org.gms.net.server.Server');
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
     var world = Server.getInstance().getWorld(em.getChannelServer().getWorld());
-    world.setExpRate(4); // 将经验值恢复到原来的4倍（正常情况下）
+    if (originalRate > 0) {
+        world.setExpRate(originalRate); // 恢复活动开始前的经验倍率
+        originalRate = -1;
+    }
     world.broadcastPacket(PacketCreator.serverNotice(6, "很遗憾，紧急经验池(EXP)能量已耗尽需要重新充能，经验倍率已恢复正常。"));
 }
 
