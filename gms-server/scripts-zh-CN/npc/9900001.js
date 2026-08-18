@@ -107,29 +107,37 @@ function doSelect(selection) {
             break;
         // GM功能
         case 61:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             openNpc("万能传送");
             break;
         case 62:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             cm.dispose();
             cm.openShopNPC(9900001);
             cm.dispose();
             break;
         case 63:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             openNpc("Salon");
             break;
         case 64:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             openNpc("UI查询");
             break;	
         case 65:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             openNpc("一键删除道具");
             break;
         case 66:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             openNpc("一键刷道具");
             break;
         case 67:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             openNpc("Example1")
             break;
         case 68:
+            if (!cm.getPlayer().isGM()) { cm.sendOk("该功能仅限GM使用！"); cm.dispose(); return; }
             openNpc("Example2")
             break;
 
