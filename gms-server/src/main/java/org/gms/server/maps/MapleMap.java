@@ -745,14 +745,11 @@ public class MapleMap {
      * 若攻击位置与服务器位置偏差过大(如毒/反射/DoT延迟死亡,怪物早已走远),回退服务器位置。
      */
     /**
-     * 掉落源点:优先取玩家攻击包上报的怪物攻击前原位置(ptPosPrev,与客户端渲染一致);
-     * 若与服务器位置偏差过大(如毒/反射/DoT延迟死亡,怪物早已走远),回退服务器位置。
+     * 掉落源点:使用玩家攻击包上报的怪物攻击前原位置(ptPosPrev,与客户端渲染一致),
+     * 无上报时回退服务器位置。
      */
     private Point getDropOrigin(Monster mob) {
         Point prevPos = mob.getClientPrevPosition();
-        if (prevPos != null && mob.getPosition().distanceSq(prevPos) > 250 * 250) {
-            prevPos = null;
-        }
         return prevPos != null ? prevPos : mob.getPosition();
     }
 
