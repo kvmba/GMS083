@@ -73,6 +73,9 @@ public final class ReportHandler extends AbstractPacketHandler {
                     c.sendPacket(PacketCreator.reportResponse((byte) 4));
                     return;
                 }
+            } else {
+                c.sendPacket(PacketCreator.reportResponse((byte) 2));
+                return;
             }
             Server.getInstance().broadcastGMMessage(c.getWorld(), PacketCreator.serverNotice(6, victim + " 被举报原因: " + description));
             addReport(c.getPlayer().getId(), Character.getIdByName(victim), reason, description, chatlog);
