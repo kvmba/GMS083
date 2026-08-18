@@ -692,7 +692,7 @@ public class Client extends ChannelInboundHandlerAdapter {
                         loginok = 7;
                     } else if (GameConfig.getServerBoolean("use_debug") && GameConfig.getServerBoolean("no_password")) {
                         return 0;
-                    } else if (passhash.charAt(0) == '$' && passhash.charAt(1) == '2' && BCrypt.checkpw(pwd, passhash)) {
+                    } else if (passhash != null && passhash.length() >= 2 && passhash.charAt(0) == '$' && passhash.charAt(1) == '2' && BCrypt.checkpw(pwd, passhash)) {
                         loginok = (tos == 0) ? 23 : 0;
                     } else if (pwd.equals(passhash) || checkHash(passhash, "SHA-1", pwd) || checkHash(passhash, "SHA-512", pwd)) {
                         // thanks GabrielSin for detecting some no-bcrypt inconsistencies here
@@ -1378,6 +1378,9 @@ public class Client extends ChannelInboundHandlerAdapter {
     }
 
     private static boolean checkHash(String hash, String type, String password) {
+        if (hash == null || hash.isEmpty()) {
+            return false;
+        }
         try {
             MessageDigest digester = MessageDigest.getInstance(type);
             digester.update(password.getBytes(StandardCharsets.UTF_8), 0, password.length());
