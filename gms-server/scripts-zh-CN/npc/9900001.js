@@ -51,8 +51,8 @@ function action(mode, type, selection) {
 //		text += "#L71#超级传送#l \t #L4#爆率一览#l \t #L2#在线奖励#l\r\n";
 //      text += "#L0#新人福利#l \t #L1#每日签到#l  \t #L72#转世重生#l\r\n";
 		// text += "#L999#测试脚本>>>未上线#l \t \r\n";
+		text += "#L5#BOSS刷新#l\r\n";
 		text += "#L1#每日签到#l \t #L2#在线奖励#l  \t #L4#爆率一览#l\r\n";
-		text += "#L5#野外BOSS刷新#l\r\n";
         if (cm.getPlayer().isGM()) {
             text += "\r\n\r\n";
             text += "\t\t\t\t#r=====以下内容仅GM可见=====\r\n";
