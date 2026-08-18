@@ -126,8 +126,8 @@ public class Monster extends AbstractLoadedLife {
     private final Lock statiLock = new ReentrantLock();
     private final Lock animationLock = new ReentrantLock();
     private final Lock aggroUpdateLock = new ReentrantLock();
-    // 玩家攻击包上报的怪物命中位置(ptHit),与客户端渲染位置一致;死亡掉落延迟结束时优先使用
-    private volatile Point clientHitPosition = null;
+    // 玩家攻击包上报的怪物攻击前原位置(ptPosPrev),比ptHit(命中点)更接近怪物实际位置;死亡掉落延迟结束时优先使用
+    private volatile Point clientPrevPosition = null;
 
     public Monster(int id, MonsterStats stats) {
         super(id);
@@ -1394,15 +1394,15 @@ public class Monster extends AbstractLoadedLife {
     }
 
     /**
-     * 玩家攻击包(ptHit)上报的怪物位置,与客户端渲染一致。
+     * 玩家攻击包(ptPosPrev)上报的怪物攻击前原位置,比ptHit(命中点)更接近怪物实际位置。
      * 攻击处理线程写入,掉落调度线程读取,用 volatile 保证可见性。
      */
-    public void setClientHitPosition(Point hitPosition) {
-        this.clientHitPosition = hitPosition;
+    public void setClientPrevPosition(Point prevPosition) {
+        this.clientPrevPosition = prevPosition;
     }
 
-    public Point getClientHitPosition() {
-        return this.clientHitPosition;
+    public Point getClientPrevPosition() {
+        return this.clientPrevPosition;
     }
 
     public void resetMobPosition(Point newPoint) {
