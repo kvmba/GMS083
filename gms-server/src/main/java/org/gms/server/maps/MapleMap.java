@@ -4585,12 +4585,21 @@ public class MapleMap {
             return null;
         }
         if (!this.guardianSpawns.isEmpty()) {
-            while (true) {
+            GuardianSpawnPoint fallback = null;
+            for (int round = 0; round < 10; round++) {
                 for (GuardianSpawnPoint gsp : this.guardianSpawns) {
-                    if (!gsp.isTaken() && Math.random() < 0.3 && (gsp.getTeam() == -1 || gsp.getTeam() == team)) {
-                        return gsp;
+                    if (!gsp.isTaken() && (gsp.getTeam() == -1 || gsp.getTeam() == team)) {
+                        if (fallback == null) {
+                            fallback = gsp;
+                        }
+                        if (Math.random() < 0.3) {
+                            return gsp;
+                        }
                     }
                 }
+            }
+            if (fallback != null) {
+                return fallback;
             }
         }
         return null;
