@@ -78,8 +78,6 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
         public boolean ranged, magic;
         public int speed = 4;
         public Point position = new Point();
-        // 每个命中怪物的客户端位置(ptHit),用于死亡掉落点对齐客户端渲染位置
-        public final Map<Integer, Point> mobHitPositions = new HashMap<>();
 
         public StatEffect getAttackEffect(Character chr, Skill theSkill) {
             Skill mySkill = theSkill;
@@ -244,10 +242,6 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
             for (Integer oned : attack.allDamage.keySet()) {
                 final Monster monster = map.getMonsterByOid(oned);
                 if (monster != null) {
-                    Point clientHitPos = attack.mobHitPositions.get(oned);
-                    if (clientHitPos != null) {
-                        monster.setClientHitPosition(clientHitPos);
-                    }
                     double distanceToDetect = 200000.0;
 
                     if (attack.ranged) {
@@ -712,11 +706,7 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
             for (int i = 0; i < ret.numAttacked + 1; i++) {
                 int oid = p.readInt();
                 if (i < ret.numAttacked) {
-                    // v83协议:1B hitAction + 1B foreAction + 1B frameIdx + 1B calcDamageStatIndex
-                    //        + 4B ptHit(命中位置x,y) + 4B ptPosPrev(原位置x,y),无tDelay
-                    p.skip(4);
-                    ret.mobHitPositions.put(oid, new Point(p.readShort(), p.readShort()));
-                    p.skip(4);
+                    p.skip(12);
                     int bullets = p.readByte();
                     List<Integer> allDamageNumbers = new ArrayList<>();
                     for (int j = 0; j < bullets; j++) {
@@ -893,11 +883,7 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
         }
         for (int i = 0; i < ret.numAttacked; i++) {
             int oid = p.readInt();
-            // v83协议:1B hitAction + 1B foreAction + 1B frameIdx + 1B calcDamageStatIndex
-            //        + 4B ptHit(命中位置x,y) + 4B ptPosPrev(原位置x,y) + 2B tDelay
-            p.skip(4);
-            ret.mobHitPositions.put(oid, new Point(p.readShort(), p.readShort()));
-            p.skip(6);
+            p.skip(14);
             List<Integer> allDamageNumbers = new ArrayList<>();
             Monster monster = chr.getMap().getMonsterByOid(oid);
 

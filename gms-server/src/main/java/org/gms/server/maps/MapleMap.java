@@ -549,7 +549,7 @@ public class MapleMap {
         int awayx = fallback.x;
         int homex = initial.x;
 
-        int y = fallback.y - 85;
+        int y = initial.y - 85;
 
         do {
             int distx = awayx - homex;
@@ -574,10 +574,7 @@ public class MapleMap {
             initial.x = xLimits.right;
         }
 
-        // 垂直搜索基准用 fallback 的 y(怪物/反应堆脚底权威位置)而不是 initial.y:
-        // initial.y 可能是攻击包 ptHit(命中点,偏高),起点偏高会在多层平台图上跳过脚下平台落到下层,
-        // 导致结束点与客户端渲染不一致
-        Point ret = calcPointBelow(new Point(initial.x, fallback.y - 85));   // actual drop ranges: default - 120, explosive - 360
+        Point ret = calcPointBelow(new Point(initial.x, initial.y - 85));   // actual drop ranges: default - 120, explosive - 360
         if (ret == null) {
             ret = bsearchDropPos(initial, fallback);
         }
@@ -740,39 +737,15 @@ public class MapleMap {
         return d;
     }
 
-    /**
-     * 掉落源点:优先取玩家攻击包上报的位置(ptHit,与客户端渲染一致);
-     * 若攻击位置与服务器位置偏差过大(如毒/反射/DoT延迟死亡,怪物早已走远),回退服务器位置。
-     */
-    /**
-     * 掉落源点:使用玩家攻击包上报的怪物命中位置(ptHit,与客户端渲染一致),
-     * 无上报时回退服务器位置。
-     */
-    private Point getDropOrigin(Monster mob) {
-        Point hitPos = mob.getClientHitPosition();
-        return hitPos != null ? hitPos : mob.getPosition();
-    }
-
-    /**
-     * 掉落来源点(出发点):怪物掉落统一用 ptHit(与落点偏移同一基准,垂直落下),其它对象用其当前位置。
-     */
-    private Point getDropSourcePos(MapObject dropper) {
-        if (dropper instanceof Monster) {
-            return getDropOrigin((Monster) dropper);
-        }
-        return dropper.getPosition();
-    }
-
     private void dropFromMonster(final Character chr, final Monster mob, final boolean useBaseRate) {
         if (mob.dropsDisabled() || mob.isNoOwnDrop() || !dropsOn) {
             return;
         }
 
         final byte droptype = (byte) (mob.getStats().isExplosiveReward() ? 3 : mob.getStats().isFfaLoot() ? 2 : chr.getParty() != null ? 1 : 0);
-        Point origin = getDropOrigin(mob);
-        final int mobpos = origin.x;
+        final int mobpos = mob.getPosition().x;
         float chRate = !mob.isBoss() ? chr.getDropRate() : chr.getBossDropRate();
-        Point pos = new Point(0, origin.y);
+        Point pos = new Point(0, mob.getPosition().y);
 
         MonsterStatusEffect stati = mob.getStati(MonsterStatus.SHOWDOWN);
         if (stati != null) {
@@ -810,11 +783,10 @@ public class MapleMap {
         }
 
         final byte droptype = (byte) (chr.getParty() != null ? 1 : 0);
-        Point origin = getDropOrigin(mob);
-        final int mobpos = origin.x;
+        final int mobpos = mob.getPosition().x;
         int chRate = 1000000;   // guaranteed item drop
         byte d = 1;
-        Point pos = new Point(0, origin.y);
+        Point pos = new Point(0, mob.getPosition().y);
 
         dropItemsFromMonsterOnMap(list, pos, d, chRate, droptype, mobpos, chr, mob);
     }
@@ -1012,7 +984,7 @@ public class MapleMap {
             try {
                 long timeNow = Server.getInstance().getCurrentTime();
                 //mobLootEntries.put(mle, timeNow + ((long) (0.42 * animationTime)));
-                mobLootEntries.put(mle, timeNow + ((long) (0.8 * animationTime)));
+                mobLootEntries.put(mle, timeNow + ((long) (animationTime + 100)));
             } finally {
                 lootLock.unlock();
             }
@@ -1187,7 +1159,7 @@ public class MapleMap {
             if (chr1.needQuestItem(questid, idrop.getItemId())) {
                 mdrop.lockItem();
                 try {
-                    c.sendPacket(PacketCreator.dropItemFromMapObject(chr1, mdrop, getDropSourcePos(dropper), dropPos, (byte) 1));
+                    c.sendPacket(PacketCreator.dropItemFromMapObject(chr1, mdrop, dropper.getPosition(), dropPos, (byte) 1));
                 } finally {
                     mdrop.unlockItem();
                 }
@@ -1206,7 +1178,7 @@ public class MapleMap {
         spawnAndAddRangedMapObject(mdrop, c -> {
             mdrop.lockItem();
             try {
-                c.sendPacket(PacketCreator.dropItemFromMapObject(c.getPlayer(), mdrop, getDropSourcePos(dropper), droppos, (byte) 1));
+                c.sendPacket(PacketCreator.dropItemFromMapObject(c.getPlayer(), mdrop, dropper.getPosition(), droppos, (byte) 1));
             } finally {
                 mdrop.unlockItem();
             }
@@ -1221,7 +1193,7 @@ public class MapleMap {
 
         mdrop.lockItem();
         try {
-            broadcastItemDropMessage(mdrop, getDropSourcePos(dropper), droppos, (byte) 3, mdrop.getPosition());
+            broadcastItemDropMessage(mdrop, dropper.getPosition(), droppos, (byte) 3, mdrop.getPosition());
         } finally {
             mdrop.unlockItem();
         }
@@ -1233,7 +1205,7 @@ public class MapleMap {
 
         mdrop.lockItem();
         try {
-            broadcastItemDropMessage(mdrop, getDropSourcePos(dropper), droppos, (byte) 3, mdrop.getPosition());
+            broadcastItemDropMessage(mdrop, dropper.getPosition(), droppos, (byte) 3, mdrop.getPosition());
         } finally {
             mdrop.unlockItem();
         }
@@ -2284,7 +2256,7 @@ public class MapleMap {
         spawnAndAddRangedMapObject(mdrop, c -> {
             mdrop.lockItem();
             try {
-                c.sendPacket(PacketCreator.dropItemFromMapObject(c.getPlayer(), mdrop, getDropSourcePos(dropper), droppos, (byte) 1));
+                c.sendPacket(PacketCreator.dropItemFromMapObject(c.getPlayer(), mdrop, dropper.getPosition(), droppos, (byte) 1));
             } finally {
                 mdrop.unlockItem();
             }
@@ -2292,7 +2264,7 @@ public class MapleMap {
 
         mdrop.lockItem();
         try {
-            broadcastItemDropMessage(mdrop, getDropSourcePos(dropper), droppos, (byte) 0);
+            broadcastItemDropMessage(mdrop, dropper.getPosition(), droppos, (byte) 0);
         } finally {
             mdrop.unlockItem();
         }
