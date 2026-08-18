@@ -343,19 +343,8 @@ public class HiredMerchant extends AbstractMapObject {
                         owner.addMerchantMesos(price);
                     } else {
                         try (Connection con = DatabaseConnection.getConnection()) {
-                            long merchantMesos = 0;
-                            try (PreparedStatement ps = con.prepareStatement("SELECT MerchantMesos FROM characters WHERE id = ?")) {
-                                ps.setInt(1, ownerId);
-                                try (ResultSet rs = ps.executeQuery()) {
-                                    if (rs.next()) {
-                                        merchantMesos = rs.getInt(1);
-                                    }
-                                }
-                            }
-                            merchantMesos += price;
-
-                            try (PreparedStatement ps = con.prepareStatement("UPDATE characters SET MerchantMesos = ? WHERE id = ?", PreparedStatement.RETURN_GENERATED_KEYS)) {
-                                ps.setInt(1, (int) Math.min(merchantMesos, Integer.MAX_VALUE));
+                            try (PreparedStatement ps = con.prepareStatement("UPDATE characters SET MerchantMesos = LEAST(CAST(MerchantMesos AS SIGNED) + ?, 2147483647) WHERE id = ?")) {
+                                ps.setInt(1, price);
                                 ps.setInt(2, ownerId);
                                 ps.executeUpdate();
                             }
