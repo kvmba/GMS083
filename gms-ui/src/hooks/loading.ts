@@ -2,6 +2,8 @@ import { ref } from 'vue';
 import { refreshToken } from '@/api/user';
 import { clearToken, getToken, setToken } from '@/utils/auth';
 
+let refreshing: Promise<string> | null = null;
+
 export default function useLoading(initValue = false) {
   const loading = ref(initValue);
   /**
@@ -17,8 +19,19 @@ export default function useLoading(initValue = false) {
       if (getToken() == null) {
         return;
       }
-      const res = await refreshToken();
-      setToken(res.data.token);
+      if (refreshing == null) {
+        refreshing = refreshToken()
+          .then((res) => {
+            refreshing = null;
+            return res.data.token as string;
+          })
+          .catch((err) => {
+            refreshing = null;
+            throw err;
+          });
+      }
+      const token = await refreshing;
+      setToken(token);
     } catch (err) {
       clearToken();
       throw err;
