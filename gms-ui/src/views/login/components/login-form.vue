@@ -85,9 +85,9 @@
   const { t } = useI18n();
 
   const loginConfig = useStorage('login-config', {
-    rememberPassword: true,
+    rememberPassword: false,
     username: 'admin', // 演示默认值
-    password: 'admin', // demo default value
+    password: '', // 不存储明文密码
   });
   const userInfo = reactive({
     username: loginConfig.value.username,
@@ -127,11 +127,10 @@
         });
         Message.success(t('message.login.success'));
         const { rememberPassword } = loginConfig.value;
-        const { username, password } = values;
-        // 实际生产环境需要进行加密存储。
-        // The actual production environment requires encrypted storage.
+        const { username } = values;
+        // 不将密码明文写入本地存储,防止XSS或共享浏览器窃取凭据
         loginConfig.value.username = rememberPassword ? username : '';
-        loginConfig.value.password = rememberPassword ? password : '';
+        loginConfig.value.password = '';
       } catch (err) {
         errorMessage.value = (err as Error).message;
         if ((err as Error).name === 'TypeError')
