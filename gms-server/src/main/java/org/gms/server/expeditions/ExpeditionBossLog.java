@@ -102,12 +102,15 @@ public class ExpeditionBossLog {
      */
     private static Calendar getCycleBoundary(boolean week) {
         Calendar c = Calendar.getInstance();
+        c.set(Calendar.MILLISECOND, 0);
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         if (week) {
             c.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);   // 本周四0点
-            if (c.after(Calendar.getInstance())) {             // 本周四还没到，回退到上周四0点
+            Calendar now = Calendar.getInstance();
+            now.set(Calendar.MILLISECOND, 0);
+            if (c.after(now)) {                                // 本周四还没到，回退到上周四0点
                 c.add(Calendar.DAY_OF_MONTH, -7);
             }
         }
