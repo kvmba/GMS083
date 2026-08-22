@@ -24,6 +24,26 @@ import java.io.*;
 public class ServerFilter extends HttpFilter {
     private final AccountService accountService;
 
+    /**
+     * 解析真实客户端IP:经反向代理(fnOS connect等)访问时 getRemoteAddr 是代理地址,
+     * 多个玩家共享同一代理IP会互相误伤(限流/封禁),优先使用代理头获取真实IP。
+     * 优先级:X-Real-IP > X-Forwarded-For(最左) > remoteAddr
+     */
+    private String resolveClientIp(HttpServletRequest request) {
+        String realIp = request.getHeader("X-Real-IP");
+        if (!RequireUtil.isEmpty(realIp)) {
+            return realIp.trim();
+        }
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (!RequireUtil.isEmpty(forwardedFor)) {
+            String first = forwardedFor.split(",")[0].trim();
+            if (!RequireUtil.isEmpty(first) && !"unknown".equalsIgnoreCase(first)) {
+                return first;
+            }
+        }
+        return request.getRemoteAddr();
+    }
+
     protected boolean shouldNotFilter(final HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         // web resource
@@ -40,18 +60,14 @@ public class ServerFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
-            String forwardedIp = request.getHeader("X-Forwarded-For");
-            String realIp = request.getHeader("X-Real-IP");
-            String remoteAddr = request.getRemoteAddr();
-            if (RequireUtil.isEmpty(remoteAddr)) remoteAddr = forwardedIp;
-            if (RequireUtil.isEmpty(remoteAddr)) remoteAddr = realIp;
+            String remoteAddr = resolveClientIp(request);
             RequireUtil.requireNotEmpty(remoteAddr, "Unknown remote address");
 
             // 封禁ip禁止请求
             if (accountService.isBanned(remoteAddr)) {
                 request.getInputStream().close();
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-                log.warn("Banned ip is requesting, forwardedIp: {}, realIp: {}, remoteAddr: {}", forwardedIp, realIp, remoteAddr);
+                log.warn("Banned ip is requesting, remoteAddr: {}", remoteAddr);
                 return;
             }
 
