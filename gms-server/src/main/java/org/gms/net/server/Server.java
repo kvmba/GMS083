@@ -322,7 +322,7 @@ public class Server {
         }
 
         String[] hostAddress = ip.split(":");
-        if (IpAddresses.isLocalAddress(remoteIp)) {
+        if (IpAddresses.isLocalAddress(remoteIp) || IpAddresses.isDockerBridgeAddress(remoteIp)) {
             hostAddress[0] = serviceProperty.getLocalhost();
         } else if (IpAddresses.isLanAddress(remoteIp)) {
             hostAddress[0] = serviceProperty.getLanHost();
