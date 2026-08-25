@@ -50,6 +50,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -62,6 +63,7 @@ public class Guild {
 
     private final List<GuildCharacter> members;
     private final Lock membersLock = new ReentrantLock(true);
+    private final AtomicBoolean disbanded = new AtomicBoolean(false);
 
     private final String[] rankTitles = new String[5]; // 1 = master, 2 = jr, 5 = lowest member
     private String name, notice;
@@ -478,6 +480,10 @@ public class Guild {
     public int addGuildMember(GuildCharacter mgc, Character chr) {
         membersLock.lock();
         try {
+            if (disbanded.get()) {
+                // 家族正在解散/已解散，拒绝加入；调用方按失败处理
+                return 0;
+            }
             if (members.size() >= capacity) {
                 return 0;
             }
@@ -640,30 +646,42 @@ public class Guild {
     }
 
     public boolean disbandGuild() {
-        int memberCount;
-        membersLock.lock();
-        try {
-            memberCount = members.size();
-        } finally {
-            membersLock.unlock();
-        }
-        log.info(I18nUtil.getLogMessage("Guild.disbandGuild.info1"), name, id, memberCount);
-
-        if (allianceId > 0) {
-            if (!Alliance.removeGuildFromAlliance(allianceId, id, world)) {
-                Alliance.disbandAlliance(allianceId);
-            }
-        }
-
-        if (!this.writeToDB(true)) {
-            log.error(I18nUtil.getLogMessage("Guild.disbandGuild.error1"), id, name);
+        if (!disbanded.compareAndSet(false, true)) {
+            log.warn(I18nUtil.getLogMessage("Guild.disbandGuild.warn1"), id, name);
             return false;
         }
 
-        this.broadcast(GuildPackets.guildDisband(this.id));
-        this.broadcast(null, -1, BCOp.DISBAND);
-        log.info(I18nUtil.getLogMessage("Guild.disbandGuild.info2"), name, id, memberCount);
-        return true;
+        try {
+            int memberCount;
+            membersLock.lock();
+            try {
+                memberCount = members.size();
+            } finally {
+                membersLock.unlock();
+            }
+            log.info(I18nUtil.getLogMessage("Guild.disbandGuild.info1"), name, id, memberCount);
+
+            if (allianceId > 0) {
+                if (!Alliance.removeGuildFromAlliance(allianceId, id, world)) {
+                    Alliance.disbandAlliance(allianceId);
+                }
+            }
+
+            if (!this.writeToDB(true)) {
+                disbanded.set(false); // 允许后续重试
+                log.error(I18nUtil.getLogMessage("Guild.disbandGuild.error1"), id, name);
+                return false;
+            }
+
+            this.broadcast(GuildPackets.guildDisband(this.id));
+            this.broadcast(null, -1, BCOp.DISBAND);
+            log.info(I18nUtil.getLogMessage("Guild.disbandGuild.info2"), name, id, memberCount);
+            return true;
+        } catch (RuntimeException e) {
+            // 异常路径必须复位标志，否则该家族将永久无法解散
+            disbanded.set(false);
+            throw e;
+        }
     }
 
     public void setGuildEmblem(short bg, byte bgcolor, short logo, byte logocolor) {
