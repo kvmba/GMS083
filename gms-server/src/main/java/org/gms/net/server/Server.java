@@ -1045,12 +1045,26 @@ public class Server {
         }
     }
 
-    public void disbandGuild(int gid) {
+    public boolean disbandGuild(int gid) {
+        Guild guild;
         synchronized (guilds) {
-            Guild g = guilds.get(gid);
-            g.disbandGuild();
-            guilds.remove(gid);
+            guild = guilds.get(gid);
         }
+        if (guild == null) {
+            log.warn(I18nUtil.getLogMessage("Server.disbandGuild.warn1"), gid);
+            return false;
+        }
+
+        // 家族解散包含数据库更新和跨频道广播，不能持有全局 guilds 锁执行。
+        // 否则任一步骤阻塞都会让所有登录线程卡在 getGuild()。
+        if (!guild.disbandGuild()) {
+            return false;
+        }
+
+        synchronized (guilds) {
+            guilds.remove(gid, guild);
+        }
+        return true;
     }
 
     public boolean increaseGuildCapacity(int gid) {

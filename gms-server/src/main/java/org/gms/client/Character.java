@@ -2494,7 +2494,7 @@ public class Character extends AbstractCharacterObject {
         try {
             Server.getInstance().disbandGuild(guildId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(I18nUtil.getLogMessage("Character.disbandGuild.error1"), id, name, guildId, e);
         }
     }
 

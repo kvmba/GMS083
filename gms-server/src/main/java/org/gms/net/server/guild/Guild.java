@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gms.service.NoteService;
 import org.gms.util.DatabaseConnection;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 
 import java.sql.Connection;
@@ -156,7 +157,7 @@ public class Guild {
         bDirty = false;
     }
 
-    public void writeToDB(boolean bDisband) {
+    public boolean writeToDB(boolean bDisband) {
         try (Connection con = DatabaseConnection.getConnection()) {
 
             if (!bDisband) {
@@ -191,15 +192,11 @@ public class Guild {
                     ps.executeUpdate();
                 }
 
-                membersLock.lock();
-                try {
-                    this.broadcast(GuildPackets.guildDisband(this.id));
-                } finally {
-                    membersLock.unlock();
-                }
             }
+            return true;
         } catch (SQLException se) {
-            se.printStackTrace();
+            log.error(I18nUtil.getLogMessage("Guild.writeToDB.error1"), id, bDisband, se);
+            return false;
         }
     }
 
@@ -329,30 +326,37 @@ public class Guild {
     }
 
     public void broadcast(Packet packet, int exceptionId, BCOp bcop) {
+        Map<Integer, List<Integer>> targetsByChannel = new LinkedHashMap<>();
         membersLock.lock(); // membersLock awareness thanks to ProjectNano dev team
         try {
             synchronized (notifications) {
                 if (bDirty) {
                     buildNotifications();
                 }
-                try {
-                    for (Integer b : Server.getInstance().getOpenChannels(world)) {
-                        if (notifications.get(b).size() > 0) {
-                            if (bcop == BCOp.DISBAND) {
-                                Server.getInstance().getWorld(world).setGuildAndRank(notifications.get(b), 0, 5, exceptionId);
-                            } else if (bcop == BCOp.EMBLEMCHANGE) {
-                                Server.getInstance().getWorld(world).changeEmblem(this.id, notifications.get(b), new GuildSummary(this));
-                            } else {
-                                Server.getInstance().getWorld(world).sendPacket(notifications.get(b), packet, exceptionId);
-                            }
-                        }
+                for (Map.Entry<Integer, List<Integer>> entry : notifications.entrySet()) {
+                    if (!entry.getValue().isEmpty()) {
+                        targetsByChannel.put(entry.getKey(), List.copyOf(entry.getValue()));
                     }
-                } catch (Exception re) {
-                    log.error("Failed to contact channel(s) for broadcast.", re);
                 }
             }
         } finally {
             membersLock.unlock();
+        }
+
+        // 跨频道调用基于快照在锁外执行，避免锁顺序反转和单频道阻塞拖住全部家族操作。
+        for (Map.Entry<Integer, List<Integer>> entry : targetsByChannel.entrySet()) {
+            try {
+                List<Integer> targets = entry.getValue();
+                if (bcop == BCOp.DISBAND) {
+                    Server.getInstance().getWorld(world).setGuildAndRank(targets, 0, 5, exceptionId);
+                } else if (bcop == BCOp.EMBLEMCHANGE) {
+                    Server.getInstance().getWorld(world).changeEmblem(this.id, targets, new GuildSummary(this));
+                } else {
+                    Server.getInstance().getWorld(world).sendPacket(targets, packet, exceptionId);
+                }
+            } catch (Exception re) {
+                log.error(I18nUtil.getLogMessage("Guild.broadcast.error1"), entry.getKey(), id, re);
+            }
         }
     }
 
@@ -635,20 +639,31 @@ public class Guild {
         this.writeToDB(false);
     }
 
-    public void disbandGuild() {
+    public boolean disbandGuild() {
+        int memberCount;
+        membersLock.lock();
+        try {
+            memberCount = members.size();
+        } finally {
+            membersLock.unlock();
+        }
+        log.info(I18nUtil.getLogMessage("Guild.disbandGuild.info1"), name, id, memberCount);
+
         if (allianceId > 0) {
             if (!Alliance.removeGuildFromAlliance(allianceId, id, world)) {
                 Alliance.disbandAlliance(allianceId);
             }
         }
 
-        membersLock.lock();
-        try {
-            this.writeToDB(true);
-            this.broadcast(null, -1, BCOp.DISBAND);
-        } finally {
-            membersLock.unlock();
+        if (!this.writeToDB(true)) {
+            log.error(I18nUtil.getLogMessage("Guild.disbandGuild.error1"), id, name);
+            return false;
         }
+
+        this.broadcast(GuildPackets.guildDisband(this.id));
+        this.broadcast(null, -1, BCOp.DISBAND);
+        log.info(I18nUtil.getLogMessage("Guild.disbandGuild.info2"), name, id, memberCount);
+        return true;
     }
 
     public void setGuildEmblem(short bg, byte bgcolor, short logo, byte logocolor) {
