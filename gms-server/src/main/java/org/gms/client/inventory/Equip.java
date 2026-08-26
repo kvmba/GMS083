@@ -698,6 +698,20 @@ public class Equip extends Item {
     }
 
     /**
+     * 计算装备的最大等级
+     */
+    public int getEquipMaxLevel() {
+        return Math.min(30, Math.max(ii.getEquipLevel(this.getItemId(), true), GameConfig.getServerInt("use_equipment_level_up")));
+    }
+
+    /**
+     * 装备是否已达到最大等级
+     */
+    public boolean isMaxLevel() {
+        return itemLevel >= getEquipMaxLevel();
+    }
+
+    /**
      * 处理装备经验值的增加逻辑（Ronan 的装备经验值获取方法）
      * @param c 客户端对象
      * @param gain 获得的经验值
@@ -707,7 +721,7 @@ public class Equip extends Item {
             return;
         }
 
-        int equipMaxLevel = Math.min(30, Math.max(ii.getEquipLevel(this.getItemId(), true), GameConfig.getServerInt("use_equipment_level_up")));// 计算装备的最大等级
+        int equipMaxLevel = getEquipMaxLevel();// 计算装备的最大等级
         if (itemLevel >= equipMaxLevel) {
             return;
         }

@@ -9610,14 +9610,19 @@ public class Character extends AbstractCharacterObject {
             }
 
             ItemInformationProvider ii = ItemInformationProvider.getInstance();
+            List<Equip> candidates = new ArrayList<>();
             for (Item item : getUpgradeableEquipList()) {
                 Equip nEquip = (Equip) item;
                 String itemName = ii.getName(nEquip.getItemId());
-                if (itemName == null) {
+                if (itemName == null || !ii.isUpgradeable(nEquip.getItemId()) || nEquip.isMaxLevel()) {
                     continue;
                 }
+                candidates.add(nEquip);
+            }
 
-                nEquip.gainItemExp(client, expGain);
+            // 每次随机选取一件未满级的装备获得经验
+            if (!candidates.isEmpty()) {
+                candidates.get(Randomizer.nextInt(candidates.size())).gainItemExp(client, expGain);
             }
         }
     }
