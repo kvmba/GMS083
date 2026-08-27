@@ -9620,8 +9620,10 @@ public class Character extends AbstractCharacterObject {
                 candidates.add(nEquip);
             }
 
-            // 每次随机选取一件未满级的装备获得经验
+            // 每次随机选取一件未满级的装备获得经验，经验按可升级装备数量比例缩减
             if (!candidates.isEmpty()) {
+                int rate = Math.min(candidates.size() * 20, 100);
+                expGain = (int) ((long) expGain * rate / 100);
                 candidates.get(Randomizer.nextInt(candidates.size())).gainItemExp(client, expGain);
             }
         }
