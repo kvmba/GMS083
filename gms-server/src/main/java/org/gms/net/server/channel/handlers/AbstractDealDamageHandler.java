@@ -71,6 +71,10 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ItemPickupHandler.class);
 
+    private static int decodeDamage(int encodedDamage) {
+        return encodedDamage < 0 ? encodedDamage & Integer.MAX_VALUE : encodedDamage;
+    }
+
     public static class AttackInfo {
 
         public int numAttacked, numDamage, numAttackedAndDamage, skill, skilllevel, stance, direction, rangedirection, charge, display;
@@ -332,10 +336,7 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                     }
 
                     for (Integer eachd : onedList) {
-                        if (eachd < 0) {
-                            eachd += Integer.MAX_VALUE;
-                        }
-                        totDamageToOneMonster += eachd;
+                        totDamageToOneMonster += decodeDamage(eachd);
                     }
                     totDamage += totDamageToOneMonster;
                     monster.aggroMonsterDamage(player, totDamageToOneMonster);
@@ -346,15 +347,8 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                             int delay = 0;
                             final int maxmeso = player.getBuffedValue(BuffStat.PICKPOCKET);
                             for (Integer eachd : onedList) {
-                                eachd += Integer.MAX_VALUE;
-
                                 if (pickpocket.getEffect(picklv).makeChanceResult()) {
-                                    final int eachdf;
-                                    if (eachd < 0) {
-                                        eachdf = eachd + Integer.MAX_VALUE;
-                                    } else {
-                                        eachdf = eachd;
-                                    }
+                                    final int eachdf = decodeDamage(eachd);
 
                                     TimerManager.getInstance().schedule(() -> map.spawnMesoDrop(Math.min((int) Math.max(((double) eachdf / (double) 20000) * (double) maxmeso, 1), maxmeso), new Point((int) (monster.getPosition().getX() + Randomizer.nextInt(100) - 50), (int) (monster.getPosition().getY())), monster, player, true, (byte) 2), delay);
                                     delay += 100;
