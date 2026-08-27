@@ -9621,8 +9621,9 @@ public class Character extends AbstractCharacterObject {
             }
 
             // 每次随机选取一件未满级的装备获得经验，经验按可升级装备数量比例缩减
+            // rate = 可升级装备数 × 15%（无上限），例：1件15%、2件30%、3件45% ...
             if (!candidates.isEmpty()) {
-                int rate = Math.min(candidates.size() * 20, 100);
+                int rate = candidates.size() * 15;
                 expGain = (int) ((long) expGain * rate / 100);
                 candidates.get(Randomizer.nextInt(candidates.size())).gainItemExp(client, expGain);
             }
