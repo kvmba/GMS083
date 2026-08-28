@@ -27,6 +27,13 @@ function start(mode, type, selection)
 {
 	if (CheckStatus(mode))
 	{
+		// 检查任务是否已开始
+		if (qm.isQuestStarted(30005))
+		{
+			qm.sendOk("时间不多了! 请尽快帮我消灭200只! ");
+			qm.dispose();
+			return;
+		}
 	    if (status == 0)
 	    {
 			//第一层对话
@@ -49,7 +56,7 @@ function start(mode, type, selection)
 		}
 		else if (status == 2 )
 		{
-			qm.sendAcceptDecline("勇士，我知道您很强大，还请#r帮帮我们，我可以送您过去！！#k");
+			qm.sendAcceptDecline("勇士，我知道您很强大，还请#r帮帮我们！！#k");
 		}
 		else if (status == 3)
 		{
@@ -63,7 +70,7 @@ function start(mode, type, selection)
 				qm.dispose();
 			} else
 			{
-				qm.warp(100040103);
+				//qm.warp(100040103);
 			    qm.sendOk("谢谢您，请帮我消灭200只，但愿这样可以让冒险岛世界的黑暗气息能有效地被遏制一些。");
 			    qm.forceStartQuest(); 
                 qm.dispose();				
@@ -80,7 +87,10 @@ function end(mode, type, selection)
 	    if (status == 0)
 	    {
 			//第一层对话
-            qm.sendOk("天呐您这么快就消灭了200只，冒险岛世界有救了！谢谢您~！");		
+            qm.sendOk("天呐您这么快就消灭了200只，冒险岛世界有救了！谢谢您~！");
+			qm.gainExp(2000);
+			qm.gainMeso(20000);
+			qm.gainFame(1);
 			qm.forceCompleteQuest();
 	    }
 		else
