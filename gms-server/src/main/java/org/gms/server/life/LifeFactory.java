@@ -438,25 +438,10 @@ public class LifeFactory {
         for (Data idata : monsterData) {
             if (!idata.getName().equals("info")) {
                 int delay = 0;
-                boolean hasStringDelay = false;
-                boolean hasIntDelay = false;
                 for (Data pic : idata.getChildren()) {
                     delay += DataTool.getIntConvert("delay", pic, 0);
-                    Data delayData = pic.getChildByPath("delay");
-                    if (delayData == null) {
-                        continue;
-                    }
-                    if (delayData.getType() == DataType.STRING) {
-                        hasStringDelay = true;
-                    } else {
-                        hasIntDelay = true;
-                    }
                 }
                 stats.setAnimationTime(idata.getName(), delay);
-                if ("die1".equals(idata.getName()) && hasStringDelay && !hasIntDelay) {
-                    // 特色怪物：死亡时会再召唤其它怪物出来，自身不掉落
-                    stats.setNoOwnDrop(true);
-                }
             }
         }
         Data reviveInfo = monsterInfoData.getChildByPath("revive");
