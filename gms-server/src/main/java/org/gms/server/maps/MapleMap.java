@@ -3701,8 +3701,11 @@ public class MapleMap {
             // Normal Drops
             d = dropItemsFromMonsterOnMap(dropEntry, pos, d, chRate, droptype, mobpos, chr, mob);
 
-            // Global Drops
-            d = dropGlobalItemsFromMonsterOnMap(globalEntry, pos, d, droptype, mobpos, chr, mob);
+            // Global Drops — only when there are non-meso item drops
+            boolean hasItemDrop = dropEntry.stream().anyMatch(e -> e.itemId != 0);
+            if (hasItemDrop) {
+                d = dropGlobalItemsFromMonsterOnMap(globalEntry, pos, d, droptype, mobpos, chr, mob);
+            }
 
             // Quest Drops
             d = dropItemsFromMonsterOnMap(visibleQuestEntry, pos, d, chRate, droptype, mobpos, chr, mob);
