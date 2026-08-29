@@ -822,6 +822,7 @@ public class Monster extends AbstractLoadedLife {
             if (toSpawn.size() > 0) {
                 final EventInstanceManager eim = this.getMap().getEventInstance();
 
+                // 复活召唤延迟取 die1 动画时长,但至少 1s,避免死亡动画未播完复活怪就出现
                 TimerManager.getInstance().schedule(() -> {
                     Character controller = lastController.getLeft();
                     boolean aggro = lastController.getRight();
@@ -866,7 +867,7 @@ public class Monster extends AbstractLoadedLife {
                             eim.reviveMonster(mob);
                         }
                     }
-                }, getAnimationTime("die1"));
+                }, Math.max(getAnimationTime("die1"), 1000L));
             }
         } else {  // is this even necessary?
             log.warn("[CRITICAL LOSS] toSpawn is null for {}", getName());
