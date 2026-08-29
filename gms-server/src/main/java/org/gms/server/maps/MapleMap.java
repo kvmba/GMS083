@@ -3702,7 +3702,13 @@ public class MapleMap {
             d = dropItemsFromMonsterOnMap(dropEntry, pos, d, chRate, droptype, mobpos, chr, mob);
 
             // Global Drops — only when there are non-meso item drops
-            boolean hasItemDrop = dropEntry.stream().anyMatch(e -> e.itemId != 0);
+            boolean hasItemDrop = false;
+            for (MonsterDropEntry e : dropEntry) {
+                if (e.itemId != 0) {
+                    hasItemDrop = true;
+                    break;
+                }
+            }
             if (hasItemDrop) {
                 d = dropGlobalItemsFromMonsterOnMap(globalEntry, pos, d, droptype, mobpos, chr, mob);
             }
