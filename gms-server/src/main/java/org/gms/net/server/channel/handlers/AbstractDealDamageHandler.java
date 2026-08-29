@@ -364,20 +364,13 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                                 monster.addStolen(0);
 
                                 MonsterInformationProvider mi = MonsterInformationProvider.getInstance();
-                                List<Integer> dropPool = mi.retrieveDropPool(monster.getId());
-                                if (dropPool != null && !dropPool.isEmpty()) {
-                                    int rndPool = (int) Math.floor(Math.random() * dropPool.get(dropPool.size() - 1));
-
-                                    int i = 0;
-                                    while (rndPool >= dropPool.get(i)) {
-                                        i++;
-                                    }
-
+                                MonsterDropEntry stolenDrop = mi.retrieveRandomStealDrop(monster.getId());
+                                if (stolenDrop != null) {
                                     List<MonsterDropEntry> toSteal = new ArrayList<>();
-                                    toSteal.add(mi.retrieveDrop(monster.getId()).get(i));
+                                    toSteal.add(stolenDrop);
 
                                     map.dropItemsFromMonster(toSteal, player, monster);
-                                    monster.addStolen(toSteal.get(0).itemId);
+                                    monster.addStolen(stolenDrop.itemId);
                                 }
                             }
                         }
