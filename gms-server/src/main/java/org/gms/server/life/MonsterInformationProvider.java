@@ -66,8 +66,8 @@ public class MonsterInformationProvider {
 
     private final Map<Integer, Pair<Integer, Integer>> mobAttackInfo = new HashMap<>();
 
-    private final Map<Integer, Boolean> mobBossCache = new HashMap<>();
-    private final Map<Integer, String> mobNameCache = new HashMap<>();
+    private final Map<Integer, Boolean> mobBossCache = new ConcurrentHashMap<>();
+    private final Map<Integer, String> mobNameCache = new ConcurrentHashMap<>();
 
     protected MonsterInformationProvider() {
         reloadGlobalDrops();
@@ -156,7 +156,11 @@ public class MonsterInformationProvider {
     }
 
     private List<MonsterDropEntry> retrieveDrop(DropCache cache, int monsterId) {
-        return cache.drops.computeIfAbsent(monsterId, this::loadMonsterDrops);
+        try {
+            return cache.drops.computeIfAbsent(monsterId, this::loadMonsterDrops);
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     private List<MonsterDropEntry> loadMonsterDrops(int monsterId) {
@@ -197,7 +201,11 @@ public class MonsterInformationProvider {
     }
 
     private List<Integer> retrieveDropPool(DropCache cache, int monsterId) {
-        return cache.dropsChancePool.computeIfAbsent(monsterId, id -> buildDropPool(cache, id));
+        try {
+            return cache.dropsChancePool.computeIfAbsent(monsterId, id -> buildDropPool(cache, id));
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     private List<Integer> buildDropPool(DropCache cache, int monsterId) {
