@@ -38,3 +38,6 @@ main/resources/static/
 src/main/resources/static/
 .claude/settings.local.json
 CLAUDE.local.md
+
+# CodeGraph
+.codegraph/
