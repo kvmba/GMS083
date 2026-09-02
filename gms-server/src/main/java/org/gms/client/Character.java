@@ -4755,7 +4755,10 @@ public class Character extends AbstractCharacterObject {
         int quickLv = GameConfig.getWorldInt(getWorld(), "quick_level");
         if (level >= quickLv) return 1;
 
-        return 1f + (quickLv - level) * GameConfig.getWorldFloat(getWorld(), "quick_level_rate");
+        // Must stay quick_level_exp_rate: that is the config_code written by
+        // V1.11.6 (and read back into world_prop). The short name quick_level_rate
+        // was the very mismatch that made this rate silently always 0.
+        return 1f + (quickLv - level) * GameConfig.getWorldFloat(getWorld(), "quick_level_exp_rate");
     }
 
     public void updateMobExpRate() {
