@@ -847,7 +847,7 @@ public class HiredMerchant extends AbstractMapObject {
             price -= Trade.getFee(price);
 
             synchronized (sold) {
-                sold.add(new SoldItem(bot.getName(), shopItem.getItem().getItemId(), quantity, price));
+                sold.add(new SoldItem(bot.getName(), shopItem.getItem().getItemId(), item.getQuantity(), price));
             }
 
             shopItem.setBundles((short) (shopItem.getBundles() - quantity));
@@ -855,11 +855,13 @@ public class HiredMerchant extends AbstractMapObject {
                 shopItem.setDoesExist(false);
             }
 
-            if (GameConfig.getServerBoolean("use_announce_shopitemsold")) {
+            if (GameConfig.getServerBoolean("use_announce_shop_item_sold")) {
                 announceItemSold(item, price, getQuantityLeft(shopItem.getItem().getItemId()));
             }
 
-            Character owner = Server.getInstance().getWorld(world).getPlayerStorage().getCharacterByName(ownerName);
+            // Resolve by id: ownerName is mutable (setOwnerName) and could otherwise
+            // credit a different character that happens to share the name.
+            Character owner = Server.getInstance().getWorld(world).getPlayerStorage().getCharacterById(ownerId);
             if (owner != null && !HostHooks.isArtificial(owner)) {
                 owner.addMerchantMesos(price);
             } else {
