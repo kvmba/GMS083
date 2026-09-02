@@ -805,10 +805,45 @@ public class HiredMerchant extends AbstractMapObject {
         return Collections.unmodifiableSet(blacklist);
     }
 
-    public void botBuy(Character bot, PlayerShopItem shopItem, short quantity) {
+    /**
+     * Bot-side purchase. Mirrors buy(Client, int, short) including every
+     * authoritative check: stock availability, quantity overflow, buyer meso
+     * balance, buyer inventory space, and item delivery.
+     *
+     * @return true if the purchase completed
+     */
+    public boolean botBuy(Character bot, PlayerShopItem shopItem, short quantity) {
+        Client botClient = bot.getClient();
         synchronized (items) {
+            if (quantity < 1 || shopItem == null || !shopItem.isExist() || shopItem.getBundles() < quantity) {
+                return false;
+            }
+            if ((long) shopItem.getItem().getQuantity() * quantity > Short.MAX_VALUE) {
+                return false;
+            }
+
             Item item = shopItem.getItem().copy();
+            item.setQuantity((short) (shopItem.getItem().getQuantity() * quantity));
+            if (item.getInventoryType().equals(InventoryType.EQUIP) && item.getQuantity() > 1) {
+                return false;
+            }
+
             int price = (int) Math.min((float) shopItem.getPrice() * quantity, Integer.MAX_VALUE);
+            if (bot.getMeso() < price) {
+                return false;
+            }
+
+            KarmaManipulator.toggleKarmaFlagToUntradeable(item);
+
+            // Charge the buyer first: addFromDrop is the authoritative delivery and
+            // must not succeed without payment, or shops become a free item source.
+            bot.gainMeso(-price, false);
+            if (!InventoryManipulator.checkSpace(botClient, item.getItemId(), item.getQuantity(), item.getOwner())
+                    || !InventoryManipulator.addFromDrop(botClient, item, false)) {
+                bot.gainMeso(price, false);
+                return false;
+            }
+
             price -= Trade.getFee(price);
 
             synchronized (sold) {
@@ -855,6 +890,7 @@ public class HiredMerchant extends AbstractMapObject {
             } catch (SQLException e) {
                 log.error(I18nUtil.getLogMessage("HiredMerchant.botBuy.error1", ownerName), e);
             }
+            return true;
         }
     }
 
