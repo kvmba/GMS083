@@ -587,13 +587,14 @@ public class PlayerShop extends AbstractMapObject {
                     return false;
                 }
 
-                // Charge the buyer, then deliver. If delivery fails the payment is
-                // refunded so a bot can never destroy stock for free.
-                bot.gainMeso(-price, false);
+                // Deliver first, then charge, exactly like buy() does. gainMeso
+                // silently truncates at the meso cap, so a "charge then refund on
+                // failure" order can permanently destroy money when the refund is
+                // clipped. Delivering first means there is no refund path at all.
                 if (!canBuy(botClient, newItem)) {
-                    bot.gainMeso(price, false);
                     return false;
                 }
+                bot.gainMeso(-price, false);
 
                 price -= Trade.getFee(price);
                 owner.gainMeso(price, true);

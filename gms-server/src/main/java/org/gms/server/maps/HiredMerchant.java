@@ -835,14 +835,15 @@ public class HiredMerchant extends AbstractMapObject {
 
             KarmaManipulator.toggleKarmaFlagToUntradeable(item);
 
-            // Charge the buyer first: addFromDrop is the authoritative delivery and
-            // must not succeed without payment, or shops become a free item source.
-            bot.gainMeso(-price, false);
+            // Deliver first, then charge, exactly like buy() does. gainMeso
+            // silently truncates at the meso cap, so a "charge then refund on
+            // failure" order can permanently destroy money when the refund is
+            // clipped. Delivering first means there is no refund path at all.
             if (!InventoryManipulator.checkSpace(botClient, item.getItemId(), item.getQuantity(), item.getOwner())
                     || !InventoryManipulator.addFromDrop(botClient, item, false)) {
-                bot.gainMeso(price, false);
                 return false;
             }
+            bot.gainMeso(-price, false);
 
             price -= Trade.getFee(price);
 
