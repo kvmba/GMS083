@@ -8,6 +8,7 @@ import org.gms.client.inventory.ModifyInventory;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.extension.api.HostItemActions;
 import org.gms.net.server.Server;
+import org.gms.net.server.world.World;
 import org.gms.server.ItemInformationProvider;
 import org.gms.server.maps.MapItem;
 import org.gms.server.maps.MapObject;
@@ -212,10 +213,14 @@ public final class BeiDouHostItemActions implements HostItemActions {
     }
 
     private static Character findOnlineCharacter(int characterId) {
-        return Server.getInstance().getWorlds().stream()
-                .map(world -> world.getPlayerStorage().getCharacterById(characterId))
-                .filter(character -> character != null)
-                .findFirst()
-                .orElse(null);
+        // Plain loop: this runs on every extension pickup/transfer call, so avoid
+        // the stream pipeline and its per-call allocations.
+        for (World world : Server.getInstance().getWorlds()) {
+            Character character = world.getPlayerStorage().getCharacterById(characterId);
+            if (character != null) {
+                return character;
+            }
+        }
+        return null;
     }
 }
