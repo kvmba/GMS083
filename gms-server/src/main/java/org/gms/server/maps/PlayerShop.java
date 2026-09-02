@@ -553,16 +553,45 @@ public class PlayerShop extends AbstractMapObject {
         return bannedList.contains(name);
     }
 
+    /**
+     * Bot-side purchase. Mirrors buy(Client, int, short): the buyer is charged
+     * and actually receives the item. Without both, a bot could drain a shop's
+     * stock while paying nothing and taking nothing.
+     *
+     * @return true if the purchase completed
+     */
     public boolean botBuy(Character bot, PlayerShopItem shopItem, int itemPosition, short quantity) {
-        synchronized (items) {
-            if (!shopItem.isExist() || shopItem.getBundles() < quantity) {
-                return false;
-            }
+        if (quantity < 1 || shopItem == null || !shopItem.isExist() || shopItem.getBundles() < quantity) {
+            return false;
+        }
+        if ((long) shopItem.getItem().getQuantity() * quantity > Short.MAX_VALUE) {
+            return false;
+        }
 
+        Client botClient = bot.getClient();
+        Item newItem = shopItem.getItem().copy();
+        newItem.setQuantity((short) (shopItem.getItem().getQuantity() * quantity));
+        if (newItem.getInventoryType().equals(InventoryType.EQUIP) && newItem.getQuantity() > 1) {
+            return false;
+        }
+        KarmaManipulator.toggleKarmaFlagToUntradeable(newItem);
+
+        synchronized (items) {
             visitorLock.lock();
             try {
                 int price = (int) Math.min((float) shopItem.getPrice() * quantity, Integer.MAX_VALUE);
+                if (bot.getMeso() < price) {
+                    return false;
+                }
                 if (!owner.canHoldMeso(price)) {
+                    return false;
+                }
+
+                // Charge the buyer, then deliver. If delivery fails the payment is
+                // refunded so a bot can never destroy stock for free.
+                bot.gainMeso(-price, false);
+                if (!canBuy(botClient, newItem)) {
+                    bot.gainMeso(price, false);
                     return false;
                 }
 
