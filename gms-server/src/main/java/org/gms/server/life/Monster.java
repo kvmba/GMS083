@@ -1938,12 +1938,50 @@ public class Monster extends AbstractLoadedLife {
 
         Character newControllerWithPuppet = null;
 
-        for (Character chr : getMap().getAllPlayers()) {
+        // 原版语义：地图上不存在人工角色(bot)时，隐身玩家永远不作为 controller 候选。
+        // 只有当插件引入了 bot、可能出现"没有任何可见玩家能驱动怪物"的情况时，
+        // 才把隐身玩家列为兜底候选 —— 它持有真实客户端，能发出 MOVE_LIFE；
+        // 而 bot 是 headless，发不出该包，永远不能当选。
+        // 该标记在主循环内一并统计，避免对 getAllPlayers() 的第二次遍历
+        // (该方法每次调用都会加锁并新建 ArrayList)。
+        boolean hasArtificial = false;
+
+        int minHiddenControlled = Integer.MAX_VALUE;
+        Character hiddenController = null;
+        int minHiddenControlledDead = Integer.MAX_VALUE;
+        Character hiddenControllerDead = null;
+
+        List<Character> players = getMap().getAllPlayers();
+        for (Character chr : players) {
+            if (HostHooks.isArtificial(chr)) {
+                hasArtificial = true;
+            }
+        }
+
+        for (Character chr : players) {
             // 过滤已断线/awayFromWorld 的幽灵玩家，避免被选为 controller 候选；
-            // 隐藏玩家同样排除，保持原版语义（隐藏 GM 不应被分配怪物控制权）；
-            // headless bot 无法发出 MOVE_LIFE，也永远不能当选。
-            if (!HostHooks.isArtificial(chr) && !chr.isHidden() && chr.isLoggedInWorld()) {
+            // headless bot 没有 socket，无法发出 MOVE_LIFE，永远不能当选。
+            if (!HostHooks.isArtificial(chr) && chr.isLoggedInWorld()) {
                 int ctrlMonsSize = chr.getNumControlledMonsters();
+
+                // 可见玩家优先，保持原有的控制器分配顺序。
+                // 隐身玩家仅在该图上确实存在 bot 时才作为兜底候选：此时若没有可见
+                // 玩家，唯一能驱动怪物的真实客户端就是隐身玩家。
+                if (chr.isHidden()) {
+                    if (!hasArtificial) {
+                        continue;
+                    }
+                    if (chr.isAlive()) {
+                        if (ctrlMonsSize < minHiddenControlled) {
+                            minHiddenControlled = ctrlMonsSize;
+                            hiddenController = chr;
+                        }
+                    } else if (ctrlMonsSize < minHiddenControlledDead) {
+                        minHiddenControlledDead = ctrlMonsSize;
+                        hiddenControllerDead = chr;
+                    }
+                    continue;
+                }
 
                 if (isCharacterPuppetInVicinity(chr)) {
                     newControllerWithPuppet = chr;
@@ -1966,8 +2004,12 @@ public class Monster extends AbstractLoadedLife {
             return newControllerWithPuppet;
         } else if (newController != null) {
             return newController;
-        } else {
+        } else if (newControllerDead != null) {
             return newControllerDead;
+        } else if (hiddenController != null) {
+            return hiddenController;
+        } else {
+            return hiddenControllerDead;
         }
     }
 
