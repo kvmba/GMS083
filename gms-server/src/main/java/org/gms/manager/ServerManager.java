@@ -81,7 +81,16 @@ public class ServerManager implements ApplicationContextAware, ApplicationRunner
 
     @Override
     public void destroy() throws Exception {
-        ExtensionLoader.getInstance().unloadAll();
+        // Extensions run their own shutdown work while the engine is still up, so
+        // they can still reach the database. A failing plugin must never prevent
+        // the engine shutdown below: unloadAll catches Exception, but an Error
+        // (e.g. NoClassDefFoundError from a closing plugin classloader) would
+        // otherwise propagate and skip shutdownInternal entirely.
+        try {
+            ExtensionLoader.getInstance().unloadAll();
+        } catch (Throwable t) {
+            log.error("Extension unload failed during shutdown; continuing engine shutdown", t);
+        }
         Server.getInstance().shutdownInternal(false);
     }
 }
