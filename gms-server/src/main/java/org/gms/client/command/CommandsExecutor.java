@@ -157,13 +157,18 @@ public class CommandsExecutor {
             client.getPlayer().yellowMessage(I18nUtil.getMessage("CommandsExecutor.handleInternal.message3"));
             return true;
         }
-        String[] args;
-        if (params.length > 0 && !params[0].isEmpty()) {
-            args = Arrays.copyOfRange(params, 0, params.length);
-        } else {
-            args = new String[]{};
+        // params already preserves case (see handleInternal); copying it again
+        // allocated a redundant array on every extension command invocation.
+        String[] args = params.length > 0 && !params[0].isEmpty() ? params : new String[]{};
+        try {
+            registered.handler().handle(client.getPlayer().getId(), args);
+        } catch (Exception e) {
+            // Extensions are third-party code. Built-in commands run unguarded
+            // too, but a failing plugin must not surface as a packet-handler
+            // error and must not leave the client without enableActions().
+            log.error(I18nUtil.getLogMessage("CommandsExecutor.extension.error"), commandName, e);
+            client.getPlayer().yellowMessage(I18nUtil.getMessage("CommandsExecutor.handleInternal.message2", commandName));
         }
-        registered.handler().handle(client.getPlayer().getId(), args);
         log.info(I18nUtil.getLogMessage("CommandsExecutor.handleInternal.info1"), client.getPlayer().getName(), "ext:" + commandName);
         return true;
     }
