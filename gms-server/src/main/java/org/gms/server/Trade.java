@@ -294,8 +294,12 @@ public class Trade {
             tradeItems.add(new Pair<>(item, item.getInventoryType()));
         }
 
-        return HostHooks.tradeRelaxInventoryChecks(chr.getId())
-                || Inventory.checkSpotsAndOwnership(chr, tradeItems);
+        // Capacity must always be verified. relaxInventoryChecks only means the
+        // participant is artificial and holds virtual stock; its delivery is then
+        // owned by the plugin via onExchangeSuccess. Short-circuiting here would
+        // let an exchange through that completeTrade() never delivers, silently
+        // destroying the items.
+        return Inventory.checkSpotsAndOwnership(chr, tradeItems);
     }
 
     private boolean fitsUniquesInInventory() {
