@@ -59,13 +59,18 @@ public final class ExtensionLoader {
         discovered.addAll(loadFromClassLoader(ServerExtension.class.getClassLoader(), "classpath"));
         discovered.addAll(loadFromPluginDirectory(pluginsDir));
 
+        // onLoad runs during ServerManager.run(), before Server.init(). An Error
+        // here (NoClassDefFoundError from a badly shaded plugin jar is the common
+        // one) would otherwise propagate out of load(), skip every remaining
+        // plugin and abort Server.init() — i.e. one broken jar bricks startup.
+        // Catch Throwable so a failing plugin can only ever fail itself.
         for (ServerExtension ext : discovered) {
             try {
                 log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.loading"), ext.id(), ext.version());
                 ext.onLoad(runtime);
                 extensions.add(ext);
                 log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.loaded"), ext.id());
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.error(I18nUtil.getLogMessage("ExtensionLoader.load.error.onLoad"), ext.id(), e);
             }
         }
