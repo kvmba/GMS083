@@ -195,8 +195,10 @@ public final class Channel {
             disconnectAwayPlayers();
             players.disconnectAll();
 
-            eventSM.dispose();
-            eventSM = null;
+            if (eventSM != null) {
+                eventSM.dispose();
+                eventSM = null;
+            }
 
             mapManager.dispose();
             mapManager = null;
@@ -233,7 +235,7 @@ public final class Channel {
         closeChannelServices();
     }
 
-    private void closeAllMerchants() {
+    public void closeAllMerchants() {
         List<HiredMerchant> merchs;
 
         merchWlock.lock();

@@ -67,3 +67,20 @@ gms:
     localhost: ${GMS_LOCALHOST:127.0.0.1}
     # 客户端登录端口
     login-port: ${GMS_LOGIN_PORT:8484}
+
+# SoloMapling plugin SPI (beidou-runtime)
+solomapling:
+  plugins-enabled: true
+  plugins-dir: plugins
+  spawn-bots-on-startup: true
+  # 可选：插件对话语言（默认取 gms.service.language）
+  language: zh-CN
+  # 可选：SocialBot 自由对话 LLM（默认关闭，仅走 YAML 台词）
+  llm:
+    enabled: false
+    api-key: ${DEEPSEEK_API_KEY:}
+    model: deepseek-v4-flash
+    max-tokens: 80
+    timeout-ms: 10000
+    history-turns: 8
+    fallback-to-yaml: true

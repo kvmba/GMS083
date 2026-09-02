@@ -40,6 +40,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,12 +51,15 @@ import java.util.concurrent.ConcurrentMap;
 
 public class MonsterInformationProvider {
     private static final Logger log = LoggerFactory.getLogger(MonsterInformationProvider.class);
+    public static final int MAX_DROP_SOURCE_RESULTS = 100;
     // Author : LightPepsi
 
-    private static final MonsterInformationProvider instance = new MonsterInformationProvider();
-
     public static MonsterInformationProvider getInstance() {
-        return instance;
+        return InstanceHolder.INSTANCE;
+    }
+
+    private static class InstanceHolder {
+        private static final MonsterInformationProvider INSTANCE = new MonsterInformationProvider();
     }
 
     private volatile DropCache dropCache = new DropCache();
@@ -68,9 +72,20 @@ public class MonsterInformationProvider {
 
     private final Map<Integer, Boolean> mobBossCache = new ConcurrentHashMap<>();
     private final Map<Integer, String> mobNameCache = new ConcurrentHashMap<>();
+    private final Map<Integer, List<DropSource>> dropSourcesByItem = new ConcurrentHashMap<>();
 
     protected MonsterInformationProvider() {
-        reloadGlobalDrops();
+        this(true);
+    }
+
+    /**
+     * Test-only constructor: skips global drop loading so drop-source unit tests
+     * do not require a live database.
+     */
+    protected MonsterInformationProvider(boolean loadGlobalDrops) {
+        if (loadGlobalDrops) {
+            reloadGlobalDrops();
+        }
     }
 
     public final List<MonsterGlobalDropEntry> getRelevantGlobalDrops(int mapid) {
@@ -181,6 +196,43 @@ public class MonsterInformationProvider {
         }
 
         return List.copyOf(loadedDrops);
+    }
+
+    /**
+     * Returns monsters backed by real {@code drop_data} rows for {@code itemId}.
+     * Results are cached per item and every request is capped to prevent unbounded
+     * plugin queries or SQL work in a bot tick loop.
+     */
+    public final List<DropSource> retrieveDropSources(final int itemId, final int limit) {
+        if (itemId <= 0 || limit <= 0) {
+            return List.of();
+        }
+
+        List<DropSource> sources = dropSourcesByItem.computeIfAbsent(itemId, this::loadDropSources);
+        return sources.subList(0, Math.min(sources.size(), Math.min(limit, MAX_DROP_SOURCE_RESULTS)));
+    }
+
+    protected List<DropSource> loadDropSources(final int itemId) {
+        List<DropSource> result = new ArrayList<>();
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT dropperid, chance FROM drop_data "
+                             + "WHERE itemid = ? AND chance > 0 "
+                             + "ORDER BY chance DESC, dropperid ASC LIMIT ?")) {
+            ps.setInt(1, itemId);
+            ps.setInt(2, MAX_DROP_SOURCE_RESULTS);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(new DropSource(rs.getInt("dropperid"), rs.getInt("chance")));
+                }
+            }
+        } catch (SQLException e) {
+            log.error(I18nUtil.getLogMessage("MonsterInformationProvider.retrieveDrop.error1"), e);
+        }
+        return Collections.unmodifiableList(result);
+    }
+
+    public record DropSource(int dropperId, int chance) {
     }
 
     public final MonsterDropEntry retrieveRandomStealDrop(int monsterId) {
@@ -316,6 +368,7 @@ public class MonsterInformationProvider {
     public final synchronized void clearDrops() {
         reloadGlobalDrops();
         dropCache = new DropCache();
+        dropSourcesByItem.clear();
     }
 
     private static final class DropCache {
