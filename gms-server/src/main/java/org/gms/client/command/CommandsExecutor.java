@@ -121,7 +121,9 @@ public class CommandsExecutor {
 
         final Command command = registeredCommands.get(commandName);
         if (command == null) {
-            if (tryExtensionCommand(client, commandName, lowercaseParams)) {
+            // Pass case-preserving params: lowercaseParams is only for matching
+            // built-in command names, and extensions may need exact player/item names.
+            if (tryExtensionCommand(client, commandName, splitedMessage[1].split(splitRegex))) {
                 return;
             }
             client.getPlayer().yellowMessage(I18nUtil.getMessage("CommandsExecutor.handleInternal.message2", commandName));
