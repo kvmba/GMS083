@@ -1942,8 +1942,10 @@ public class Monster extends AbstractLoadedLife {
         // 只有当插件引入了 bot、可能出现"没有任何可见玩家能驱动怪物"的情况时，
         // 才把隐身玩家列为兜底候选 —— 它持有真实客户端，能发出 MOVE_LIFE；
         // 而 bot 是 headless，发不出该包，永远不能当选。
-        // 该标记在主循环内一并统计，避免对 getAllPlayers() 的第二次遍历
-        // (该方法每次调用都会加锁并新建 ArrayList)。
+        //
+        // hasArtificial 必须先于候选判定确定，因此需要单独一趟遍历；下面主循环
+        // 依赖它决定隐身玩家是否入候选。两趟都复用同一次 getAllPlayers() 的结果
+        // (该方法每次调用都会加锁并新建 ArrayList)，不要在主循环里再次调用它。
         boolean hasArtificial = false;
 
         int minHiddenControlled = Integer.MAX_VALUE;
