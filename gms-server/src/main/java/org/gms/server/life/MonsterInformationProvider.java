@@ -208,10 +208,25 @@ public class MonsterInformationProvider {
             return List.of();
         }
 
+        // loadDropSources returns null on SQL failure so computeIfAbsent does not
+        // cache the failure; treat that as "no sources" for this call and let the
+        // next one retry.
         List<DropSource> sources = dropSourcesByItem.computeIfAbsent(itemId, this::loadDropSources);
+        if (sources == null || sources.isEmpty()) {
+            return List.of();
+        }
         return sources.subList(0, Math.min(sources.size(), Math.min(limit, MAX_DROP_SOURCE_RESULTS)));
     }
 
+    /**
+     * Loads drop sources for {@code itemId}.
+     *
+     * <p>Returns {@code null} on failure: {@link #retrieveDropSources} caches via
+     * {@code computeIfAbsent}, and an empty list would be cached permanently,
+     * so a single SQL hiccup would make this item report "no sources" for the
+     * rest of the process lifetime. Null is never stored by computeIfAbsent,
+     * so the next call retries the query. This mirrors loadMonsterDrops.
+     */
     protected List<DropSource> loadDropSources(final int itemId) {
         List<DropSource> result = new ArrayList<>();
         try (Connection con = DatabaseConnection.getConnection();
@@ -228,6 +243,7 @@ public class MonsterInformationProvider {
             }
         } catch (SQLException e) {
             log.error(I18nUtil.getLogMessage("MonsterInformationProvider.retrieveDrop.error1"), e);
+            return null;
         }
         return Collections.unmodifiableList(result);
     }
