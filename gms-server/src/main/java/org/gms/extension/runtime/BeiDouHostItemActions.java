@@ -57,7 +57,17 @@ public final class BeiDouHostItemActions implements HostItemActions {
                 return PickupResult.failed("DROP_NOT_READY");
             }
             itemId = mapItem.getItemId();
-            quantity = mapItem.getMeso() > 0 ? mapItem.getMeso() : mapItem.getItem().getQuantity();
+            if (mapItem.getMeso() > 0) {
+                quantity = mapItem.getMeso();
+            } else {
+                // Meso drops are constructed with a null Item (see MapItem(int meso, ...));
+                // only item drops carry one, so guard before dereferencing.
+                Item dropped = mapItem.getItem();
+                if (dropped == null) {
+                    return PickupResult.failed("MAP_ITEM_NOT_FOUND");
+                }
+                quantity = dropped.getQuantity();
+            }
         } finally {
             mapItem.unlockItem();
         }
