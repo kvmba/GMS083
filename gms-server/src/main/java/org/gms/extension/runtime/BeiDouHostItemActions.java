@@ -139,7 +139,11 @@ public final class BeiDouHostItemActions implements HostItemActions {
 
             short originalQuantity = sourceItem.getQuantity();
             boolean wholeStack = quantity == originalQuantity;
-            Item droppedItem = wholeStack ? sourceItem : sourceItem.copy();
+            // Hand the map a private copy even for a whole-stack transfer. Sharing the
+            // live inventory instance would alias the drop to the bag: picking the
+            // drop back up (or any later mutation of either side) would then edit
+            // the same object from two places.
+            Item droppedItem = sourceItem.copy();
             droppedItem.setQuantity((short) quantity);
 
             if (wholeStack) {
