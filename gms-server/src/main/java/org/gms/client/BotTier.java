@@ -135,7 +135,7 @@ public enum BotTier {
      * @return the default tier (C - Average)
      */
     public static BotTier getDefaultTier() {
-        return S;
+        return C;
     }
 
     @Override
