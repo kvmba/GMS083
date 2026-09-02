@@ -110,7 +110,11 @@ public final class BeiDouHostItemActions implements HostItemActions {
         if (FieldLimit.DROP_LIMIT.check(map.getFieldLimit())) {
             return DropResult.failed("MAP_DISALLOWS_DROPS");
         }
-        if (quantity <= 0 || slot <= 0 || slot > Short.MAX_VALUE) {
+        // Upper bound matters: the quantity is stored in a short, and a value
+        // above Short.MAX_VALUE would silently wrap (e.g. 70000 -> 4464) and
+        // hand out a small, unrelated stack.
+        if (quantity <= 0 || quantity > Short.MAX_VALUE
+                || slot <= 0 || slot > Short.MAX_VALUE) {
             return DropResult.failed("INVALID_QUANTITY_OR_SLOT");
         }
 
