@@ -199,8 +199,22 @@ public class MapItem extends AbstractMapObject {
         return !permanentOwner && hasExpiredOwnershipTime();
     }
 
-    public void setPermanentOwner(boolean permanentOwner) {
+    /**
+     * 标记本掉落物为"永久归属"。置位后 {@link #hasClientsideOwnership} /
+     * {@link #isFFADrop} / {@link #canBePickedBy} 不再因归属超时而放开拾取，
+     * 即只有 owner 本人(或其队伍)能捡。
+     *
+     * <p><b>并发约束:</b>与 {@link #setPartyOwnerIdLocked(int)} 相同 ——
+     * {@code permanentOwner} 被上述几个方法读取,调用方必须已持有
+     * {@link #itemLock},否则与持锁路径并发时会出现字段撕裂。方法名带
+     * {@code Locked} 后缀即为明示该约定。
+     */
+    public void setPermanentOwnerLocked(boolean permanentOwner) {
         this.permanentOwner = permanentOwner;
+    }
+
+    public final boolean isPermanentOwner() {
+        return permanentOwner;
     }
 
     public final Client getOwnerClient() {

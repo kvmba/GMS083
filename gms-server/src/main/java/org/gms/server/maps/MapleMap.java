@@ -2377,7 +2377,7 @@ public class MapleMap {
         mdrop.lockItem();
         try {
             mdrop.setPartyOwnerIdLocked(-1);
-            mdrop.setPermanentOwner(true);
+            mdrop.setPermanentOwnerLocked(true);
         } finally {
             mdrop.unlockItem();
         }
