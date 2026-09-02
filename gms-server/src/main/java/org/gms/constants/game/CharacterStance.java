@@ -55,6 +55,7 @@ public final class CharacterStance {
         return stance == WALK_LEFT_STANCE
                 || stance == STAND_LEFT_STANCE
                 || stance == JUMP_LEFT_STANCE
+                || stance == ALERT_LEFT_STANCE
                 || stance == PRONE_LEFT_STANCE
                 || stance == SWIM_LEFT_STANCE
                 || stance == LADDER_LEFT_STANCE
