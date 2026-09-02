@@ -1932,30 +1932,13 @@ public class Monster extends AbstractLoadedLife {
         Character newControllerDead = null;
 
         Character newControllerWithPuppet = null;
-        int minHiddenControlled = Integer.MAX_VALUE;
-        Character hiddenController = null;
-        int minHiddenControlledDead = Integer.MAX_VALUE;
-        Character hiddenControllerDead = null;
 
         for (Character chr : getMap().getAllPlayers()) {
-            if (!HostHooks.isArtificial(chr) && chr.isLoggedInWorld()) {
+            // 过滤已断线/awayFromWorld 的幽灵玩家，避免被选为 controller 候选；
+            // 隐藏玩家同样排除，保持原版语义（隐藏 GM 不应被分配怪物控制权）；
+            // headless bot 无法发出 MOVE_LIFE，也永远不能当选。
+            if (!HostHooks.isArtificial(chr) && !chr.isHidden() && chr.isLoggedInWorld()) {
                 int ctrlMonsSize = chr.getNumControlledMonsters();
-
-                // Prefer visible players, preserving normal controller distribution. A hidden GM
-                // remains a valid fallback: its real client can drive mob movement without revealing
-                // the GM. Headless bots must never be selected because they cannot emit MOVE_LIFE.
-                if (chr.isHidden()) {
-                    if (chr.isAlive()) {
-                        if (ctrlMonsSize < minHiddenControlled) {
-                            minHiddenControlled = ctrlMonsSize;
-                            hiddenController = chr;
-                        }
-                    } else if (ctrlMonsSize < minHiddenControlledDead) {
-                        minHiddenControlledDead = ctrlMonsSize;
-                        hiddenControllerDead = chr;
-                    }
-                    continue;
-                }
 
                 if (isCharacterPuppetInVicinity(chr)) {
                     newControllerWithPuppet = chr;
@@ -1978,12 +1961,8 @@ public class Monster extends AbstractLoadedLife {
             return newControllerWithPuppet;
         } else if (newController != null) {
             return newController;
-        } else if (newControllerDead != null) {
-            return newControllerDead;
-        } else if (hiddenController != null) {
-            return hiddenController;
         } else {
-            return hiddenControllerDead;
+            return newControllerDead;
         }
     }
 
