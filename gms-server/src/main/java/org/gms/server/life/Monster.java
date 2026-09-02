@@ -596,14 +596,19 @@ public class Monster extends AbstractLoadedLife {
 
         int membersSize = expMembers.size();
         float participationExp = partyDamage * expPerDmg;
-        Party participantParty = partyParticipation.keySet().iterator().next().getParty();
-        if (hasArtificialMember(participantParty)) {
-            log.info("Artificial-party EXP diagnostic map={} mobId={} mobLevel={} mobExp={} partyDamage={} participationExp={} "
-                            + "participants={} partyMembers={} eligible={} totalPartyLevel={}",
-                    getMap().getId(), getId(), getLevel(), getExp(), partyDamage, participationExp,
-                    describeCharacters(partyParticipation.keySet()),
-                    describePartyMembers(participantParty),
-                    describeCharacters(expMembers), totalPartyLevel);
+        // Diagnostic only, and only for parties that actually contain a bot: building
+        // these strings walks the whole party, so it must never run on the normal
+        // kill path. Guarded against an empty participation map.
+        if (log.isDebugEnabled() && !partyParticipation.isEmpty()) {
+            Party participantParty = partyParticipation.keySet().iterator().next().getParty();
+            if (hasArtificialMember(participantParty)) {
+                log.debug("Artificial-party EXP diagnostic map={} mobId={} mobLevel={} mobExp={} partyDamage={} participationExp={} "
+                                + "participants={} partyMembers={} eligible={} totalPartyLevel={}",
+                        getMap().getId(), getId(), getLevel(), getExp(), partyDamage, participationExp,
+                        describeCharacters(partyParticipation.keySet()),
+                        describePartyMembers(participantParty),
+                        describeCharacters(expMembers), totalPartyLevel);
+            }
         }
 
         // thanks Crypter for reporting an insufficiency on party exp bonuses
