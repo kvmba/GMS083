@@ -206,8 +206,23 @@ public class MapItem extends AbstractMapObject {
      *
      * <p><b>并发约束:</b>与 {@link #setPartyOwnerIdLocked(int)} 相同 ——
      * {@code permanentOwner} 被上述几个方法读取,调用方必须已持有
-     * {@link #itemLock},否则与持锁路径并发时会出现字段撕裂。方法名带
-     * {@code Locked} 后缀即为明示该约定。
+     * {@link #itemLock},否则与持锁路径并发时会出现字段撕裂。
+     *
+     * @deprecated 方法名未体现持锁约定,请改用 {@link #setPermanentOwnerLocked(boolean)}。
+     *             保留仅为兼容既有插件(solomapling-plugin 的 DropCommands)。
+     */
+    @Deprecated
+    public void setPermanentOwner(boolean permanentOwner) {
+        this.permanentOwner = permanentOwner;
+    }
+
+    /**
+     * 同 {@link #setPermanentOwner(boolean)},方法名显式体现"调用方须已持有
+     * {@link #itemLock}"的约定,与 {@link #setPartyOwnerIdLocked(int)} 一致。
+     *
+     * <p><b>并发约束:</b>{@code permanentOwner} 被 {@link #hasClientsideOwnership} /
+     * {@link #isFFADrop} / {@link #canBePickedBy} 读取,这些方法的调用方均需
+     * 持锁,因此写入也必须在锁内,否则会出现字段撕裂。
      */
     public void setPermanentOwnerLocked(boolean permanentOwner) {
         this.permanentOwner = permanentOwner;
