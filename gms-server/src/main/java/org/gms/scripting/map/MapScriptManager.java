@@ -47,6 +47,16 @@ public class MapScriptManager extends AbstractScriptManager {
     }
 
     public boolean runMapScript(Client c, String mapScriptPath, boolean firstUser) {
+        // Headless bot clients (BotClient) carry no Character — getPlayer() is null for them.
+        // Map scripts are player-facing content (quests, intros, medals) and every one of them
+        // starts by reading ms.getPlayer(). Running one with a null player throws
+        // "Cannot read property 'getMapId' of null". Artificial characters are normally gated out
+        // by the caller (see MapleMap.addPlayer), but a character whose artificial classification
+        // is not yet established at map-entry time still reaches here — so bail defensively
+        // instead of throwing.
+        if (c == null || c.getPlayer() == null) {
+            return false;
+        }
         if (firstUser) {
             Character chr = c.getPlayer();
             int mapid = chr.getMapId();
