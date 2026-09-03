@@ -166,7 +166,9 @@ public class CommandsExecutor {
             // Extensions are third-party code. Built-in commands run unguarded
             // too, but a failing plugin must not surface as a packet-handler
             // error and must not leave the client without enableActions().
-            log.error(I18nUtil.getLogMessage("CommandsExecutor.extension.error"), commandName, e);
+            // CommandsExecutor.extension.error 是 MessageFormat 风格（{0}），
+            // 所以参数要传给 getLogMessage；异常对象留给 slf4j 打堆栈。
+            log.error(I18nUtil.getLogMessage("CommandsExecutor.extension.error", commandName), e);
             client.getPlayer().yellowMessage(I18nUtil.getMessage("CommandsExecutor.handleInternal.message2", commandName));
         }
         log.info(I18nUtil.getLogMessage("CommandsExecutor.handleInternal.info1"), client.getPlayer().getName(), "ext:" + commandName);

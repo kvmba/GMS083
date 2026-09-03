@@ -66,16 +66,16 @@ public final class ExtensionLoader {
         // Catch Throwable so a failing plugin can only ever fail itself.
         for (ServerExtension ext : discovered) {
             try {
-                log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.loading"), ext.id(), ext.version());
+                log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.loading", ext.id(), ext.version()));
                 ext.onLoad(runtime);
                 extensions.add(ext);
-                log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.loaded"), ext.id());
+                log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.loaded", ext.id()));
             } catch (Throwable e) {
-                log.error(I18nUtil.getLogMessage("ExtensionLoader.load.error.onLoad"), ext.id(), e);
+                log.error(I18nUtil.getLogMessage("ExtensionLoader.load.error.onLoad", ext.id()), e);
             }
         }
 
-        log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.summary"), extensions.size());
+        log.info(I18nUtil.getLogMessage("ExtensionLoader.load.info.summary", extensions.size()));
     }
 
     public synchronized void notifyServerReady() {
@@ -85,9 +85,9 @@ public final class ExtensionLoader {
         for (ServerExtension ext : extensions) {
             try {
                 ext.onServerReady();
-                log.info(I18nUtil.getLogMessage("ExtensionLoader.ready.info"), ext.id());
+                log.info(I18nUtil.getLogMessage("ExtensionLoader.ready.info", ext.id()));
             } catch (Exception e) {
-                log.error(I18nUtil.getLogMessage("ExtensionLoader.ready.error"), ext.id(), e);
+                log.error(I18nUtil.getLogMessage("ExtensionLoader.ready.error", ext.id()), e);
             }
         }
     }
@@ -100,7 +100,7 @@ public final class ExtensionLoader {
             try {
                 ext.onUnload();
             } catch (Exception e) {
-                log.error(I18nUtil.getLogMessage("ExtensionLoader.unload.error"), ext.id(), e);
+                log.error(I18nUtil.getLogMessage("ExtensionLoader.unload.error", ext.id()), e);
             }
         }
         extensions.clear();
@@ -123,11 +123,11 @@ public final class ExtensionLoader {
         try {
             ServiceLoader<ServerExtension> loader = ServiceLoader.load(ServerExtension.class, classLoader);
             for (ServerExtension ext : loader) {
-                log.info(I18nUtil.getLogMessage("ExtensionLoader.discover.info"), ext.id(), source);
+                log.info(I18nUtil.getLogMessage("ExtensionLoader.discover.info", ext.id(), source));
                 result.add(ext);
             }
         } catch (Exception e) {
-            log.error(I18nUtil.getLogMessage("ExtensionLoader.discover.error"), source, e);
+            log.error(I18nUtil.getLogMessage("ExtensionLoader.discover.error", source), e);
         }
         return result;
     }
@@ -140,7 +140,7 @@ public final class ExtensionLoader {
         try {
             Files.createDirectories(pluginsDir);
         } catch (IOException e) {
-            log.error(I18nUtil.getLogMessage("ExtensionLoader.plugins.error.mkdir"), pluginsDir, e);
+            log.error(I18nUtil.getLogMessage("ExtensionLoader.plugins.error.mkdir", pluginsDir), e);
             return result;
         }
 
@@ -151,14 +151,14 @@ public final class ExtensionLoader {
                             new URL[]{jar.toUri().toURL()},
                             ServerExtension.class.getClassLoader());
                     pluginLoaders.add(pluginCl);
-                    log.info(I18nUtil.getLogMessage("ExtensionLoader.plugins.info.jar"), jar.getFileName());
+                    log.info(I18nUtil.getLogMessage("ExtensionLoader.plugins.info.jar", jar.getFileName()));
                     result.addAll(loadFromClassLoader(pluginCl, jar.getFileName().toString()));
                 } catch (Exception e) {
-                    log.error(I18nUtil.getLogMessage("ExtensionLoader.plugins.error.jar"), jar, e);
+                    log.error(I18nUtil.getLogMessage("ExtensionLoader.plugins.error.jar", jar), e);
                 }
             }
         } catch (IOException e) {
-            log.error(I18nUtil.getLogMessage("ExtensionLoader.plugins.error.scan"), pluginsDir, e);
+            log.error(I18nUtil.getLogMessage("ExtensionLoader.plugins.error.scan", pluginsDir), e);
         }
         return result;
     }
