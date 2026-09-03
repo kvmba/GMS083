@@ -666,14 +666,20 @@ public class Equip extends Item {
         }
 
         // 通知客户端更新装备状态
-        c.getPlayer().equipChanged();
-        c.getPlayer().showHint(I18nUtil.getMessage("Equip.gainStats.showHint", ii.getName(this.getItemId()), itemLevel), 300); // 显示等级提升的消息
-        c.getPlayer().dropMessage(6, lvupStr); // 显示属性提升的消息
+        // Shared BotClient has no Character (BotClient never sets one), so there is no real
+        // client to notify — skip the whole notification block instead of NPE-ing. Everything
+        // above (stat roll, upgrade slots, itemLevel++) is real game state and still applies;
+        // only the client-facing effects are skipped.
+        if (c.getPlayer() != null) {
+            c.getPlayer().equipChanged();
+            c.getPlayer().showHint(I18nUtil.getMessage("Equip.gainStats.showHint", ii.getName(this.getItemId()), itemLevel), 300); // 显示等级提升的消息
+            c.getPlayer().dropMessage(6, lvupStr); // 显示属性提升的消息
 
-        // 发送装备升级的效果包
-        c.sendPacket(PacketCreator.showEquipmentLevelUp());
-        c.getPlayer().getMap().broadcastPacket(c.getPlayer(), PacketCreator.showForeignEffect(c.getPlayer().getId(), 15));
-        c.getPlayer().forceUpdateItem(this); // 强制更新装备状态
+            // 发送装备升级的效果包
+            c.sendPacket(PacketCreator.showEquipmentLevelUp());
+            c.getPlayer().getMap().broadcastPacket(c.getPlayer(), PacketCreator.showForeignEffect(c.getPlayer().getId(), 15));
+            c.getPlayer().forceUpdateItem(this); // 强制更新装备状态
+        }
     }
 
     public int getItemExp() {
@@ -738,7 +744,7 @@ public class Equip extends Item {
         int expNeeded = ExpTable.getEquipExpNeededForLevel(itemLevel);
 
         // 调试信息：显示经验值获取详情
-        if (GameConfig.getServerBoolean("use_debug_show_eqp_exp")) {
+        if (GameConfig.getServerBoolean("use_debug_show_eqp_exp") && c.getPlayer() != null) {
             log.info("{} -> EXP Gain: {}, Mastery: {}, Base gain: {}, exp: {} / {}, Kills TNL: {}", ii.getName(getItemId()),
                     gain, masteryModifier, baseExpGain, itemExp, expNeeded, expNeeded / (baseExpGain / c.getPlayer().getExpRate()));
         }
@@ -758,7 +764,13 @@ public class Equip extends Item {
             }
         }
 
-        c.getPlayer().forceUpdateItem(this);// 通知客户端更新装备状态
+        // Shared BotClient has no Character (BotClient never sets one): there is no real
+        // client to notify, so skip the packet instead of NPE-ing. The equip EXP/level
+        // calculation above is unaffected — only the client refresh is skipped.
+        // Same guard style as Client.announceBossHpBar.
+        if (c.getPlayer() != null) {
+            c.getPlayer().forceUpdateItem(this);// 通知客户端更新装备状态
+        }
     }
 
     private boolean reachedMaxLevel() {
