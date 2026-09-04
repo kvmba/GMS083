@@ -806,45 +806,26 @@ public class HiredMerchant extends AbstractMapObject {
     }
 
     /**
-     * Bot-side purchase. Mirrors buy(Client, int, short) including every
-     * authoritative check: stock availability, quantity overflow, buyer meso
-     * balance, buyer inventory space, and item delivery.
+     * Bot-side purchase. Consumes the shop's stock and credits the owner,
+     * mirroring the accounting half of {@code buy(Client, int, short)}.
      *
-     * @return true if the purchase completed
+     * <p>Deliberately NOT mirrored: charging the buyer and delivering the item.
+     * A template-cloned bot ({@code BotGeneration.createBot}) is an in-memory
+     * clone of the fmbot row that is never persisted, so a delivered item would
+     * vanish on the next restart and any mesos charged would be silently
+     * destroyed. This is the upstream design (BeiDou-Server PR #846).
+     *
+     * <p>Quantity semantics: {@code quantity} is a number of <em>bundles</em>,
+     * and one bundle carries {@code item.getQuantity()} items. For rechargeable
+     * items (throwing stars, bullets) a single bundle is the whole group - e.g.
+     * one entry of 500 stars is 500 stars - so the sale record and the sold
+     * announcement report {@code item.getQuantity()}, the actual item count,
+     * rather than the bundle count.
      */
-    public boolean botBuy(Character bot, PlayerShopItem shopItem, short quantity) {
-        Client botClient = bot.getClient();
+    public void botBuy(Character bot, PlayerShopItem shopItem, short quantity) {
         synchronized (items) {
-            if (quantity < 1 || shopItem == null || !shopItem.isExist() || shopItem.getBundles() < quantity) {
-                return false;
-            }
-            if ((long) shopItem.getItem().getQuantity() * quantity > Short.MAX_VALUE) {
-                return false;
-            }
-
             Item item = shopItem.getItem().copy();
-            item.setQuantity((short) (shopItem.getItem().getQuantity() * quantity));
-            if (item.getInventoryType().equals(InventoryType.EQUIP) && item.getQuantity() > 1) {
-                return false;
-            }
-
             int price = (int) Math.min((float) shopItem.getPrice() * quantity, Integer.MAX_VALUE);
-            if (bot.getMeso() < price) {
-                return false;
-            }
-
-            KarmaManipulator.toggleKarmaFlagToUntradeable(item);
-
-            // Deliver first, then charge, exactly like buy() does. gainMeso
-            // silently truncates at the meso cap, so a "charge then refund on
-            // failure" order can permanently destroy money when the refund is
-            // clipped. Delivering first means there is no refund path at all.
-            if (!InventoryManipulator.checkSpace(botClient, item.getItemId(), item.getQuantity(), item.getOwner())
-                    || !InventoryManipulator.addFromDrop(botClient, item, false)) {
-                return false;
-            }
-            bot.gainMeso(-price, false);
-
             price -= Trade.getFee(price);
 
             synchronized (sold) {
@@ -893,7 +874,6 @@ public class HiredMerchant extends AbstractMapObject {
             } catch (SQLException e) {
                 log.error(I18nUtil.getLogMessage("HiredMerchant.botBuy.error1", ownerName), e);
             }
-            return true;
         }
     }
 
