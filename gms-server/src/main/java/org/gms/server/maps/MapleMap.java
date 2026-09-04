@@ -687,17 +687,21 @@ public class MapleMap {
                 if (de.itemId == 0) { // meso
                     int mesos = (de.Maximum != 1 && de.Maximum > de.Minimum) ? Randomizer.nextInt(de.Maximum - de.Minimum) + de.Minimum : de.Maximum;
 
-                    if (mesos > 0) {
-                        if (chr.getBuffedValue(BuffStat.MESOUP) != null) {
-                            mesos = NumberTool.doubleToInt(mesos * chr.getBuffedValue(BuffStat.MESOUP).doubleValue() / 100.0);
-                        }
-                        mesos = NumberTool.floatToInt(mesos * chr.getMesoRate());
-                        if (mesos <= 0) {
-                            mesos = 1;
-                        }
-
-                        spawnMesoDrop(mesos, calcDropPos(pos, mob.getPosition()), mob, chr, false, droptype);
+                    // 脏数据(如 drop_data.maximum_quantity <= 0)会产生 0 金币,此时不该占用掉落扇位;
+                    // pos.x 每轮都会按当前 d 重算,直接 continue 不会影响后续掉落的位置。
+                    if (mesos <= 0) {
+                        continue;
                     }
+
+                    if (chr.getBuffedValue(BuffStat.MESOUP) != null) {
+                        mesos = NumberTool.doubleToInt(mesos * chr.getBuffedValue(BuffStat.MESOUP).doubleValue() / 100.0);
+                    }
+                    mesos = NumberTool.floatToInt(mesos * chr.getMesoRate());
+                    if (mesos <= 0) {
+                        mesos = 1;
+                    }
+
+                    spawnMesoDrop(mesos, calcDropPos(pos, mob.getPosition()), mob, chr, false, droptype);
                 } else {
                     if (ItemConstants.getInventoryType(de.itemId) == InventoryType.EQUIP) {
                         idrop = ii.randomizeStats((Equip) ii.getEquipById(de.itemId));
