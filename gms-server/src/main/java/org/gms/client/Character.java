@@ -1422,7 +1422,7 @@ public class Character extends AbstractCharacterObject {
         changeMap(to, to.getPortal(portal));
     }
 
-    public void changeMap(final MapleMap target, Portal pto) {
+    public synchronized void changeMap(final MapleMap target, Portal pto) {
         canWarpCounter++;
 
         eventChangedMap(target.getId());    // player can be dropped from an event here, hence the new warping target.  //玩家可以从这里的事件中退出，因此成为新的扭曲目标。
@@ -1441,7 +1441,7 @@ public class Character extends AbstractCharacterObject {
         eventAfterChangedMap(this.getMapId());
     }
 
-    public void changeMap(final MapleMap target, final Point pos) {
+    public synchronized void changeMap(final MapleMap target, final Point pos) {
         canWarpCounter++;
 
         eventChangedMap(target.getId());
@@ -1457,7 +1457,7 @@ public class Character extends AbstractCharacterObject {
         eventAfterChangedMap(this.getMapId());
     }
 
-    public void forceChangeMap(final MapleMap target, Portal pto) {
+    public synchronized void forceChangeMap(final MapleMap target, Portal pto) {
         // will actually enter the map given as parameter, regardless of being an eventmap or whatnot       //将实际输入作为参数给出的映射，无论是事件映射还是其他什么
 
         canWarpCounter++;
@@ -1739,7 +1739,7 @@ public class Character extends AbstractCharacterObject {
      * @param pos
      * @param warpPacket
      */
-    private void changeMapInternal(final MapleMap to, final Point pos, Packet warpPacket) {
+    private synchronized void changeMapInternal(final MapleMap to, final Point pos, Packet warpPacket) {
         if (!canWarpMap) {
             return;
         }
