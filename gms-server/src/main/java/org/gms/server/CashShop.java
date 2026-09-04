@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -130,7 +131,10 @@ public class CashShop {
         @Getter
         private static final List<CashCategory> cashCategories = new ArrayList<>();
         @Getter
-        private static final Map<Integer, ModifiedCashItemDO> modifiedCashItems = new HashMap<>();
+        // Rebuilt at runtime by GM edits (CashShopService reload) while players are browsing the
+        // shop on the packet threads, so readers can observe the map mid-clear. Snapshot the rows
+        // first and publish the finished map once.
+        private static volatile Map<Integer, ModifiedCashItemDO> modifiedCashItems = new ConcurrentHashMap<>();
 
         public static void loadAllCashItems() {
             DataProvider etc = DataProviderFactory.getDataProvider(WZFiles.ETC);
@@ -197,9 +201,13 @@ public class CashShop {
         }
 
         public static void loadAllModifiedCashItems() {
-            modifiedCashItems.clear();
             CashShopService cashShopService = ServerManager.getApplicationContext().getBean(CashShopService.class);
-            cashShopService.loadAllModifiedCashItems().forEach(modifiedCashItemDO -> modifiedCashItems.put(modifiedCashItemDO.getSn(), modifiedCashItemDO));
+            Map<Integer, ModifiedCashItemDO> reloaded = new ConcurrentHashMap<>();
+            cashShopService.loadAllModifiedCashItems().forEach(
+                    modifiedCashItemDO -> reloaded.put(modifiedCashItemDO.getSn(), modifiedCashItemDO));
+            // Publish the finished map in one write instead of clear()+put() - a reader between
+            // those two steps used to see an empty shop.
+            modifiedCashItems = reloaded;
         }
 
         private static void loadCashCategories() {
