@@ -1,18 +1,15 @@
 package org.gms.net.packet;
 
-import org.gms.client.Client;
-import org.gms.constants.string.CharsetConstants;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import net.jcip.annotations.NotThreadSafe;
+import org.gms.constants.string.CharsetConstants;
 import org.gms.net.opcodes.Opcode;
 import org.gms.net.opcodes.SendOpcode;
 import org.gms.util.ThreadLocalUtil;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Optional;
 
 @NotThreadSafe
 public class ByteBufOutPacket implements OutPacket {
@@ -86,9 +83,19 @@ public class ByteBufOutPacket implements OutPacket {
         writeFixedString(value, 13);
     }
 
+    /**
+     * 写入定长字符串：不足 {@code fixed} 字节补 0，超出则截断。
+     */
     @Override
     public void writeFixedString(String value, int fixed) {
-        writeBytes(Arrays.copyOf(value.getBytes(CharsetConstants.getCharset(ThreadLocalUtil.getClientLang())), fixed));
+        byte[] bytes = (value == null ? "" : value).getBytes(CharsetConstants.getCharset(ThreadLocalUtil.getClientLang()));
+        if (bytes.length >= fixed) {
+            byteBuf.writeBytes(bytes, 0, fixed);
+            return;
+        }
+        // 短于定长：先写实际字节再补 0，省掉 copyOf 的临时数组分配。
+        byteBuf.writeBytes(bytes);
+        byteBuf.writeZero(fixed - bytes.length);
     }
 
     @Override
@@ -99,7 +106,8 @@ public class ByteBufOutPacket implements OutPacket {
 
     @Override
     public void skip(int numberOfBytes) {
-        writeBytes(new byte[numberOfBytes]);
+        // 与 writeBytes(new byte[n]) 等价，省掉一次数组分配。
+        byteBuf.writeZero(numberOfBytes);
     }
 
     @Override
