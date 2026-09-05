@@ -1973,6 +1973,12 @@ public class PacketCreator {
             p.writeByte(chr.getStance());
         }
 
+        // Foothold ID (NOT getFh(), which returns a Y coordinate for StatEffect).
+        // The client uses this to bind the character to a platform and pick the render layer;
+        // a 0 here leaves it unbound, drawing remote players behind ladders/ropes/tiles.
+        // Ladder/rope (0x8000 | index) is not encoded here: bots always enter a map on the
+        // ground, and climbing states are conveyed by the MOVE_PLAYER broadcasts instead
+        // (see BotMovementManager.resolveBroadcastFhId).
         p.writeShort(chr.getFootholdId());
         p.writeByte(0);
         Pet[] pet = chr.getPets();
