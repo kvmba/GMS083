@@ -74,14 +74,9 @@ public class ByteBufOutPacket implements OutPacket {
         byteBuf.writeByte(value ? 1 : 0);
     }
 
-    // TEMP experiment: force GBK for every outgoing string, ignoring the per-client charset.
-    // If the garbled yellow notice clears up, the cause is server-side charset selection;
-    // if it persists, that text is not produced by this path at all.
-    private static final java.nio.charset.Charset GBK = java.nio.charset.Charset.forName("GBK");
-
     @Override
     public void writeString(String value) {
-        byte[] bytes = (value == null ? "" : value).getBytes(GBK);
+        byte[] bytes = value.getBytes(CharsetConstants.getCharset(ThreadLocalUtil.getClientLang()));
         writeShort(bytes.length);
         writeBytes(bytes);
     }
