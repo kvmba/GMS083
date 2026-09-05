@@ -4986,10 +4986,27 @@ public class Character extends AbstractCharacterObject {
         Point pos = this.getPosition();
         pos.y -= 6;
 
-        if (map.getFootholds().findBelow(pos) == null) {
+        if (map == null || map.getFootholds() == null || map.getFootholds().findBelow(pos) == null) {
             return 0;
         } else {
             return map.getFootholds().findBelow(pos).getY1();
+        }
+    }
+
+    /**
+     * 返回角色当前所站 foothold 的 ID（SN）。
+     * 与 getFh() 不同：getFh() 返回的是 Y 坐标（供 StatEffect 等做坐标计算），
+     * 而客户端 SPAWN_PLAYER 包的 foothold 字段按 ID 匹配平台来决定绘制层级，
+     * 因此发包时必须使用本方法。
+     */
+    public int getFootholdId() {
+        Point pos = this.getPosition();
+        pos.y -= 6;
+
+        if (map == null || map.getFootholds() == null || map.getFootholds().findBelow(pos) == null) {
+            return 0;
+        } else {
+            return map.getFootholds().findBelow(pos).getId();
         }
     }
 

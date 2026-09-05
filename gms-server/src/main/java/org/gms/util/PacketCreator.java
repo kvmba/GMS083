@@ -1973,7 +1973,7 @@ public class PacketCreator {
             p.writeByte(chr.getStance());
         }
 
-        p.writeShort(0);//chr.getFh()
+        p.writeShort(chr.getFootholdId());
         p.writeByte(0);
         Pet[] pet = chr.getPets();
         for (byte i = 0; i < 3; i++) {
