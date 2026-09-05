@@ -147,11 +147,11 @@ public class InventoryService {
 
     private Character getCharacterById(int characterId) {
         for (World world : Server.getInstance().getWorlds()) {
-            Optional<Character> characterOptional = world.getPlayerStorage().getAllCharacters().stream()
-                    .filter(c -> Objects.equals(c.getId(), characterId))
-                    .findFirst();
-            if (characterOptional.isPresent()) {
-                return characterOptional.get();
+            // storage 以角色 id 为键，直接查表即可；getAllCharacters() 会拷贝整个在线列表，
+            // 每个背包行都拷贝一次，在线人数上千时是 O(rows * online) 的分配风暴。
+            Character character = world.getPlayerStorage().getCharacterById(characterId);
+            if (character != null) {
+                return character;
             }
         }
         return null;
