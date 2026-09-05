@@ -1974,20 +1974,11 @@ public class PacketCreator {
         }
 
         // Foothold ID (NOT getFh(), which returns a Y coordinate for StatEffect).
-        //
-        // Why this matters despite the MOVE_PLAYER fh being dead data: a remote player's
-        // draw layer is set ONCE here, on spawn. The client reads this short in
-        // CUser_DecodeSpawnPacket (0x97F6E0) -> FootholdTree_LookupFootholdById, then
-        // sub_9B1288 stores it and sub_9B12A8 turns it into the layer fields
-        // CUser+0x130/+0x134. With 0 the lookup fails and the character falls back to the
-        // default layer (7), which sits below ladders/ropes/tiles.
-        //
-        // This path only ever takes a GROUND foothold id — there is no ladder/rope branch
-        // (no FootholdTree_FindLadderOrRope on it) — so climbing still cannot be expressed
-        // from here. The fh carried by MOVE_PLAYER is ignored by the client entirely:
-        // CMovePath::Decode stores it at CMovePath+0x2C but its only caller, sub_68B371,
-        // never reads it. See the comment in
-        // BotMovementManager.resolveBroadcastFhId (solomapling-plugin).
+        // The client uses this to bind the character to a platform and pick the render layer;
+        // a 0 here leaves it unbound, drawing remote players behind ladders/ropes/tiles.
+        // Ladder/rope (0x8000 | index) is not encoded here: bots always enter a map on the
+        // ground, and climbing states are conveyed by the MOVE_PLAYER broadcasts instead
+        // (see BotMovementManager.resolveBroadcastFhId).
         p.writeShort(chr.getFootholdId());
         p.writeByte(0);
         Pet[] pet = chr.getPets();
