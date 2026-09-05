@@ -53,7 +53,7 @@ import java.util.concurrent.ScheduledFuture;
 public class ReactorActionManager extends AbstractPlayerInteraction {
     private final Reactor reactor;
     private final Invocable iv;
-    private ScheduledFuture<?> sprayTask = null;
+    private volatile ScheduledFuture<?> sprayTask = null;
 
     public ReactorActionManager(Client c, Reactor reactor, Invocable iv) {
         super(c);
@@ -192,10 +192,14 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
             final float worldMesoRate = c.getWorldServer().getMesoRate();
 
             dropPos.x -= (12 * items.size());
-
             sprayTask = TimerManager.getInstance().register(() -> {
                 if (dropItems.isEmpty()) {
-                    sprayTask.cancel(false);
+                    // register() 初始延迟为 0，首轮可能在 sprayTask 赋值完成前就执行，
+                    // 这里取局部快照做 null 检测，最坏情况下一轮再取消。
+                    ScheduledFuture<?> task = sprayTask;
+                    if (task != null) {
+                        task.cancel(false);
+                    }
                     return;
                 }
 
@@ -220,6 +224,17 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
 
                 dropPos.x += 25;
             }, 200);
+        }
+    }
+
+    /**
+     * 取消当前的喷射/掉落定时任务（如果存在）。
+     */
+    public void cancelSprayTask() {
+        ScheduledFuture<?> task = sprayTask;
+        if (task != null) {
+            task.cancel(false);
+            sprayTask = null;
         }
     }
 
