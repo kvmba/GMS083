@@ -735,7 +735,7 @@ public class HiredMerchant extends AbstractMapObject {
             return true;
         }
         // 查库不持 items 锁：避免购买/上架被开店与换图路径阻塞。
-        Boolean banned;
+        boolean banned;
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement("SELECT a.banned, a.tempban > CURRENT_TIMESTAMP AS temporarily_banned FROM accounts a JOIN characters c ON c.accountid = a.id WHERE c.id = ?")) {
             ps.setInt(1, ownerId);
@@ -743,10 +743,10 @@ public class HiredMerchant extends AbstractMapObject {
                 banned = !rs.next() || rs.getInt("banned") == 1 || rs.getBoolean("temporarily_banned");
             }
         } catch (SQLException | RuntimeException e) {
-            // 无法确定封禁状态时只拒绝本次开店，不置 ownerBanned，避免数据库抖动误伤正常店主。
+            // 无法确定封禁状态时按封禁处理（fail-closed）：调用方会据此收店并注销注册，
+            // 若不注销该店会滞留在 world 注册表，导致店主此后永远无法再开店。
             log.error(I18nUtil.getLogMessage("HiredMerchant.open.checkFailed", ownerId), e);
-            open.set(false);
-            return false;
+            banned = true;
         }
 
         synchronized (items) {
