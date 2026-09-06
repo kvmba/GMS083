@@ -366,6 +366,10 @@ public class Character extends AbstractCharacterObject {
     private final Map<Integer, Summon> summons = new LinkedHashMap<>();
     private final Map<Integer, CooldownValueHolder> coolDowns = new LinkedHashMap<>();
     private final EnumMap<Disease, Pair<DiseaseValueHolder, MobSkill>> diseases = new EnumMap<>(Disease.class);
+    // debuff 消失后的短暂免疫截止时间,value 为 Server 时钟下的毫秒时间戳,懒清理
+    private final EnumMap<Disease, Long> debuffImmuneUntil = new EnumMap<>(Disease.class);
+    /** debuff 消失后,同类 debuff 的免疫时长(毫秒),写死 8 秒 */
+    private static final long DEBUFF_IMMUNE_DURATION = 8000L;
     @Getter
     @Setter
     private byte[] quickSlotLoaded;
@@ -2618,7 +2622,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     public void giveDebuff(final Disease disease, MobSkill skill) {
-        if (!hasDisease(disease) && getDiseasesSize() < 2) {
+        if (!hasDisease(disease) && !isDebuffImmune(disease) && getDiseasesSize() < 2) {
             if (!(disease == Disease.SEDUCE || disease == Disease.STUN)) {
                 if (hasActiveBuff(Bishop.HOLY_SHIELD)) {
                     return;
@@ -2649,6 +2653,28 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
+    /**
+     * 判断某类 debuff 是否仍处于消失后的免疫期内(同类 debuff 消失后 8 秒内不再中同一种)。
+     */
+    private boolean isDebuffImmune(final Disease disease) {
+        chrLock.lock();
+        try {
+            Long immuneUntil = debuffImmuneUntil.get(disease);
+            if (immuneUntil == null) {
+                return false;
+            }
+
+            if (immuneUntil <= Server.getInstance().getCurrentTime()) {
+                debuffImmuneUntil.remove(disease);
+                return false;
+            }
+
+            return true;
+        } finally {
+            chrLock.unlock();
+        }
+    }
+
     public void dispelDebuff(Disease debuff) {
         if (hasDisease(debuff)) {
             long mask = debuff.getValue();
@@ -2664,6 +2690,8 @@ public class Character extends AbstractCharacterObject {
             try {
                 diseases.remove(debuff);
                 diseaseExpires.remove(debuff);
+                // 消失后进入 8 秒免疫期,期间不会再中同一种 debuff
+                debuffImmuneUntil.put(debuff, Server.getInstance().getCurrentTime() + DEBUFF_IMMUNE_DURATION);
             } finally {
                 chrLock.unlock();
             }
