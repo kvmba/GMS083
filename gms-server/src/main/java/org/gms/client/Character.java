@@ -368,8 +368,8 @@ public class Character extends AbstractCharacterObject {
     private final EnumMap<Disease, Pair<DiseaseValueHolder, MobSkill>> diseases = new EnumMap<>(Disease.class);
     // debuff 消失后的短暂免疫截止时间,value 为 Server 时钟下的毫秒时间戳,懒清理
     private final EnumMap<Disease, Long> debuffImmuneUntil = new EnumMap<>(Disease.class);
-    /** debuff 消失后,同类 debuff 的免疫时长(毫秒),写死 8 秒 */
-    private static final long DEBUFF_IMMUNE_DURATION = 8000L;
+    /** debuff 消失后,同类 debuff 的免疫时长(毫秒),写死 5 秒 */
+    private static final long DEBUFF_IMMUNE_DURATION = 5000L;
     @Getter
     @Setter
     private byte[] quickSlotLoaded;
@@ -2654,7 +2654,7 @@ public class Character extends AbstractCharacterObject {
     }
 
     /**
-     * 判断某类 debuff 是否仍处于消失后的免疫期内(同类 debuff 消失后 8 秒内不再中同一种)。
+     * 判断某类 debuff 是否仍处于消失后的免疫期内(同类 debuff 消失后 5 秒内不再中同一种)。
      */
     private boolean isDebuffImmune(final Disease disease) {
         chrLock.lock();
@@ -2690,7 +2690,7 @@ public class Character extends AbstractCharacterObject {
             try {
                 diseases.remove(debuff);
                 diseaseExpires.remove(debuff);
-                // 消失后进入 8 秒免疫期,期间不会再中同一种 debuff
+                // 消失后进入 5 秒免疫期,期间不会再中同一种 debuff
                 debuffImmuneUntil.put(debuff, Server.getInstance().getCurrentTime() + DEBUFF_IMMUNE_DURATION);
             } finally {
                 chrLock.unlock();
