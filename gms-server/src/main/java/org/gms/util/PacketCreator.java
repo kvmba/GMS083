@@ -5199,11 +5199,12 @@ public class PacketCreator {
         p.writeString(hm.getDescription());
         p.writeByte(0x10); //TODO SLOTS, which is 16 for most stores...slotMax
         p.writeInt(hm.isOwner(chr) ? chr.getMerchantMeso() : chr.getMeso());
-        p.writeByte(hm.getItems().size());
-        if (hm.getItems().isEmpty()) {
+        List<PlayerShopItem> items = hm.getItems();
+        p.writeByte(items.size());
+        if (items.isEmpty()) {
             p.writeByte(0);//Hmm??
         } else {
-            for (PlayerShopItem item : hm.getItems()) {
+            for (PlayerShopItem item : items) {
                 p.writeShort(item.getBundles());
                 p.writeShort(item.getItem().getQuantity());
                 p.writeInt(item.getPrice());
@@ -5217,8 +5218,9 @@ public class PacketCreator {
         final OutPacket p = OutPacket.create(SendOpcode.PLAYER_INTERACTION);
         p.writeByte(PlayerInteractionHandler.Action.UPDATE_MERCHANT.getCode());
         p.writeInt(hm.isOwner(chr) ? chr.getMerchantMeso() : chr.getMeso());
-        p.writeByte(hm.getItems().size());
-        for (PlayerShopItem item : hm.getItems()) {
+        List<PlayerShopItem> items = hm.getItems();
+        p.writeByte(items.size());
+        for (PlayerShopItem item : items) {
             p.writeShort(item.getBundles());
             p.writeShort(item.getItem().getQuantity());
             p.writeInt(item.getPrice());

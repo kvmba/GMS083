@@ -259,7 +259,7 @@ public class HiredMerchant extends AbstractMapObject {
 
     public void takeItemBack(int slot, Character chr) {
         synchronized (items) {
-            if (ownerBanned || closing.get() || detached || !isOwner(chr) || isOpen()
+            if (ownerBanned || closing.get() || detached || !isOwner(chr)
                     || slot < 0 || slot >= items.size()) return;
             PlayerShopItem shopItem = items.get(slot);
             if (shopItem.isExist()) {
@@ -734,23 +734,26 @@ public class HiredMerchant extends AbstractMapObject {
             open.set(false);
             return true;
         }
+        // 查库不持 items 锁：避免购买/上架被开店与换图路径阻塞。
+        Boolean banned;
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement("SELECT a.banned, a.tempban > CURRENT_TIMESTAMP AS temporarily_banned FROM accounts a JOIN characters c ON c.accountid = a.id WHERE c.id = ?")) {
+            ps.setInt(1, ownerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                banned = !rs.next() || rs.getInt("banned") == 1 || rs.getBoolean("temporarily_banned");
+            }
+        } catch (SQLException | RuntimeException e) {
+            // 无法确定封禁状态时只拒绝本次开店，不置 ownerBanned，避免数据库抖动误伤正常店主。
+            log.error(I18nUtil.getLogMessage("HiredMerchant.open.checkFailed", ownerId), e);
+            open.set(false);
+            return false;
+        }
+
         synchronized (items) {
             if (ownerBanned || closing.get() || detached) return false;
-            // 创建时已注册，发布/维护结束时再查封禁，补住封号与开店交错的窗口。
-            try (Connection con = DatabaseConnection.getConnection();
-                 PreparedStatement ps = con.prepareStatement("SELECT a.banned, a.tempban > CURRENT_TIMESTAMP AS temporarily_banned FROM accounts a JOIN characters c ON c.accountid = a.id WHERE c.id = ?")) {
-                ps.setInt(1, ownerId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next() || rs.getInt("banned") == 1 || rs.getBoolean("temporarily_banned")) {
-                        ownerBanned = true;
-                        open.set(false);
-                        return false;
-                    }
-                }
-            } catch (SQLException | RuntimeException e) {
+            if (banned) {
                 ownerBanned = true;
                 open.set(false);
-                log.error(I18nUtil.getLogMessage("HiredMerchant.open.checkFailed", ownerId), e);
                 return false;
             }
             open.set(true);
