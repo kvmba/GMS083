@@ -740,7 +740,9 @@ public class HiredMerchant extends AbstractMapObject {
              PreparedStatement ps = con.prepareStatement("SELECT a.banned, a.tempban > CURRENT_TIMESTAMP AS temporarily_banned FROM accounts a JOIN characters c ON c.accountid = a.id WHERE c.id = ?")) {
             ps.setInt(1, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
-                banned = !rs.next() || rs.getInt("banned") == 1 || rs.getBoolean("temporarily_banned");
+                // 查不到角色记录说明店主不是真实角色（如人造/机器人商店），不能按封禁处理，
+                // 否则这类商店会被 setOpen 判为封禁而全部收店。封禁判定只在记录存在时生效。
+                banned = rs.next() && (rs.getInt("banned") == 1 || rs.getBoolean("temporarily_banned"));
             }
         } catch (SQLException | RuntimeException e) {
             // 无法确定封禁状态时按封禁处理（fail-closed）：调用方会据此收店并注销注册，
