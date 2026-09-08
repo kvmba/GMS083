@@ -40,7 +40,15 @@ public class PlayerStorage {
     private final Lock wlock;
 
     public PlayerStorage() {
-        ReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
+        // NOT fair. A fair read/write lock serialises readers and writers strictly in arrival
+        // order, so a steady stream of readers starves the writers - and the writers are the ones
+        // registering characters. A startup dump showed dozens of threads parked in getSize()
+        // holding the read lock while addPlayer() sat on the write lock and made no progress:
+        // each wave of bot spawns is doing both at once, thousands of times.
+        //
+        // Unfair lets a reader jump ahead of a queued writer, which is what keeps the throughput
+        // up. Nothing here depends on lock fairness - callers only need the maps to be consistent.
+        ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         this.rlock = readWriteLock.readLock();
         this.wlock = readWriteLock.writeLock();
     }
