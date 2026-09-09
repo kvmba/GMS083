@@ -263,7 +263,7 @@ public enum ItemFactory {
 
                                 if (mit.equals(InventoryType.EQUIP) || mit.equals(InventoryType.EQUIPPED)) {
                                     Equip equip = (Equip) item;
-                                    psEquip.setInt(1, rs.getInt(1));
+                                    psEquip.setLong(1, rs.getLong(1));
                                     psEquip.setInt(2, equip.getUpgradeSlots());
                                     psEquip.setInt(3, equip.getLevel());
                                     psEquip.setInt(4, equip.getStr());
@@ -339,7 +339,7 @@ public enum ItemFactory {
                     while (rs.next()) {
                         short bundles = 0;
                         try (PreparedStatement psBundle = con.prepareStatement("SELECT `bundles` FROM `inventorymerchant` WHERE `inventoryitemid` = ?")) {
-                            psBundle.setInt(1, rs.getInt("inventoryitemid"));
+                            psBundle.setLong(1, rs.getLong("inventoryitemid"));
 
                             try (ResultSet rs2 = psBundle.executeQuery()) {
                                 if (rs2.next()) {
@@ -408,7 +408,7 @@ public enum ItemFactory {
                     final InventoryType mit = pair.getRight();
                     i++;
 
-                    final int genKey;
+                    final long genKey;
                     // Item
                     try (PreparedStatement ps = con.prepareStatement("INSERT INTO `inventoryitems` VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
                         ps.setInt(1, value);
@@ -430,13 +430,13 @@ public enum ItemFactory {
                                 throw new RuntimeException("Inserting item failed.");
                             }
 
-                            genKey = rs.getInt(1);
+                            genKey = rs.getLong(1);
                         }
                     }
 
                     // Merchant
                     try (PreparedStatement ps = con.prepareStatement("INSERT INTO `inventorymerchant` VALUES (DEFAULT, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
-                        ps.setInt(1, genKey);
+                        ps.setLong(1, genKey);
                         ps.setInt(2, id);
                         ps.setInt(3, bundles);
                         ps.executeUpdate();
@@ -445,7 +445,7 @@ public enum ItemFactory {
                     // Equipment
                     if (mit.equals(InventoryType.EQUIP) || mit.equals(InventoryType.EQUIPPED)) {
                         try (PreparedStatement ps = con.prepareStatement("INSERT INTO `inventoryequipment` VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
-                            ps.setInt(1, genKey);
+                            ps.setLong(1, genKey);
 
                             Equip equip = (Equip) item;
                             ps.setInt(2, equip.getUpgradeSlots());
