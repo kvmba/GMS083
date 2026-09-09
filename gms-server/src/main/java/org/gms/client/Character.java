@@ -8124,11 +8124,11 @@ public class Character extends AbstractCharacterObject {
                             if (!rs.next()) {
                                 throw new SQLException("批量插入任务状态后未返回自增ID");
                             }
-                            int questStatusId = rs.getInt(1);
+                            long questStatusId = rs.getLong(1);
 
                             for (int mob : qs.getProgress().keySet()) {
                                 psProgress.setInt(1, id);
-                                psProgress.setInt(2, questStatusId);
+                                psProgress.setLong(2, questStatusId);
                                 psProgress.setInt(3, mob);
                                 psProgress.setString(4, qs.getProgress(mob));
                                 psProgress.addBatch();
@@ -8136,7 +8136,7 @@ public class Character extends AbstractCharacterObject {
 
                             for (int i = 0; i < qs.getMedalMaps().size(); i++) {
                                 psMedal.setInt(1, id);
-                                psMedal.setInt(2, questStatusId);
+                                psMedal.setLong(2, questStatusId);
                                 psMedal.setInt(3, qs.getMedalMaps().get(i));
                                 psMedal.addBatch();
                             }
