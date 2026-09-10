@@ -19,4 +19,25 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.15.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <debug>false</debug>
+                    <debuglevel>none</debuglevel>
+                    <parameters>false</parameters>
+                    <!-- <debug>false</debug> alone does NOT emit -g for javac; strip
+                         line numbers / local variable tables / source file attributes. -->
+                    <compilerArgs>
+                        <arg>-g:none</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
