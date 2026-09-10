@@ -58,7 +58,32 @@ public class MapManager {
         return getMap(mapid);
     }
 
-    private synchronized MapleMap loadMapFromWz(int mapid, boolean cache) {
+    /**
+     * Loads a map NOT under the instance monitor, then publishes it under the write lock with a
+     * re-check, so exactly one MapleMap per id is ever visible to callers.
+     *
+     * <p>Not synchronized, and that is the point. This used to be
+     * {@code private synchronized}, which held this MapManager's monitor across
+     * {@link MapFactory#loadMapFromWz} - a slow WZ read plus a database round trip. While holding
+     * that monitor it could end up needing a script call, and a script calling
+     * {@code getMapFactory().getMap()} back into this class needs the same monitor from a thread
+     * already holding the scripting engine's lock ({@code SynchronizedInvocable}). The two paths
+     * take the locks in opposite orders, so the server deadlocks: every task parks with no CPU
+     * and no IO. Loading outside the monitor removes one side of that cycle.
+     *
+     * <p>The monitor was also doing a second job: de-duplication. Two threads missing on the same
+     * mapId used to serialise on it, so only one loaded and the other picked the result out of
+     * the cache. Without it both would build their own MapleMap and publish it, and the two
+     * halves of the map - players, monster respawns, the item monitor - would split across two
+     * instances: a split brain where some characters cannot see others. The re-check under the
+     * write lock restores that: the loser of the race returns the winner's instance instead of
+     * publishing its own, so callers never observe two different maps for one id.
+     *
+     * <p>The costly case is two threads racing one cold id: the map is built twice and one result
+     * is discarded. That is a wasted WZ read on a path that is already slow, and it is the
+     * deliberate trade - correctness over one redundant load.
+     */
+    private MapleMap loadMapFromWz(int mapid, boolean cache) {
         MapleMap map;
 
         if (cache) {
@@ -74,18 +99,25 @@ public class MapManager {
             }
         }
 
+        // Slow part, deliberately outside every lock: WZ read + DB access, and any script call
+        // reached from here must not be holding this instance's monitor.
         map = MapFactory.loadMapFromWz(mapid, world, channel, event);
 
-        if (cache) {
-            mapsWLock.lock();
-            try {
-                maps.put(mapid, map);
-            } finally {
-                mapsWLock.unlock();
-            }
+        if (!cache) {
+            return map; // disposable: never published, so no instance to prefer
         }
 
-        return map;
+        mapsWLock.lock();
+        try {
+            MapleMap winner = maps.get(mapid);
+            if (winner != null) {
+                return winner; // someone else published first - use theirs, discard ours
+            }
+            maps.put(mapid, map);
+            return map;
+        } finally {
+            mapsWLock.unlock();
+        }
     }
 
     public MapleMap getMap(int mapid) {
