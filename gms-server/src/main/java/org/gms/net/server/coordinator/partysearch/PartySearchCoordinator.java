@@ -103,7 +103,9 @@ public class PartySearchCoordinator {
     }
 
     public static boolean isInVicinity(int callerMapid, int calleeMapid) {
-        Set<Integer> vicinityMapids = mapNeighbors.get(calleeMapid);
+        // 取"发起方"地图所在的邻近图簇，判断目标地图是否落在其中。
+        // 原实现取的是 calleeMapid 自己的图簇再判断其是否包含自身，恒为 true，导致就近匹配完全失效。
+        Set<Integer> vicinityMapids = mapNeighbors.get(callerMapid);
 
         if (vicinityMapids != null) {
             return vicinityMapids.contains(calleeMapid);
