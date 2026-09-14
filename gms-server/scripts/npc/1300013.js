@@ -44,8 +44,13 @@ function action(mode, type, selection) {
 
                 var party = cm.getPlayer().getParty();
                 if (party != null) {
-                    if (!em.startInstance(party, cm.getMap(), 1)) {
-                        cm.sendOk("Another party is already challenging the boss in this channel.");
+                    var eli = em.getEligibleParty(party);
+                    if (eli.size() > 0) {
+                        if (!em.startInstance(party, cm.getMap(), 1)) {
+                            cm.sendOk("Another party is already challenging the boss in this channel.");
+                        }
+                    } else {
+                        cm.sendOk("You cannot start this challenge now: your party may not meet the size requirement, or some members are not on this map.");
                     }
                 } else {
                     if (!em.startInstance(cm.getPlayer())) {

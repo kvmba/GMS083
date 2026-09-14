@@ -44,8 +44,13 @@ function action(mode, type, selection) {
 
                 var party = cm.getPlayer().getParty();
                 if (party != null) {
-                    if (!em.startInstance(party, cm.getMap(), 1)) {
-                        cm.sendOk("另一个队伍已经在这个频道挑战boss了。");
+                    var eli = em.getEligibleParty(party);
+                    if (eli.size() > 0) {
+                        if (!em.startInstance(party, cm.getMap(), 1)) {
+                            cm.sendOk("另一个队伍已经在这个频道挑战boss了。");
+                        }
+                    } else {
+                        cm.sendOk("你目前无法开始这个挑战，因为你的队伍可能不符合人数要求，或者有队员不在这张地图上。");
                     }
                 } else {
                     if (!em.startInstance(cm.getPlayer())) {
