@@ -26,6 +26,7 @@ import lombok.Setter;
 import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.config.GameConfig;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.net.server.coordinator.matchchecker.MatchCheckerCoordinator;
 import org.gms.net.server.coordinator.matchchecker.MatchCheckerListenerFactory.MatchCheckerType;
 import org.gms.scripting.event.EventInstanceManager;
@@ -258,7 +259,9 @@ public class Party {
         lock.lock();
         try {
             for (PartyCharacter mpc : members) {
-                if (mpc.getId() != leaderId && (newLeadr == null || newLeadr.getLevel() < mpc.getLevel())) {
+                // 自动继任时跳过 bot：bot 不得接任玩家队长（仅限自动继任，bot 主动建队不受影响）。
+                if (mpc.getId() != leaderId && !HostHooks.isArtificial(mpc.getId())
+                        && (newLeadr == null || newLeadr.getLevel() < mpc.getLevel())) {
                     newLeadr = mpc;
                 }
             }

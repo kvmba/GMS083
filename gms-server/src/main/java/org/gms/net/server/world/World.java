@@ -1032,8 +1032,10 @@ public class World {
                             }
                         }
                     }
-                    party.setLeader(target);
                 }
+                // 前任队长可能已离线（getPlayer() 返回 null，例如队长掉线时由 removePartyPlayer 触发继任），
+                // 此时仍必须完成队长移交，否则队伍会永久停留在一个已离线的队长身上，所有"仅队长可操作"的流程都会卡死。
+                party.setLeader(target);
                 break;
             default:
                 log.warn("Unhandled updateParty operation: {}", operation.name());

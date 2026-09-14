@@ -26,6 +26,7 @@ import org.gms.client.inventory.InventoryType;
 import org.gms.config.GameConfig;
 import org.gms.constants.game.GameConstants;
 import org.gms.constants.id.MapId;
+import org.gms.extension.runtime.HostHooks;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -915,7 +916,9 @@ public class Client extends ChannelInboundHandlerAdapter {
             if (party.getLeader().getId() == idz && map != null) {
                 PartyCharacter lchr = null;
                 for (PartyCharacter pchr : party.getMembers()) {
-                    if (pchr != null && pchr.getId() != idz && (lchr == null || lchr.getLevel() <= pchr.getLevel()) && map.getCharacterById(pchr.getId()) != null) {
+                    // 自动继任时跳过 bot：玩家队长掉线后不得由 bot 接任队长。
+                    if (pchr != null && pchr.getId() != idz && !HostHooks.isArtificial(pchr.getId())
+                            && (lchr == null || lchr.getLevel() <= pchr.getLevel()) && map.getCharacterById(pchr.getId()) != null) {
                         lchr = pchr;
                     }
                 }
