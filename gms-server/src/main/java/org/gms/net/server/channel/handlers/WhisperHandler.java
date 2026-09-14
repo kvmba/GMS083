@@ -28,6 +28,9 @@ import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.gms.extension.event.CharacterDirectChatEvent;
+import org.gms.extension.event.ChatType;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.server.ChatLogger;
 import org.gms.util.PacketCreator;
 import org.gms.util.PacketCreator.WhisperFlag;
@@ -103,6 +106,11 @@ public final class WhisperHandler extends AbstractPacketHandler {
         ChatLogger.log(user.getClient(), "Whisper To " + target.getName(), message);
 
         target.sendPacket(PacketCreator.getWhisperReceive(user.getName(), user.getClient().getChannel() - 1, user.isGM(), message));
+        // The whisper packet only reaches a real client. A plugin-owned character (SoloMapling bot)
+        // has none, so it answers through this event instead.
+        if (HostHooks.isArtificial(target)) {
+            HostHooks.publish(new CharacterDirectChatEvent(user, target, message, ChatType.WHISPER));
+        }
 
         boolean hidden = target.isHidden() && target.gmLevel() > user.gmLevel();
         user.sendPacket(PacketCreator.getWhisperResult(target.getName(), !hidden));

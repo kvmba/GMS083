@@ -24,14 +24,25 @@ package org.gms.net.server.channel.handlers;
 import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.autoban.AutobanFactory;
+import org.gms.extension.event.CharacterDirectChatEvent;
+import org.gms.extension.event.ChatType;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.gms.net.server.Server;
+import org.gms.net.server.guild.Alliance;
+import org.gms.net.server.guild.Guild;
+import org.gms.net.server.guild.GuildCharacter;
+import org.gms.net.server.world.Party;
+import org.gms.net.server.world.PartyCharacter;
 import org.gms.net.server.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gms.server.ChatLogger;
 import org.gms.util.PacketCreator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MultiChatHandler extends AbstractPacketHandler {
     private static final Logger log = LoggerFactory.getLogger(MultiChatHandler.class);
@@ -64,19 +75,85 @@ public final class MultiChatHandler extends AbstractPacketHandler {
         if (type == 0) {
             world.buddyChat(recipients, player.getId(), player.getName(), chattext);
             ChatLogger.log(c, "Buddy", chattext);
+            publishToArtificialRecipients(player, buddyRecipients(world, recipients, player), chattext, ChatType.BUDDY);
         } else if (type == 1 && player.getParty() != null) {
             world.partyChat(player.getParty(), chattext, player.getName());
             ChatLogger.log(c, "Party", chattext);
+            publishToArtificialRecipients(player, partyRecipients(player.getParty()), chattext, ChatType.PARTY);
         } else if (type == 2 && player.getGuildId() > 0) {
             Server.getInstance().guildChat(player.getGuildId(), player.getName(), player.getId(), chattext);
             ChatLogger.log(c, "Guild", chattext);
+            publishToArtificialRecipients(player, guildRecipients(player.getGuild()), chattext, ChatType.GUILD);
         } else if (type == 3 && player.getGuild() != null) {
             int allianceId = player.getGuild().getAllianceId();
             if (allianceId > 0) {
                 Server.getInstance().allianceMessage(allianceId, PacketCreator.multiChat(player.getName(), chattext, 3), player.getId(), -1);
                 ChatLogger.log(c, "Ally", chattext);
+                publishToArtificialRecipients(player, allianceRecipients(allianceId), chattext, ChatType.ALLIANCE);
             }
         }
         player.getAutoBanManager().spam(7);
+    }
+
+    /**
+     * The recipient sets mirror what the engine broadcast actually reaches, so the event and the
+     * packet agree. Buddy chat is the odd one: the client supplies the recipient ids and the engine
+     * only delivers to those on the sender's visible buddy list.
+     */
+    private static List<Character> buddyRecipients(World world, int[] recipients, Character sender) {
+        List<Character> out = new ArrayList<>(recipients.length);
+        for (int id : recipients) {
+            Character chr = world.getPlayerStorage().getCharacterById(id);
+            if (chr != null && chr.getBuddylist().containsVisible(sender.getId())) {
+                out.add(chr);
+            }
+        }
+        return out;
+    }
+
+    private static List<Character> partyRecipients(Party party) {
+        List<Character> out = new ArrayList<>();
+        for (PartyCharacter pc : party.getMembers()) {
+            if (pc != null && pc.getPlayer() != null) {
+                out.add(pc.getPlayer());
+            }
+        }
+        return out;
+    }
+
+    private static List<Character> guildRecipients(Guild guild) {
+        List<Character> out = new ArrayList<>();
+        if (guild == null) {
+            return out;
+        }
+        for (GuildCharacter mgc : guild.getMembers()) {
+            if (mgc != null && mgc.isOnline() && mgc.getCharacter() != null) {
+                out.add(mgc.getCharacter());
+            }
+        }
+        return out;
+    }
+
+    private static List<Character> allianceRecipients(int allianceId) {
+        List<Character> out = new ArrayList<>();
+        Alliance alliance = Server.getInstance().getAlliance(allianceId);
+        if (alliance == null) {
+            return out;
+        }
+        for (int gid : alliance.getGuilds()) {
+            out.addAll(guildRecipients(Server.getInstance().getGuild(gid)));
+        }
+        return out;
+    }
+
+    // A plugin-owned recipient has no real client to read the chat packet, so it answers through
+    // this event instead. Published once per artificial recipient; real recipients keep the packet.
+    private static void publishToArtificialRecipients(Character sender, List<Character> recipients,
+                                                      String message, ChatType type) {
+        for (Character recipient : recipients) {
+            if (HostHooks.isArtificial(recipient)) {
+                HostHooks.publish(new CharacterDirectChatEvent(sender, recipient, message, type));
+            }
+        }
     }
 }
