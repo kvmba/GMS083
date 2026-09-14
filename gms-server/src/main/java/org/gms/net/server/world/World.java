@@ -1765,7 +1765,14 @@ public class World {
     }
 
     public void runPlayerHpDecreaseSchedule() {
-        Map<Character, Integer> m = new HashMap<>(playerHpDec);
+        // SynchronizedMap.entrySet() returns the raw inner set, so the copy below iterates an
+        // unsynchronized WeakHashMap view. Concurrent add/remove from map-enter/leave threads (many
+        // more of them once the bot system is loaded) bumped modCount mid-copy, throwing
+        // ConcurrentModificationException. Lock on the map (its own mutex) for the snapshot.
+        Map<Character, Integer> m;
+        synchronized (playerHpDec) {
+            m = new HashMap<>(playerHpDec);
+        }
 
         for (Entry<Character, Integer> e : m.entrySet()) {
             Character chr = e.getKey();
