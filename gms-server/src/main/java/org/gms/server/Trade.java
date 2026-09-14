@@ -163,8 +163,14 @@ public class Trade {
         // 但如果 completeTrade 检查失败，会先 unlock 再 cancelTrade，正常客户端不会走 else 分支
         boolean bothLocked = isLocked() && partner != null && partner.isLocked();
         if (!bothLocked) {
-            for (Item item : items) {
-                InventoryManipulator.addFromDrop(chr.getClient(), item, show);
+            // Artificial participants hold virtual stock (their traded items are plugin-generated and
+            // never lived in a real inventory), so there is nothing to hand back. Returning them via
+            // addFromDrop also NPEs: bots share a single headless client whose getPlayer() is null.
+            // completeTrade() already skips delivery for them the same way; mirror it here.
+            if (!HostHooks.tradeRelaxInventoryChecks(chr.getId())) {
+                for (Item item : items) {
+                    InventoryManipulator.addFromDrop(chr.getClient(), item, show);
+                }
             }
             if (meso > 0) {
                 chr.gainMeso(meso, show, true, show);
