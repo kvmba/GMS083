@@ -430,9 +430,32 @@ public class MapFactory {
         return builder.toString();
     }
 
+    // The area node ("victoria", "ossyria", ...) that actually holds mapid in String.wz/Map.img.
+    //
+    // getMapStringName pins the area from the id's numeric range, but that table can't know about
+    // area nodes a regional WZ adds: the zh-CN Map.img keeps the whole 上海/嵩山 block (7xxxxxxxx)
+    // under a "china" node and the 5xxxxxxxx block under a "thai" node, neither of which the range
+    // table reaches, so the name came back empty. (The 8891xxxx block is duplicated under "jp" and
+    // "etc" for the same reason.) Resolve by id when the range's node doesn't own it — but keep the
+    // range lookup first so the common case stays a single path walk.
+    private static Data getMapNameData(int mapid) {
+        Data node = nameData.getChildByPath(getMapStringName(mapid));
+        if (node != null && node.getChildByPath("mapName") != null) {
+            return node;
+        }
+        String id = Integer.toString(mapid);
+        for (Data area : nameData.getChildren()) {
+            Data candidate = area.getChildByPath(id);
+            if (candidate != null) {
+                return candidate;
+            }
+        }
+        return node;
+    }
+
     public static String loadPlaceName(int mapid) {
         try {
-            return DataTool.getString("mapName", nameData.getChildByPath(getMapStringName(mapid)), "");
+            return DataTool.getString("mapName", getMapNameData(mapid), "");
         } catch (Exception e) {
             return "";
         }
@@ -440,7 +463,7 @@ public class MapFactory {
 
     public static String loadStreetName(int mapid) {
         try {
-            return DataTool.getString("streetName", nameData.getChildByPath(getMapStringName(mapid)), "");
+            return DataTool.getString("streetName", getMapNameData(mapid), "");
         } catch (Exception e) {
             return "";
         }
