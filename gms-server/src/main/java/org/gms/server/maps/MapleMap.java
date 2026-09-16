@@ -2042,7 +2042,14 @@ public class MapleMap {
     public Point getGroundBelow(Point pos) {
         Point spos = new Point(pos.x, pos.y - 14); // Using -14 fixes spawning pets causing a lot of issues.
         spos = calcPointBelow(spos);
-        spos.y--;//shouldn't be null!
+        if (spos == null) {
+            // calcPointBelow returns null when no foothold lies below 'pos' - a warp portal can sit
+            // over a gap (verified on map 600010600's st01 respawn point), so this is reachable in
+            // normal play, not just a malformed map. Every caller needs a point (pet/mob/door
+            // placement), so fall back to the given position instead of NPEing on the dereference.
+            return new Point(pos.x, pos.y);
+        }
+        spos.y--;
         return spos;
     }
 
