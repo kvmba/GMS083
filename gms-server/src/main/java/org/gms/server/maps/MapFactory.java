@@ -453,9 +453,27 @@ public class MapFactory {
         return node;
     }
 
+    // A map image that carries no data of its own may still declare info/link to a template map
+    // (Nexon ships hundreds of id-only stubs that way). Such a stub has no entry in Map.img, so the
+    // name came back empty — even though loadMapFromWz already follows that same link for the map's
+    // geometry. Follow it here too, one hop like loadMapFromWz, so a stub reports the name of the map
+    // it copies. Maps that do have a Map.img entry take the branch above unchanged.
+    private static String loadLinkedName(int mapid, String field) {
+        Data node = getMapNameData(mapid);
+        if (node != null) {
+            return DataTool.getString(field, node, "");
+        }
+        Data infoData = mapSource.getData(getMapName(mapid)).getChildByPath("info");
+        String link = DataTool.getString(infoData.getChildByPath("link"), "");
+        if (link.isEmpty()) {
+            return "";
+        }
+        return DataTool.getString(field, getMapNameData(Integer.parseInt(link)), "");
+    }
+
     public static String loadPlaceName(int mapid) {
         try {
-            return DataTool.getString("mapName", getMapNameData(mapid), "");
+            return loadLinkedName(mapid, "mapName");
         } catch (Exception e) {
             return "";
         }
@@ -463,7 +481,7 @@ public class MapFactory {
 
     public static String loadStreetName(int mapid) {
         try {
-            return DataTool.getString("streetName", getMapNameData(mapid), "");
+            return loadLinkedName(mapid, "streetName");
         } catch (Exception e) {
             return "";
         }
