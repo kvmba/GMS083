@@ -53,6 +53,7 @@
         <fastjson2.version>2.0.47</fastjson2.version>
         <mybatis-flex.version>1.8.9</mybatis-flex.version>
         <swagger.version>2.5.0</swagger.version>
+        <woodstox.version>7.1.0</woodstox.version> <!-- Fast StAX XML parser (WZ loading) -->
     </properties>
 
     <dependencyManagement>
@@ -113,6 +114,11 @@
             <groupId>net.jcip</groupId>
             <artifactId>jcip-annotations</artifactId>
             <version>${jcip-annotations.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.woodstox</groupId>
+            <artifactId>woodstox-core</artifactId>
+            <version>${woodstox.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>

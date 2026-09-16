@@ -66,20 +66,16 @@ public class XMLWZFile implements DataProvider {
     @Override
     public synchronized Data getData(String path) {
         Path dataFile = root.resolve(path + ".xml");
-        Path imageDataDir = root.resolve(path);
         if (!Files.exists(dataFile)) {
             return null;
         }
-        final XMLDomMapleData domMapleData;
         try (FileInputStream fis = new FileInputStream(dataFile.toString())) {
-            domMapleData = new XMLDomMapleData(fis, imageDataDir.getParent());
+            return XMLWZData.parse(fis);
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Datafile " + path + " does not exist in " + root.toAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        return domMapleData;
     }
 
 	@Override
