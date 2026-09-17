@@ -2775,7 +2775,11 @@ public class MapleMap {
         Pet[] pets = chr.getPets();
         for (Pet pet : pets) {
             if (pet != null) {
-                pet.setPos(getGroundBelow(chr.getPosition()));
+                // 进图时宠物与主人同坐标、不吸附地面：位置保持一致，客户端接管物理自然落地。
+                // fh 必须为 0——否则会残留上一张图的 fh，客户端以 fh 为准反算坐标，宠物被吸到
+                // 新图同 id 的 foothold 上（位置残留 bug）。
+                pet.setPos(chr.getPosition());
+                pet.setFh(0);
                 chr.sendPacket(PacketCreator.showPet(chr, pet, false, false));
             } else {
                 break;
