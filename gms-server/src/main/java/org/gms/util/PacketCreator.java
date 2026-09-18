@@ -45,12 +45,14 @@ import org.gms.client.inventory.ModifyInventory;
 import org.gms.client.inventory.Pet;
 import org.gms.client.keybind.KeyBinding;
 import org.gms.client.keybind.QuickslotBinding;
+import org.gms.constants.game.CharacterStance;
 import org.gms.constants.game.CommodityFlag;
 import org.gms.dao.entity.ModifiedCashItemDO;
 import org.gms.model.pojo.NewYearCardRecord;
 import org.gms.client.status.MonsterStatus;
 import org.gms.client.status.MonsterStatusEffect;
 import org.gms.config.GameConfig;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.constants.game.ExpTable;
 import org.gms.constants.game.GameConstants;
 import org.gms.constants.id.ItemId;
@@ -1973,7 +1975,19 @@ public class PacketCreator {
             p.writeByte(chr.getStance());
         }
 
-        p.writeShort(0);//chr.getFh()
+        // fh：SPAWN_PLAYER 的 foothold 字段会驱动远程角色的绘制层级
+        // （FootholdTree_LookupFootholdById -> CUser+0x130/+0x134）。发 0 时查找失败，远程角色被降到
+        // 默认最低层、被前景装饰/绳索遮挡。
+        // 仅对“人造角色（bot）”填真实 foothold ID：真人客户端会持续上报自己的移动，层级本来不会坏，
+        // 不动真人的包（保持其现有行为）；bot 进图后本引擎不再重算其层号，只能靠这一处修。
+        // 又因同一字段也用于“位置吸附”、且进图路径只有地面分支（无绳索/空中分支），bot 不在实地
+        // （爬梯/绳索、跳跃、游泳）时脚下往往仍有地面，填它的 id 会被进图观察者吸附到地面 —— 故仅
+        // “站在地面”时发 id，其余状态发 0，观察者随后靠移动包纠正。
+        int stance = chr.getStance();
+        boolean onFoot = !CharacterStance.isClimbing(stance)
+                && !CharacterStance.isJumping(stance)
+                && !CharacterStance.isSwimming(stance);
+        p.writeShort(HostHooks.isArtificial(chr) && onFoot ? chr.getFootholdId() : 0);
         p.writeByte(0);
         Pet[] pet = chr.getPets();
         for (byte i = 0; i < 3; i++) {

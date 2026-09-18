@@ -5034,6 +5034,22 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
+    /**
+     * 返回角色当前所站 foothold 的 ID（SN）。
+     * 与 getFh() 不同：getFh() 返回的是 Y 坐标（供 StatEffect 等做坐标计算），
+     * 而客户端 SPAWN_PLAYER 包的 foothold 字段按 ID 匹配平台来决定绘制层级
+     * （CUser_DecodeSpawnPacket -> LookupFootholdById -> 写 CUser+0x130/+0x134），
+     * 发送 0 会让查找失败，远程角色被降到默认最低层，从而被前景装饰/绳索遮挡。
+     * 因此发包时必须使用本方法。
+     */
+    public int getFootholdId() {
+        Point pos = this.getPosition();
+        pos.y -= 6;
+
+        Foothold fh = map.getFootholds().findBelow(pos);
+        return fh == null ? 0 : fh.getId();
+    }
+
     public int getMapId() {
         if (map != null) {
             return map.getId();
