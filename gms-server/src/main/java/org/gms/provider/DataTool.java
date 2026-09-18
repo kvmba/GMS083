@@ -207,6 +207,35 @@ public class DataTool {
         return getPoint(pointData);
     }
 
+    /**
+     * Parses a WZ numeric literal without depending on a {@link java.util.Locale}, which the old
+     * {@link java.text.NumberFormat} path did. The v83 tree mixes two conventions: every {@code <float>}
+     * (map {@code info/fs}, {@code mobRate}, …) writes its fraction with a dot ("0.2", "1.5"), while a
+     * handful of {@code <double>} ({@code unitPrice}, {@code recovery}) write it with a comma ("0,3").
+     * A single {@code NumberFormat} can only honour one of the two, so whichever Locale it was built
+     * with corrupted the other — with {@code Locale.FRANCE} every {@code fs} became 0 and snow maps
+     * (El Nath) stopped being slippery for every character.
+     * <p>
+     * The two conventions never appear together in one literal (verified across the whole tree: no
+     * numeric tag carries both a dot and a comma, no grouping separators, no scientific notation), so
+     * the separator is chosen by content: a dot wins when present, otherwise a comma is the fraction.
+     * Returns {@code 0} when the value is null/unparseable, matching the previous lenient behaviour.
+     */
+    public static Number parseNumber(String value) {
+        if (value == null) {
+            return 0;
+        }
+        String v = value.trim();
+        if (v.indexOf(',') >= 0 && v.indexOf('.') < 0) {
+            v = v.replace(',', '.');
+        }
+        try {
+            return Double.parseDouble(v);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     public static String getFullDataPath(Data data) {
         String path = "";
         DataEntity myData = data;

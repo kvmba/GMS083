@@ -22,9 +22,9 @@
 package org.gms.provider.wz;
 
 import com.ctc.wstx.stax.WstxInputFactory;
-import org.gms.constants.game.GameConstants;
 import org.gms.provider.Data;
 import org.gms.provider.DataEntity;
+import org.gms.provider.DataTool;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -247,13 +247,13 @@ public class XMLWZData implements Data {
     public Object getData() {
         switch (type) {
             case DOUBLE:
-                return GameConstants.parseNumber(attr("value")).doubleValue();
+                return DataTool.parseNumber(attr("value")).doubleValue();
             case FLOAT:
-                return GameConstants.parseNumber(attr("value")).floatValue();
+                return DataTool.parseNumber(attr("value")).floatValue();
             case INT:
-                return GameConstants.parseNumber(attr("value")).intValue();
+                return DataTool.parseNumber(attr("value")).intValue();
             case SHORT:
-                return GameConstants.parseNumber(attr("value")).shortValue();
+                return DataTool.parseNumber(attr("value")).shortValue();
             case STRING:
             case UOL:
                 return attr("value");
