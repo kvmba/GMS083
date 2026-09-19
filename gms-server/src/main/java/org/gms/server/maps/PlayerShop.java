@@ -170,6 +170,7 @@ public class PlayerShop extends AbstractMapObject {
                 for (int i = 0; i < 3; i++) {
                     if (visitors[i] != null && visitors[i].getId() == visitor.getId()) {
                         visitor.setSlot(-1);    //absolutely cant remove player slot for late players without dc'ing them... heh
+                        final int leavingSeat = i + 1;  // the departing visitor's seat, before the shift below
 
                         for (int j = i; j < 2; j++) {
                             if (visitors[j] != null) {
@@ -187,7 +188,7 @@ public class PlayerShop extends AbstractMapObject {
                             }
                         }
 
-                        this.broadcastRestoreToVisitors();
+                        this.broadcastRestoreToVisitors(leavingSeat);
                         owner.getMap().broadcastMessage(PacketCreator.updatePlayerShopBox(this));
                         return;
                     }
@@ -356,12 +357,18 @@ public class PlayerShop extends AbstractMapObject {
         }
     }
 
-    public void broadcastRestoreToVisitors() {
+    // Re-syncs the remaining visitors after a visitor left: signal the departure, then rebuild the
+    // room so their seat/roster is correct again. The leave packet must name the DEPARTING seat,
+    // not the receiver's own seat: the client (CPersonalShopDlg::OnLeave) shows a "you have left"
+    // notice - with an empty message for an unmapped reason - only when the seat in the packet
+    // equals its own position. Sending each visitor its own seat would therefore close the browsing
+    // window of every remaining visitor with a blank popup.
+    public void broadcastRestoreToVisitors(int leavingSeat) {
         visitorLock.lock();
         try {
             for (int i = 0; i < 3; i++) {
                 if (visitors[i] != null) {
-                    visitors[i].sendPacket(PacketCreator.getPlayerShopRemoveVisitor(i + 1));
+                    visitors[i].sendPacket(PacketCreator.getPlayerShopRemoveVisitor(leavingSeat));
                 }
             }
 
