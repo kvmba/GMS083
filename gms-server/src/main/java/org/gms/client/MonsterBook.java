@@ -98,15 +98,41 @@ public final class MonsterBook {
     private void calculateLevel() {
         lock.lock();
         try {
-            int collectionExp = (normalCard + specialCard);
+            bookLevel = levelForTotal(normalCard + specialCard);
+        } finally {
+            lock.unlock();
+        }
+    }
 
-            int level = 0, expToNextlevel = 1;
-            do {
-                level++;
-                expToNextlevel += level * 10;
-            } while (collectionExp >= expToNextlevel);
+    /**
+     * The book level a collection of {@code total} cards shows. Split out so both
+     * {@link #calculateLevel()} (after a card is added) and {@link #setCardCounts(int, int)}
+     * (when an aggregate is preset) derive it the same way.
+     */
+    private static int levelForTotal(int total) {
+        int level = 0, expToNextlevel = 1;
+        do {
+            level++;
+            expToNextlevel += level * 10;
+        } while (total >= expToNextlevel);
+        return level;
+    }
 
-            bookLevel = level;  // thanks IxianMace for noticing book level differing between book UI and character info UI
+    /**
+     * Preset the collection's aggregate counters - the four values the character-info window
+     * shows - without touching the per-card map. The book level is recomputed from the totals
+     * exactly as {@link #addCard} would, so the shown level always matches the counts.
+     *
+     * <p>Intended for presenting a plausible collection on an artificial player (see the
+     * SoloMapling plugin's BotDetailSystem) without replaying individual card pickups, which
+     * would broadcast and require a live client.
+     */
+    public void setCardCounts(int normalCard, int specialCard) {
+        lock.lock();
+        try {
+            this.normalCard = normalCard;
+            this.specialCard = specialCard;
+            this.bookLevel = levelForTotal(normalCard + specialCard);
         } finally {
             lock.unlock();
         }
