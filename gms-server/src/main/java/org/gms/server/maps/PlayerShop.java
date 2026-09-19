@@ -36,10 +36,8 @@ import org.gms.extension.runtime.HostHooks;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,7 +58,6 @@ public class PlayerShop extends AbstractMapObject {
     private int boughtnumber = 0;
     private final List<String> bannedList = new ArrayList<>();
     private final List<Pair<Character, String>> chatLog = new LinkedList<>();
-    private final Map<Integer, Byte> chatSlot = new LinkedHashMap<>();
     private final Lock visitorLock = new ReentrantLock(true);
 
     public PlayerShop(Character owner, String description, int itemid) {
@@ -439,19 +436,25 @@ public class PlayerShop extends AbstractMapObject {
             if (chatLog.size() > 25) {
                 chatLog.remove(0);
             }
-            chatSlot.put(player.getId(), s);
         }
 
         broadcast(PacketCreator.getPlayerShopChat(player, chat, s));
     }
 
+    // Replays the shop's chat history to the players still inside it (after a seat shift caused by
+    // someone leaving). The seat is recomputed from the CURRENT occupants for each line, because
+    // removeVisitor shifts seat indices: a remembered slot would name a seat that no longer holds
+    // its speaker. A speaker who has already left has no seat at all, so the line is dropped -
+    // otherwise the receiving client renders a speaker-less (blank) chat entry.
     private void recoverChatLog() {
         synchronized (chatLog) {
             for (Pair<Character, String> it : chatLog) {
                 Character chr = it.getLeft();
-                Byte pos = chatSlot.get(chr.getId());
+                if (chr != owner && !isVisitor(chr)) {
+                    continue;   // the speaker already left the shop: no seat to address
+                }
 
-                broadcastToVisitors(PacketCreator.getPlayerShopChat(chr, it.getRight(), pos));
+                broadcastToVisitors(PacketCreator.getPlayerShopChat(chr, it.getRight(), getVisitorSlot(chr)));
             }
         }
     }
