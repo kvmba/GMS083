@@ -150,7 +150,7 @@ public class PlayerShop extends AbstractMapObject {
                     visitors[i] = null;
                     visitor.setSlot(-1);
 
-                    this.broadcast(PacketCreator.getPlayerShopRemoveVisitor(i + 1));
+                    this.broadcast(PacketCreator.getPlayerShopRemoveVisitor(i + 1, PacketCreator.PLAYER_SHOP_LEAVE_USER_REQUEST));
                     owner.getMap().broadcastMessage(PacketCreator.updatePlayerShopBox(this));
                     return;
                 }
@@ -174,7 +174,7 @@ public class PlayerShop extends AbstractMapObject {
 
                         for (int j = i; j < 2; j++) {
                             if (visitors[j] != null) {
-                                owner.sendPacket(PacketCreator.getPlayerShopRemoveVisitor(j + 1));
+                                owner.sendPacket(PacketCreator.getPlayerShopRemoveVisitor(j + 1, PacketCreator.PLAYER_SHOP_LEAVE_USER_REQUEST));
                             }
                             visitors[j] = visitors[j + 1];
                             if (visitors[j] != null) {
@@ -359,16 +359,16 @@ public class PlayerShop extends AbstractMapObject {
 
     // Re-syncs the remaining visitors after a visitor left: signal the departure, then rebuild the
     // room so their seat/roster is correct again. The leave packet must name the DEPARTING seat,
-    // not the receiver's own seat: the client (CPersonalShopDlg::OnLeave) shows a "you have left"
-    // notice - with an empty message for an unmapped reason - only when the seat in the packet
-    // equals its own position. Sending each visitor its own seat would therefore close the browsing
-    // window of every remaining visitor with a blank popup.
+    // not the receiver's own seat: the client (CPersonalShopDlg::OnLeave) closes the shop window
+    // and pops a notice - with an empty message for an unmapped reason - only when the seat in the
+    // packet equals its own position. Sending each visitor its own seat would therefore close the
+    // browsing window of every remaining visitor with a blank popup.
     public void broadcastRestoreToVisitors(int leavingSeat) {
         visitorLock.lock();
         try {
             for (int i = 0; i < 3; i++) {
                 if (visitors[i] != null) {
-                    visitors[i].sendPacket(PacketCreator.getPlayerShopRemoveVisitor(leavingSeat));
+                    visitors[i].sendPacket(PacketCreator.getPlayerShopRemoveVisitor(leavingSeat, PacketCreator.PLAYER_SHOP_LEAVE_USER_REQUEST));
                 }
             }
 

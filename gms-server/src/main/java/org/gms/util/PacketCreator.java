@@ -3172,13 +3172,36 @@ public class PacketCreator {
         return p;
     }
 
-    public static Packet getPlayerShopRemoveVisitor(int slot) {
-        OutPacket p = OutPacket.create(SendOpcode.PLAYER_INTERACTION);
+    // Second payload byte of a player-shop EXIT (0x0A) when a visitor leaves. The leaver never
+    // receives this packet, so an ordinary departure carries no notice text (the client shows an
+    // empty CUtilDlg::Notice only for the leaver's own seat, which is never addressed here).
+    public static final int PLAYER_SHOP_LEAVE_USER_REQUEST = 0;
+
+    /**
+     * Player-shop visitor-leave notification, sent to the players still inside the shop.
+     *
+     * <p>Payload is {@code [seat:1][reason:1]}. The client (GMS083 {@code CPersonalShopDlg::OnLeave})
+     * reads exactly those two bytes and, only when {@code seat} equals its OWN position, closes the
+     * shop window and pops {@code CUtilDlg::Notice(reasonText)}. Therefore {@code seat} must name the
+     * seat whose occupant left - never the receiver's own seat, or the receiver believes it is the
+     * one leaving and the window closes with a notice.
+     *
+     * <p>{@code reason} selects the notice text, mirroring the client's leave-reason switch
+     * (083 StringPool ids in parentheses): 1 (401), 3 (417), 5 (430), 6 (5569),
+     * 14 (418, "The items are out of stock."), 15 (431, time-limit ban). Any other value -
+     * including {@link #PLAYER_SHOP_LEAVE_USER_REQUEST} - has no text.
+     */
+    public static Packet getPlayerShopRemoveVisitor(int slot, int reason) {
+        final OutPacket p = OutPacket.create(SendOpcode.PLAYER_INTERACTION);
         p.writeByte(PlayerInteractionHandler.Action.EXIT.getCode());
-        if (slot != 0) {
-            p.writeShort(slot);
-        }
+        p.writeByte(slot);
+        p.writeByte(reason);
         return p;
+    }
+
+    /** Script-facing single-argument overload; see {@link #getPlayerShopRemoveVisitor(int, int)}. */
+    public static Packet getPlayerShopRemoveVisitor(int slot) {
+        return getPlayerShopRemoveVisitor(slot, PLAYER_SHOP_LEAVE_USER_REQUEST);
     }
 
     public static Packet getTradePartnerAdd(Character chr) {
