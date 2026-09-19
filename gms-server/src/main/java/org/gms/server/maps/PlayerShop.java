@@ -392,7 +392,11 @@ public class PlayerShop extends AbstractMapObject {
             try {
                 for (int i = 0; i < 3; i++) {
                     if (visitors[i] != null) {
-                        visitors[i].sendPacket(PacketCreator.shopErrorMessage(10, 1));
+                        // Each guest must be told its OWN seat left: the client (CPersonalShopDlg::OnLeave)
+                        // closes the window only when the packet's seat equals its own position, and reads
+                        // the next byte as the notice reason. A hardcoded seat would leave guests on other
+                        // seats unstuck (and can disconnect one whose seat has no avatar).
+                        visitors[i].sendPacket(PacketCreator.getPlayerShopRemoveVisitor(i + 1, PacketCreator.PLAYER_SHOP_LEAVE_HOST_OUT));
                         visitorList.add(visitors[i]);
                     }
                 }
@@ -538,11 +542,13 @@ public class PlayerShop extends AbstractMapObject {
         }
 
         Character target = null;
+        int targetSeat = 0;
         visitorLock.lock();
         try {
             for (int i = 0; i < 3; i++) {
                 if (visitors[i] != null && visitors[i].getName().equals(name)) {
                     target = visitors[i];
+                    targetSeat = i + 1;
                     break;
                 }
             }
@@ -551,7 +557,9 @@ public class PlayerShop extends AbstractMapObject {
         }
 
         if (target != null) {
-            target.sendPacket(PacketCreator.shopErrorMessage(5, 1));
+            // The banned guest is addressed on its OWN seat with the "banned" reason; the client pops
+            // the notice only when the seat matches its position (see getPlayerShopRemoveVisitor).
+            target.sendPacket(PacketCreator.getPlayerShopRemoveVisitor(targetSeat, PacketCreator.PLAYER_SHOP_LEAVE_BANNED));
             removeVisitor(target);
         }
     }

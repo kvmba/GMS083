@@ -3176,6 +3176,10 @@ public class PacketCreator {
     // receives this packet, so an ordinary departure carries no notice text (the client shows an
     // empty CUtilDlg::Notice only for the leaver's own seat, which is never addressed here).
     public static final int PLAYER_SHOP_LEAVE_USER_REQUEST = 0;
+    /** Guest's own seat when the owner closes the shop; text: "The shop is closed." (083 StringPool 417). */
+    public static final int PLAYER_SHOP_LEAVE_HOST_OUT = 3;
+    /** Banned guest's own seat; text: "The user has been banned." (083 StringPool 430). */
+    public static final int PLAYER_SHOP_LEAVE_BANNED = 5;
 
     /**
      * Player-shop visitor-leave notification, sent to the players still inside the shop.
