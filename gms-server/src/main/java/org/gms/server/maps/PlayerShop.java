@@ -170,25 +170,19 @@ public class PlayerShop extends AbstractMapObject {
                 for (int i = 0; i < 3; i++) {
                     if (visitors[i] != null && visitors[i].getId() == visitor.getId()) {
                         visitor.setSlot(-1);    //absolutely cant remove player slot for late players without dc'ing them... heh
-                        final int leavingSeat = i + 1;  // the departing visitor's seat, before the shift below
 
-                        for (int j = i; j < 2; j++) {
-                            if (visitors[j] != null) {
-                                owner.sendPacket(PacketCreator.getPlayerShopRemoveVisitor(j + 1, PacketCreator.PLAYER_SHOP_LEAVE_USER_REQUEST));
-                            }
-                            visitors[j] = visitors[j + 1];
-                            if (visitors[j] != null) {
-                                visitors[j].setSlot(j);
-                            }
-                        }
-                        visitors[2] = null;
-                        for (int j = i; j < 2; j++) {
-                            if (visitors[j] != null) {
-                                owner.sendPacket(PacketCreator.getPlayerShopNewVisitor(visitors[j], j + 1));
-                            }
-                        }
+                        // Clear only the departing seat; the remaining guests KEEP their positions. Seats
+                        // must stay stable: the client pins every guest to the position it read on entry
+                        // (OnEnterResult), and the leave/close packets name a seat the receiver compares
+                        // against its own position. Compacting the array here would silently renumber a
+                        // remaining guest, so its client and the server would disagree on its seat - the
+                        // mismatch closes windows with blank popups and can disconnect. HiredMerchant and
+                        // the reference GMS095 server likewise leave a hole instead of renumbering.
+                        visitors[i] = null;
 
-                        this.broadcastRestoreToVisitors(leavingSeat);
+                        owner.sendPacket(PacketCreator.getPlayerShopRemoveVisitor(i + 1, PacketCreator.PLAYER_SHOP_LEAVE_USER_REQUEST));
+
+                        this.broadcastRestoreToVisitors(i + 1);
                         owner.getMap().broadcastMessage(PacketCreator.updatePlayerShopBox(this));
                         return;
                     }
