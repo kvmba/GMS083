@@ -2363,6 +2363,20 @@ public class PacketCreator {
         return p;
     }
 
+    /**
+     * The energy attack (能量攻击, 0xBD) - the packet a client's touch attack is echoed back as.
+     *
+     * <p>A client sends its charged touch (Energy Charge / Body Pressure) as TOUCH_MONSTER_ATTACK
+     * (0x2F) and the server answers with this opcode. The four attack packets carry the same body,
+     * so this is {@link #addAttackBody} behind a different header, exactly as the v83 protocol has
+     * it - the client then plays the real strike pose instead of only watching the mob's HP drop.</p>
+     */
+    public static Packet energyAttack(Character chr, int skill, int skilllevel, int stance, int numAttackedAndDamage, Map<Integer, List<Integer>> damage, int speed, int direction, int display) {
+        final OutPacket p = OutPacket.create(SendOpcode.ENERGY_ATTACK);
+        addAttackBody(p, chr, skill, skilllevel, stance, numAttackedAndDamage, 0, damage, speed, direction, display);
+        return p;
+    }
+
     private static void addAttackBody(OutPacket p, Character chr, int skill, int skilllevel, int stance, int numAttackedAndDamage, int projectile, Map<Integer, List<Integer>> damage, int speed, int direction, int display) {
         p.writeInt(chr.getId());
         p.writeByte(numAttackedAndDamage);
