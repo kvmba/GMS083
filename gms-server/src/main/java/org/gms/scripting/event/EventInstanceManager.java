@@ -26,6 +26,7 @@ import org.gms.client.Skill;
 import org.gms.client.SkillFactory;
 import org.gms.config.GameConfig;
 import org.gms.constants.inventory.ItemConstants;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.net.server.coordinator.world.EventRecallCoordinator;
 import org.gms.net.server.world.Party;
 import org.gms.net.server.world.PartyCharacter;
@@ -263,12 +264,51 @@ public class EventInstanceManager {
     }
 
     /**
+     * Whether a character may take part in an event instance.
+     *
+     * <p>Real players are admitted when the world considers them present. <b>Artificial
+     * characters (headless bots) never satisfy that test</b> - their {@code Character.loggedIn}
+     * stays false, because {@code CharacterService.loadCharFromDB(cid, client, false)} returns
+     * before its {@code setLoggedIn(true)} - but they are real, present participants with a map,
+     * a party and a client. {@link HostHooks#isArtificial} is how every other reachability gate
+     * in the engine treats them (see {@code MapleMap}, {@code Monster}, {@code PlayerShop}).
+     *
+     * <p>Without this clause a bot in a party that starts a party quest is silently dropped from
+     * the instance: it never gets {@code setEventInstance}, never reaches the quest's
+     * {@code playerEntry} (so it is never warped in), and is missing from
+     * {@code getPlayerCount()} - which means the body-count puzzles can never be solved and the
+     * run dies at its first area check.
+     *
+     * <p>Primitive-argument form on purpose: the rule is then unit-testable, which the previous
+     * "verified by reading the source" version of this gate was not (see
+     * {@code EventInstanceManagerAdmissionTest}).
+     */
+    static boolean admitsParticipant(boolean loggedInWorld, boolean artificial) {
+        return loggedInWorld || artificial;
+    }
+
+    /**
+     * Whether a character leaving may run the exit path.
+     *
+     * <p>Deliberately the narrower test of the two - it does not care about {@code awayFromWorld},
+     * matching the original gate, so a player standing in the cash shop still gets his
+     * {@code playerExit}. The artificial clause is what lets a bot warped off an event map be
+     * unregistered instead of lingering in {@code chars} forever, inflating
+     * {@code getPlayerCount()} for the rest of the instance's life.
+     */
+    static boolean admitsLeaver(boolean loggedIn, boolean artificial) {
+        return loggedIn || artificial;
+    }
+
+    /**
      * 注册玩家到事件实例
      * @param chr 要注册的玩家角色
      * @param runEntryScript 是否执行入口脚本
      */
     public synchronized void registerPlayer(final Character chr, boolean runEntryScript) {
-        if (chr == null || !chr.isLoggedInWorld() || disposed) {
+        if (chr == null
+                || !admitsParticipant(chr.isLoggedInWorld(), HostHooks.isArtificial(chr))
+                || disposed) {
             return;
         }
 
@@ -294,7 +334,8 @@ public class EventInstanceManager {
     }
 
     public void exitPlayer(final Character chr) {
-        if (chr == null || !chr.isLoggedIn()) {
+        if (chr == null
+                || !admitsLeaver(chr.isLoggedIn(), HostHooks.isArtificial(chr))) {
             return;
         }
 
