@@ -19,8 +19,7 @@ public class OutPacketLogger extends ChannelOutboundHandlerAdapter implements Pa
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
-        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof OutPacket packet
-                && !LoggingUtil.isFilteredMoveSendPacket(LoggingUtil.readFirstShort(packet.getBytes()))) {
+        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof OutPacket packet) {
             log(packet);
         }
 
@@ -30,10 +29,13 @@ public class OutPacketLogger extends ChannelOutboundHandlerAdapter implements Pa
     @Override
     public void log(Packet packet) {
         final byte[] content = packet.getBytes();
+        final short opcode = LoggingUtil.readFirstShort(content);
+        if (LoggingUtil.isFilteredMoveSendPacket(opcode)) {
+            return;
+        }
         final int packetLength = content.length;
 
         if (packetLength <= LOG_CONTENT_THRESHOLD) {
-            final short opcode = LoggingUtil.readFirstShort(content);
             String opcodeHex = Integer.toHexString(opcode).toUpperCase();
             String opcodeName = getSendOpcodeName(opcode);
             String prefix = opcodeName == null ? "<UnknownPacket> " : "";

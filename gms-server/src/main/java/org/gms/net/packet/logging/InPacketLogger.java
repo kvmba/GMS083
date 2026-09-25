@@ -18,8 +18,7 @@ public class InPacketLogger extends ChannelInboundHandlerAdapter implements Pack
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof InPacket packet
-                && !LoggingUtil.isFilteredMoveRecvPacket(LoggingUtil.readFirstShort(packet.getBytes()))) {
+        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof InPacket packet) {
             log(packet);
         }
 
@@ -29,10 +28,13 @@ public class InPacketLogger extends ChannelInboundHandlerAdapter implements Pack
     @Override
     public void log(Packet packet) {
         final byte[] content = packet.getBytes();
+        final short opcode = LoggingUtil.readFirstShort(content);
+        if (LoggingUtil.isFilteredMoveRecvPacket(opcode)) {
+            return;
+        }
         final int packetLength = content.length;
 
         if (packetLength <= LOG_CONTENT_THRESHOLD) {
-            final short opcode = LoggingUtil.readFirstShort(content);
             final String opcodeHex = Integer.toHexString(opcode).toUpperCase();
             final String opcodeName = getRecvOpcodeName(opcode);
             final String prefix = opcodeName == null ? "<UnknownPacket> " : "";
