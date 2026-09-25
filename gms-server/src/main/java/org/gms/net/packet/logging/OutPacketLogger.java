@@ -19,7 +19,8 @@ public class OutPacketLogger extends ChannelOutboundHandlerAdapter implements Pa
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
-        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof OutPacket packet) {
+        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof OutPacket packet
+                && !LoggingUtil.isFilteredMoveSendPacket(LoggingUtil.readFirstShort(packet.getBytes()))) {
             log(packet);
         }
 

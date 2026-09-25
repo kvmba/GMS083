@@ -1,7 +1,9 @@
 package org.gms.net.packet.logging;
 
 import io.netty.buffer.Unpooled;
+import org.gms.config.GameConfig;
 import org.gms.net.opcodes.RecvOpcode;
+import org.gms.net.opcodes.SendOpcode;
 
 import java.util.Set;
 
@@ -22,5 +24,24 @@ public class LoggingUtil {
 
     public static boolean isIgnoredRecvPacket(short opcode) {
         return ignoredDebugRecvPackets.contains(opcode);
+    }
+
+    // 封包调试日志是否过滤玩家/宠物移动封包（开关关闭时过滤，开启时打印）
+    public static boolean isFilteredMoveRecvPacket(short opcode) {
+        return isFilteredMovePacket(opcode, (short) RecvOpcode.MOVE_PLAYER.getValue(), (short) RecvOpcode.MOVE_PET.getValue());
+    }
+
+    public static boolean isFilteredMoveSendPacket(short opcode) {
+        return isFilteredMovePacket(opcode, (short) SendOpcode.MOVE_PLAYER.getValue(), (short) SendOpcode.MOVE_PET.getValue());
+    }
+
+    private static boolean isFilteredMovePacket(short opcode, short playerMoveOpcode, short petMoveOpcode) {
+        if (opcode == playerMoveOpcode) {
+            return !GameConfig.getServerBoolean("use_debug_show_player_move");
+        }
+        if (opcode == petMoveOpcode) {
+            return !GameConfig.getServerBoolean("use_debug_show_pet_move");
+        }
+        return false;
     }
 }

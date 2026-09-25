@@ -18,7 +18,8 @@ public class InPacketLogger extends ChannelInboundHandlerAdapter implements Pack
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof InPacket packet) {
+        if (GameConfig.getServerBoolean("use_debug_show_packet") && msg instanceof InPacket packet
+                && !LoggingUtil.isFilteredMoveRecvPacket(LoggingUtil.readFirstShort(packet.getBytes()))) {
             log(packet);
         }
 
