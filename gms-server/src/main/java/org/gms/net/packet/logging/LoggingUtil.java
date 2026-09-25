@@ -26,22 +26,36 @@ public class LoggingUtil {
         return ignoredDebugRecvPackets.contains(opcode);
     }
 
-    // 封包调试日志是否过滤玩家/宠物移动封包（开关关闭时过滤，开启时打印）
+    // 封包调试日志是否过滤移动封包（对应开关关闭时过滤，开启时打印）
+    // 入站：玩家/宠物移动；出站：玩家/宠物/怪物移动（怪物移动日志由 use_debug_show_life_move 复用同一开关控制）
     public static boolean isFilteredMoveRecvPacket(short opcode) {
-        return isFilteredMovePacket(opcode, (short) RecvOpcode.MOVE_PLAYER.getValue(), (short) RecvOpcode.MOVE_PET.getValue());
+        if (opcode == (short) RecvOpcode.MOVE_PLAYER.getValue()) {
+            return isMoveLogOff("use_debug_show_player_move");
+        }
+        if (opcode == (short) RecvOpcode.MOVE_PET.getValue()) {
+            return isMoveLogOff("use_debug_show_pet_move");
+        }
+        if (opcode == (short) RecvOpcode.MOVE_LIFE.getValue()) {
+            return isMoveLogOff("use_debug_show_life_move");
+        }
+        return false;
     }
 
     public static boolean isFilteredMoveSendPacket(short opcode) {
-        return isFilteredMovePacket(opcode, (short) SendOpcode.MOVE_PLAYER.getValue(), (short) SendOpcode.MOVE_PET.getValue());
-    }
-
-    private static boolean isFilteredMovePacket(short opcode, short playerMoveOpcode, short petMoveOpcode) {
-        if (opcode == playerMoveOpcode) {
-            return !GameConfig.getServerBoolean("use_debug_show_player_move");
+        if (opcode == (short) SendOpcode.MOVE_PLAYER.getValue()) {
+            return isMoveLogOff("use_debug_show_player_move");
         }
-        if (opcode == petMoveOpcode) {
-            return !GameConfig.getServerBoolean("use_debug_show_pet_move");
+        if (opcode == (short) SendOpcode.MOVE_PET.getValue()) {
+            return isMoveLogOff("use_debug_show_pet_move");
+        }
+        if (opcode == (short) SendOpcode.MOVE_MONSTER.getValue()) {
+            return isMoveLogOff("use_debug_show_life_move");
         }
         return false;
+    }
+
+    // 开关关闭时过滤该移动封包，避免刷屏（与 use_debug_show_player_move/pet_move/life_move 语义一致）
+    private static boolean isMoveLogOff(String configCode) {
+        return !GameConfig.getServerBoolean(configCode);
     }
 }
