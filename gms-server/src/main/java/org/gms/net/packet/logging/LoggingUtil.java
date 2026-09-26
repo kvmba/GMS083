@@ -27,7 +27,7 @@ public class LoggingUtil {
     }
 
     // 封包调试日志是否过滤移动封包（对应开关关闭时过滤，开启时打印）
-    // 入站：玩家/宠物移动；出站：玩家/宠物/怪物移动（怪物移动日志由 use_debug_show_life_move 复用同一开关控制）
+    // 入站：玩家/宠物/怪物移动；出站：怪物移动及怪物移动反馈（均由 use_debug_show_life_move 控制日志）
     public static boolean isFilteredMoveRecvPacket(short opcode) {
         if (opcode == (short) RecvOpcode.MOVE_PLAYER.getValue()) {
             return isMoveLogOff("use_debug_show_player_move");
@@ -48,7 +48,8 @@ public class LoggingUtil {
         if (opcode == (short) SendOpcode.MOVE_PET.getValue()) {
             return isMoveLogOff("use_debug_show_pet_move");
         }
-        if (opcode == (short) SendOpcode.MOVE_MONSTER.getValue()) {
+        if (opcode == (short) SendOpcode.MOVE_MONSTER.getValue()
+                || opcode == (short) SendOpcode.MOVE_MONSTER_RESPONSE.getValue()) {
             return isMoveLogOff("use_debug_show_life_move");
         }
         return false;
