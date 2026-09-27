@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Matze
@@ -101,7 +102,7 @@ public class ItemInformationProvider {
     protected Map<Integer, Integer> wholePriceCache = new HashMap<>();
     protected Map<Integer, Double> unitPriceCache = new HashMap<>();
     protected Map<Integer, Integer> projectileWatkCache = new HashMap<>();
-    protected Map<Integer, Pair<String, String>> nameDescCache = new HashMap<>();
+    protected Map<Integer, Pair<String, String>> nameDescCache = new ConcurrentHashMap<>();
     protected Map<Integer, String> msgCache = new HashMap<>();
     protected Map<Integer, Boolean> accountItemRestrictionCache = new HashMap<>();
     protected Map<Integer, Boolean> dropRestrictionCache = new HashMap<>();
