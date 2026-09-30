@@ -26,92 +26,52 @@ import org.gms.client.Client;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerStorage {
-    private final Map<Integer, Character> storage = new LinkedHashMap<>();
-    private final Map<String, Character> nameStorage = new LinkedHashMap<>();
-    private final Lock rlock;
-    private final Lock wlock;
+    // ConcurrentHashMap, not a locked LinkedHashMap: the lock version serialised readers
+    // against writers, and startup bot-spawn waves do both thousands of times at once.
+    // A read/write lock there kept deadlocking startup in both directions (fair: readers
+    // starved writers; unfair: a queued writer made every new reader park behind it, so
+    // periodic readers like RespawnTask sat forever while the wave ran). CHM needs no
+    // lock at all - readers never block, and each caller only needs the map to be
+    // consistent, not a transaction across calls.
+    private final Map<Integer, Character> storage = new ConcurrentHashMap<>();
+    private final Map<String, Character> nameStorage = new ConcurrentHashMap<>();
 
     public PlayerStorage() {
-        // NOT fair. A fair read/write lock serialises readers and writers strictly in arrival
-        // order, so a steady stream of readers starves the writers - and the writers are the ones
-        // registering characters. A startup dump showed dozens of threads parked in getSize()
-        // holding the read lock while addPlayer() sat on the write lock and made no progress:
-        // each wave of bot spawns is doing both at once, thousands of times.
-        //
-        // Unfair lets a reader jump ahead of a queued writer, which is what keeps the throughput
-        // up. Nothing here depends on lock fairness - callers only need the maps to be consistent.
-        ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-        this.rlock = readWriteLock.readLock();
-        this.wlock = readWriteLock.writeLock();
     }
 
     public void addPlayer(Character chr) {
-        wlock.lock();
-        try {
-            storage.put(chr.getId(), chr);
-            nameStorage.put(chr.getName().toLowerCase(), chr);
-        } finally {
-            wlock.unlock();
-        }
+        storage.put(chr.getId(), chr);
+        nameStorage.put(chr.getName().toLowerCase(), chr);
     }
 
     public Character removePlayer(int chr) {
-        wlock.lock();
-        try {
-            Character mc = storage.remove(chr);
-            if (mc != null) {
-                nameStorage.remove(mc.getName().toLowerCase());
-            }
-
-            return mc;
-        } finally {
-            wlock.unlock();
+        Character mc = storage.remove(chr);
+        if (mc != null) {
+            nameStorage.remove(mc.getName().toLowerCase());
         }
+
+        return mc;
     }
 
     public Character getCharacterByName(String name) {
-        rlock.lock();
-        try {
-            return nameStorage.get(name.toLowerCase());
-        } finally {
-            rlock.unlock();
-        }
+        return nameStorage.get(name.toLowerCase());
     }
 
     public Character getCharacterById(int id) {
-        rlock.lock();
-        try {
-            return storage.get(id);
-        } finally {
-            rlock.unlock();
-        }
+        return storage.get(id);
     }
 
     public Collection<Character> getAllCharacters() {
-        rlock.lock();
-        try {
-            return new ArrayList<>(storage.values());
-        } finally {
-            rlock.unlock();
-        }
+        return new ArrayList<>(storage.values());
     }
 
     public final void disconnectAll() {
-        List<Character> chrList;
-        rlock.lock();
-        try {
-            chrList = new ArrayList<>(storage.values());
-        } finally {
-            rlock.unlock();
-        }
+        List<Character> chrList = new ArrayList<>(storage.values());
 
         for (Character mc : chrList) {
             Client client = mc.getClient();
@@ -120,20 +80,10 @@ public class PlayerStorage {
             }
         }
 
-        wlock.lock();
-        try {
-            storage.clear();
-        } finally {
-            wlock.unlock();
-        }
+        storage.clear();
     }
 
     public int getSize() {
-        rlock.lock();
-        try {
-            return storage.size();
-        } finally {
-            rlock.unlock();
-        }
+        return storage.size();
     }
 }
