@@ -51,6 +51,8 @@ public class Mist extends AbstractMapObject {
     private boolean isPoisonMist;
     private boolean isRecoveryMist;
     private final int skillDelay;
+    // Forced WZ level for owners whose skill level is unregistered (e.g. ambient bots); 0 = derive from owner.
+    private final int overrideLevel;
 
     public Mist(Rectangle mistPosition, Monster mob, MobSkill skill) {
         this.mistPosition = mistPosition;
@@ -60,9 +62,14 @@ public class Mist extends AbstractMapObject {
         isPoisonMist = true;
         isRecoveryMist = false;
         skillDelay = 0;
+        overrideLevel = 0;
     }
 
     public Mist(Rectangle mistPosition, Character owner, StatEffect source) {
+        this(mistPosition, owner, source, 0);
+    }
+
+    public Mist(Rectangle mistPosition, Character owner, StatEffect source, int overrideLevel) {
         this.mistPosition = mistPosition;
         this.owner = owner;
         this.source = source;
@@ -70,6 +77,7 @@ public class Mist extends AbstractMapObject {
         this.isMobMist = false;
         this.isRecoveryMist = false;
         this.isPoisonMist = false;
+        this.overrideLevel = overrideLevel;
         switch (source.getSourceId()) {
             case Evan.RECOVERY_AURA:
                 isRecoveryMist = true;
@@ -140,7 +148,8 @@ public class Mist extends AbstractMapObject {
 
     public final Packet makeSpawnData() {
         if (owner != null) {
-            return PacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().getId(), owner.getSkillLevel(SkillFactory.getSkill(source.getSourceId())), this);
+            int level = overrideLevel > 0 ? overrideLevel : owner.getSkillLevel(SkillFactory.getSkill(source.getSourceId()));
+            return PacketCreator.spawnMist(getObjectId(), owner.getId(), getSourceSkill().getId(), level, this);
         }
         return PacketCreator.spawnMobMist(getObjectId(), mob.getId(), skill.getId(), this);
     }
