@@ -282,6 +282,12 @@ public class EventInstanceManager {
      * <p>Primitive-argument form on purpose: the rule is then unit-testable, which the previous
      * "verified by reading the source" version of this gate was not (see
      * {@code EventInstanceManagerAdmissionTest}).
+     *
+     * <p>This is the ONE participant rule. The other party-wide gates that must admit bots the
+     * same way ({@code AbstractPlayerInteraction.warpParty}, {@code Expedition.getActiveMembers})
+     * read {@code HostHooks.isArtificial(chr) || chr.isLoggedInWorld()} against it rather than
+     * restating their own boolean - a gate that drifted from this one would admit a bot to the
+     * instance but drop it from every team warp that follows.
      */
     static boolean admitsParticipant(boolean loggedInWorld, boolean artificial) {
         return loggedInWorld || artificial;
