@@ -20,12 +20,7 @@
 package org.gms.net.server.coordinator.world;
 
 import org.gms.client.Character;
-import org.gms.util.Pair;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -49,48 +44,32 @@ public class InviteCoordinator {
         GUILD,
         ALLIANCE;
 
-        final ConcurrentHashMap<Integer, Object> invites;
-        final ConcurrentHashMap<Integer, Character> inviteFrom;
-        final ConcurrentHashMap<Integer, Integer> inviteTimeouts;
-        final ConcurrentHashMap<Integer, Object[]> inviteParams;
+        private final ConcurrentHashMap<Integer, Invitation> invites = new ConcurrentHashMap<>();
 
-        InviteType() {
-            invites = new ConcurrentHashMap<>();
-            inviteTimeouts = new ConcurrentHashMap<>();
-            inviteFrom = new ConcurrentHashMap<>();
-            inviteParams = new ConcurrentHashMap<>();
-        }
-
-        private Map<Integer, Object> getRequestsTable() {
-            return invites;
-        }
-
-        private Map<Integer, Integer> getRequestsTimeoutTable() {
-            return inviteTimeouts;
-        }
-
-        private Pair<Character, Object[]> removeRequest(Integer target) {
+        private void removeRequest(int target) {
             invites.remove(target);
-            Character from = inviteFrom.remove(target);
-            inviteTimeouts.remove(target);
-
-            return new Pair<>(from, inviteParams.remove(target));
         }
 
         private boolean addRequest(Character from, Object referenceFrom, int targetCid, Object[] params) {
-            Object v = invites.putIfAbsent(targetCid, referenceFrom);
-            if (v != null) {    // there was already an entry
-                return false;
-            }
-
-            inviteFrom.put(targetCid, from);
-            inviteTimeouts.put(targetCid, 0);
-            inviteParams.put(targetCid, params);
-            return true;
+            return invites.putIfAbsent(targetCid, new Invitation(from, referenceFrom, params)) == null;
         }
 
         private boolean hasRequest(int targetCid) {
             return invites.containsKey(targetCid);
+        }
+    }
+
+    /** Publish and consume the complete invitation together; identity distinguishes replacements. */
+    private static final class Invitation {
+        final Character from;
+        final Object reference;
+        final Object[] params;
+        int timeoutSweeps; // accessed only by ConcurrentHashMap.computeIfPresent
+
+        Invitation(Character from, Object reference, Object[] params) {
+            this.from = from;
+            this.reference = reference;
+            this.params = params;
         }
     }
 
@@ -104,24 +83,17 @@ public class InviteCoordinator {
     }
 
     public static InviteResult answerInvite(InviteType type, int targetCid, Object referenceFrom, boolean answer) {
-        Map<Integer, Object> table = type.getRequestsTable();
-
-        Character from = null;
-        InviteResultType result = InviteResultType.NOT_FOUND;
-        Pair<Character, Object[]> inviteInfo = null;
-
-        Object reference = table.get(targetCid);
-        if (referenceFrom.equals(reference)) {
-            inviteInfo = type.removeRequest(targetCid);
-            from = inviteInfo.getLeft();
-            if (from != null && !from.isLoggedInWorld()) {
-                from = null;
-            }
-
-            result = answer ? InviteResultType.ACCEPTED : InviteResultType.DENIED;
+        Invitation invitation = type.invites.get(targetCid);
+        if (invitation == null || !referenceFrom.equals(invitation.reference)
+                || !type.invites.remove(targetCid, invitation)) {
+            return new InviteResult(InviteResultType.NOT_FOUND, null, new Object[0]);
         }
-
-        return new InviteResult(result, from, inviteInfo != null ? inviteInfo.getRight() : new Object[0]);
+        Character from = invitation.from;
+        if (from != null && !from.isLoggedInWorld()) {
+            from = null;
+        }
+        return new InviteResult(answer ? InviteResultType.ACCEPTED : InviteResultType.DENIED,
+                from, invitation.params);
     }
 
     public static void removeInvite(InviteType type, int targetCid) {
@@ -136,20 +108,10 @@ public class InviteCoordinator {
 
     public static void runTimeoutSchedule() {
         for (InviteType it : InviteType.values()) {
-            Map<Integer, Integer> timeoutTable = it.getRequestsTimeoutTable();
-
-            if (!timeoutTable.isEmpty()) {
-                Set<Entry<Integer, Integer>> entrySet = new HashSet<>(timeoutTable.entrySet());
-                for (Entry<Integer, Integer> e : entrySet) {
-                    int eVal = e.getValue();
-
-                    if (eVal > 5) { // 3min to expire
-                        it.removeRequest(e.getKey());
-                    } else {
-                        timeoutTable.put(e.getKey(), eVal + 1);
-                    }
-                }
-            }
+            it.invites.forEach((target, observed) -> it.invites.computeIfPresent(target, (id, current) -> {
+                if (current != observed) return current; // never age a replacement from an old scan
+                return current.timeoutSweeps++ > 5 ? null : current;
+            }));
         }
     }
 
