@@ -25,6 +25,7 @@ package org.gms.server.expeditions;
 import org.gms.client.Character;
 import org.gms.constants.id.MapId;
 import org.gms.constants.id.MobId;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.net.packet.Packet;
 import org.gms.net.server.PlayerStorage;
 import org.gms.net.server.Server;
@@ -336,7 +337,7 @@ public class Expedition {
         List<Character> activeMembers = new LinkedList<>();
         for (Integer chrid : getMembers().keySet()) {
             Character chr = ps.getCharacterById(chrid);
-            if (chr != null && chr.isLoggedInWorld()) {
+            if (chr != null && (chr.isLoggedInWorld() || HostHooks.isArtificial(chr))) {
                 activeMembers.add(chr);
             }
         }

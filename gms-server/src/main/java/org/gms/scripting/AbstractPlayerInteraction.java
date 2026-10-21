@@ -39,6 +39,7 @@ import org.gms.net.server.Server;
 import org.gms.net.server.guild.Guild;
 import org.gms.net.server.world.Party;
 import org.gms.net.server.world.PartyCharacter;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.scripting.event.EventInstanceManager;
 import org.gms.scripting.event.EventManager;
 import org.gms.scripting.npc.NPCScriptManager;
@@ -162,7 +163,7 @@ public class AbstractPlayerInteraction {
 
     public void warpParty(int id, int portalId, int fromMinId, int fromMaxId) {
         for (Character mc : this.getPlayer().getPartyMembersOnline()) {
-            if (mc.isLoggedInWorld()) {
+            if (mc.isLoggedInWorld() || HostHooks.isArtificial(mc)) {
                 if (mc.getMapId() >= fromMinId && mc.getMapId() <= fromMaxId) {
                     mc.changeMap(id, portalId);
                 }
