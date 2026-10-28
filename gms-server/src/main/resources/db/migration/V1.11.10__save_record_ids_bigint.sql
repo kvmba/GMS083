@@ -2,7 +2,7 @@
 -- 覆盖 12 个自增主键，以及装备、雇佣商店和遗留快递表的物品关联列。
 -- 每列独立检查，已是 BIGINT（含 UNSIGNED）则跳过，兼容手工扩容和中断后重跑。
 -- 保留现有 ID、自增进度、默认值、主键及索引；不清表、不重置 AUTO_INCREMENT。
--- 任务关联 queststatusid 由 V1.11.7__queststatusid_bigint.sql 负责。
+-- 任务关联 queststatusid 由 V1.11.13__queststatusid_bigint.sql 负责。
 -- 仅在获准的部署维护窗口执行：类型变更可能重建大表、阻塞写入，DDL 会隐式提交。
 
 SET @save_id_bigint_sql = IF(
