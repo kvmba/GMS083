@@ -46,8 +46,9 @@ public class BotClient extends Client {
     }
 
     @Override
-    public void updateLoginState(int newState) {
+    public boolean updateLoginState(int newState) {
         // headless: no account row, no session registration
+        return true;
     }
 
     @Override

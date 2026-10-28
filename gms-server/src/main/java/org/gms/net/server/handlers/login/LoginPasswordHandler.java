@@ -117,7 +117,7 @@ public final class LoginPasswordHandler implements PacketHandler {
             c.sendPacket(PacketCreator.getPermBan(c.getGReason()));//crashes but idc :D
             return;
         } else if (loginok != 0) {
-            c.sendPacket(PacketCreator.getLoginFailed(loginok));
+            c.sendLoginFailure(loginok);
             return;
         }
         if (c.finishLogin() == 0) {
@@ -125,7 +125,7 @@ public final class LoginPasswordHandler implements PacketHandler {
             login(c);
             log.info(I18nUtil.getLogMessage("LoginPasswordHandler.timing.info1", login, authEnd - loginStart, banCheckEnd - authEnd, System.currentTimeMillis() - banCheckEnd));
         } else {
-            c.sendPacket(PacketCreator.getLoginFailed(7));
+            c.sendLoginFailure(7);
         }
     }
 
