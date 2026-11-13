@@ -70,11 +70,11 @@ function action(mode, type, selection) {
             if (status == 0) {
                 if (cm.getChar().getParty() != null) {
                     var shiu = "";
-                    if (cm.getPlayer().getFestivalPoints() >= 300) {
+                    if (cm.getPlayer().getFestivalPoints() >= 500) {
                         shiu += "#rA#k";
                         cm.sendOk("很遗憾，尽管你表现出色，但你要么平局要么输掉了这场战斗。下次胜利就属于你了！\r\n\r\n#b你的结果：" + shiu);
                         rnk = 10;
-                    } else if (cm.getPlayer().getFestivalPoints() >= 100) {
+                    } else if (cm.getPlayer().getFestivalPoints() >= 250) {
                         shiu += "#rB#k";
                         rnk = 20;
                         cm.sendOk("很遗憾，即使你表现出色，你要么平局要么失败了这场战斗。只差一点点，胜利就可能属于你了！\r\n\r\n#b你的结果：" + shiu);
@@ -95,22 +95,22 @@ function action(mode, type, selection) {
                 switch (rnk) {
                     case 10:
                         cm.warp(980000000, 0);
-                        cm.gainExp(17500);
+                        cm.gainExp(10000);
                         cm.dispose();
                         break;
                     case 20:
                         cm.warp(980000000, 0);
-                        cm.gainExp(1200);
+                        cm.gainExp(8500);
                         cm.dispose();
                         break;
                     case 30:
                         cm.warp(980000000, 0);
-                        cm.gainExp(5000);
+                        cm.gainExp(7000);
                         cm.dispose();
                         break;
                     case 40:
                         cm.warp(980000000, 0);
-                        cm.gainExp(2500);
+                        cm.gainExp(1000);
                         cm.dispose();
                         break;
                     default:
@@ -123,11 +123,11 @@ function action(mode, type, selection) {
             if (status == 0) {
                 if (cm.getChar().getParty() != null) {
                     var shi = "";
-                    if (cm.getPlayer().getFestivalPoints() >= 300) {
+                    if (cm.getPlayer().getFestivalPoints() >= 500) {
                         shi += "#rA#k";
                         rnk = 1;
                         cm.sendOk("恭喜你的胜利！表现太棒了！对方队伍毫无还手之力！希望下次也能有同样出色的表现！\r\n\r\n#b你的成绩：" + shi);
-                    } else if (cm.getPlayer().getFestivalPoints() >= 100) {
+                    } else if (cm.getPlayer().getFestivalPoints() >= 250) {
                         shi += "#rB#k";
                         rnk = 2;
                         cm.sendOk("恭喜你的胜利！太棒了！你对抗对方团队做得很好！再坚持一会儿，下次你肯定能拿到A！\r\n\r\n#b你的成绩：" + shi);
@@ -148,7 +148,7 @@ function action(mode, type, selection) {
                 switch (rnk) {
                     case 1:
                         cm.warp(980000000, 0);
-                        cm.gainExp(50000);
+                        cm.gainExp(30000);
                         cm.dispose();
                         break;
                     case 2:
@@ -163,7 +163,7 @@ function action(mode, type, selection) {
                         break;
                     case 4:
                         cm.warp(980000000, 0);
-                        cm.gainExp(19505);
+                        cm.gainExp(7500);
                         cm.dispose();
                         break;
                     default:
