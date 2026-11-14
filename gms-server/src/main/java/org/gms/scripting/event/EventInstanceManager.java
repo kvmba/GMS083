@@ -26,6 +26,7 @@ import org.gms.client.Skill;
 import org.gms.client.SkillFactory;
 import org.gms.config.GameConfig;
 import org.gms.constants.inventory.ItemConstants;
+import org.gms.extension.event.PartyQuestStageClearedEvent;
 import org.gms.extension.runtime.HostHooks;
 import org.gms.net.server.coordinator.world.EventRecallCoordinator;
 import org.gms.net.server.world.Party;
@@ -1376,6 +1377,7 @@ public class EventInstanceManager {
                 writeLock.unlock();
             }
         }
+        HostHooks.publish(new PartyQuestStageClearedEvent(this, map));
     }
 
     public final void recoverOpenedGate(Character chr, int thisMapId) {
