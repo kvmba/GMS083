@@ -68,6 +68,30 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         }
 
         Monster monster = (Monster) mmo;
+        List<Character> banishPlayers;
+        // A headless hit and a controller's in-flight move must not overwrite each other.
+        monster.lockMonster();
+        try {
+            // Damage/removal may have completed while this packet was waiting for the lock.
+            if (!monster.isAlive() || monster.getMap() != map || map.getMapObject(objectid) != monster
+                    || monster.isHitReactionActive()) {
+                // v83 OnCtrlAck calls SetActive(1), so even an ACK would cancel the pause.
+                return;
+            }
+            banishPlayers = handleMovement(p, c, player, map, monster, moveid);
+        } finally {
+            monster.unlockMonster();
+        }
+        if (banishPlayers != null) {
+            for (Character chr : banishPlayers) {
+                chr.changeMapBanish(monster.getBanish().getMap(), monster.getBanish().getPortal(), monster.getBanish().getMsg());
+            }
+        }
+    }
+
+    private List<Character> handleMovement(InPacket p, Client c, Character player, MapleMap map,
+                                            Monster monster, short moveid) {
+        int objectid = monster.getObjectId();
         List<Character> banishPlayers = null;
 
         byte pNibbles = p.readByte();
@@ -144,7 +168,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
 
         Boolean aggro = monster.aggroMoveLifeUpdate(player);
         if (aggro == null) {
-            return;
+            return null;
         }
 
         if (nextUse != null) {
@@ -173,11 +197,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
         } catch (EmptyMovementException e) {
         }
 
-        if (banishPlayers != null) {
-            for (Character chr : banishPlayers) {
-                chr.changeMapBanish(monster.getBanish().getMap(), monster.getBanish().getPortal(), monster.getBanish().getMsg());
-            }
-        }
+        return banishPlayers;
     }
 
     private static boolean inRangeInclusive(Byte pVal, Integer pMin, Integer pMax) {

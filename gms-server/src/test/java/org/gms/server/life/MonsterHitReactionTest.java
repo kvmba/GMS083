@@ -9,6 +9,7 @@ import org.gms.net.packet.Packet;
 import org.gms.net.packet.ByteBufInPacket;
 import org.gms.net.server.Server;
 import org.gms.net.server.channel.handlers.AbstractMovementPacketHandler;
+import org.gms.net.server.channel.handlers.MoveLifeHandler;
 import org.gms.property.ServiceProperty;
 import org.gms.server.TimerManager;
 import org.gms.server.maps.MapleMap;
@@ -31,6 +32,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -128,18 +130,147 @@ class MonsterHitReactionTest {
     }
 
     @Test
-    void reactionRestoresTheSameControllerAfterTheHitWithoutApplyingDamageAgain() {
+    void reactionRestoresTheSameControllerOnlyAfterTheHitWithoutApplyingDamageAgain() {
         mob.showHitReaction(attacker, 100, 0);
 
         Packet movement = movement();
         assertEquals(13, movement.getBytes()[8] & 0xff, "v83 hit1 = (6 << 1) | left");
+        verify(client, never()).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
+        now.addAndGet(400);
+        pending.removeFirst().run();
         var order = inOrder(map, client);
-        order.verify(map).broadcastMessage(movement, mob.getPosition());
         order.verify(client).sendPacket(argThat(p ->
-                (packet(p).getShort() & 0xffff) == SendOpcode.SPAWN_MONSTER_CONTROL.getValue()));
+                (packet(p).getShort() & 0xffff) == SendOpcode.SPAWN_MONSTER_CONTROL.getValue()
+                        && p.getBytes()[2] == 0));
+        order.verify(map).broadcastMessage(movement, mob.getPosition());
+        order.verify(client).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
         assertSame(controller, mob.getController());
         assertEquals(1000, mob.getHp());
         verify(controller, never()).stopControllingMonster(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1})
+    void aHitReplacesAWalkingStanceWithAStationaryPath(int movementType) {
+        mob.getStats().setMovetype(movementType);
+        mob.setStance(2);
+        mob.showHitReaction(attacker, 100, 0);
+        int stance = movementType == 1 ? 13 : 5;
+        assertEquals(stance, mob.getStance());
+        assertEquals(stance, movement().getBytes()[29] & 0xff);
+    }
+
+    @Test
+    void inFlightMovementCannotOverwriteTheHitAndMovementResumesAfterIt() {
+        mob = spy(mob);
+        doReturn(0).when(mob).canUseAttack(anyInt(), anyBoolean());
+        when(map.getMonsterByOid(123)).thenReturn(mob);
+        when(client.getPlayer()).thenReturn(controller);
+        when(map.getMapObject(123)).thenReturn(mob);
+        mob.showHitReaction(attacker, 100, 0);
+        Point hitPosition = new Point(mob.getPosition());
+        MoveLifeHandler handler = new MoveLifeHandler();
+
+        handler.handlePacket(walkingPacket(), client);
+
+        assertEquals(hitPosition, mob.getPosition());
+        verify(map, never()).moveMonster(any(), any());
+        verify(client, never()).sendPacket(argThat(p ->
+                (packet(p).getShort() & 0xffff) == SendOpcode.MOVE_MONSTER_RESPONSE.getValue()));
+        now.addAndGet(400);
+        pending.removeFirst().run();
+        handler.handlePacket(walkingPacket(), client);
+        assertEquals(new Point(120, -20), mob.getPosition());
+        verify(map).moveMonster(mob, new Point(120, -20));
+        verify(client).sendPacket(argThat(p ->
+                (packet(p).getShort() & 0xffff) == SendOpcode.MOVE_MONSTER_RESPONSE.getValue()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void aMoveCannotReactivateAMobRemovedWhileWaitingForItsLock(int change) {
+        mob = spy(mob);
+        doReturn(0).when(mob).canUseAttack(anyInt(), anyBoolean());
+        AtomicReference<Monster> mapped = new AtomicReference<>(mob);
+        when(client.getPlayer()).thenReturn(controller);
+        when(map.getMapObject(123)).thenAnswer(inv -> mapped.get());
+        doAnswer(inv -> {
+            inv.callRealMethod();
+            switch (change) {
+                case 0 -> mob.disposeMapObject();
+                case 1 -> mapped.set(null);
+                case 2 -> mob.setMap(mock(MapleMap.class));
+            }
+            return null;
+        }).when(mob).lockMonster();
+
+        new MoveLifeHandler().handlePacket(walkingPacket(), client);
+
+        assertEquals(new Point(40, -20), mob.getPosition());
+        verify(client, never()).sendPacket(any(Packet.class));
+        verify(map, never()).moveMonster(any(), any());
+    }
+
+    @Test
+    void anAggroRefreshCannotReactivateLocalPhysicsDuringTheHit() {
+        mob.showHitReaction(attacker, 100, 0);
+        try (var config = mockStatic(org.gms.config.GameConfig.class)) {
+            mob.aggroAutoAggroUpdate(controller);
+        }
+        verify(client, never()).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
+        now.addAndGet(400);
+        pending.removeFirst().run();
+        verify(client).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"100100,600", "9400101,120", "9870029,120", "2220000,600"})
+    void realWzHitTimingsMatchClientDefaults(int templateId, int duration) {
+        try (var information = mockStatic(MonsterInformationProvider.class)) {
+            information.when(MonsterInformationProvider::getInstance)
+                    .thenReturn(mock(MonsterInformationProvider.class));
+            MonsterStats stats = LifeFactory.getMonster(templateId).getStats();
+            assertEquals(duration, stats.getHitAnimationTime(0),
+                    "missing frame delays default to 120ms; non-frame metadata is not an animation");
+        }
+    }
+
+    @Test
+    void anExpiredResumeCannotInterruptANewerHit() {
+        mob.showHitReaction(attacker, 100, 0);
+        Runnable firstResume = pending.removeFirst();
+        now.addAndGet(400);
+        mob.showHitReaction(attacker, 100, 0);
+        firstResume.run();
+        verify(client, never()).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
+        now.addAndGet(400);
+        pending.removeFirst().run();
+        verify(client).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void resumingAHitCannotReviveARemovedMobOrFollowTheMobAcrossMaps(int change) {
+        mob.showHitReaction(attacker, 100, 0);
+        switch (change) {
+            case 0 -> mob.disposeMapObject();
+            case 1 -> when(map.getMonsterByOid(123)).thenReturn(null);
+            case 2 -> mob.setMap(mock(MapleMap.class));
+        }
+        now.addAndGet(400);
+        pending.removeFirst().run();
+        verify(client, never()).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
+    }
+
+    @Test
+    void resumingUsesTheCurrentControllerEvenWhenTheAttackerHasLeft() throws Exception {
+        mob.showHitReaction(attacker, 100, 0);
+        Client replacementClient = mock(Client.class);
+        useController(controller(replacementClient));
+        when(attacker.getMap()).thenReturn(mock(MapleMap.class));
+        now.addAndGet(400);
+        pending.removeFirst().run();
+        verify(replacementClient).sendPacket(argThat(MonsterHitReactionTest::isStartControl));
     }
 
     @ParameterizedTest
@@ -235,6 +366,10 @@ class MonsterHitReactionTest {
         when(player.isLoggedInWorld()).thenReturn(true);
         when(player.isMapObjectVisible(any())).thenReturn(true);
         when(player.getClient()).thenReturn(socket);
+        doAnswer(inv -> {
+            socket.sendPacket(inv.getArgument(0));
+            return null;
+        }).when(player).sendPacket(any(Packet.class));
         return player;
     }
 
@@ -252,6 +387,22 @@ class MonsterHitReactionTest {
 
     private static ByteBuffer packet(Packet p) {
         return ByteBuffer.wrap(p.getBytes()).order(ByteOrder.LITTLE_ENDIAN);
+    }
+
+    private static boolean isStartControl(Packet p) {
+        return (packet(p).getShort() & 0xffff) == SendOpcode.SPAWN_MONSTER_CONTROL.getValue()
+                && p.getBytes()[2] != 0;
+    }
+
+    private static ByteBufInPacket walkingPacket() {
+        ByteBuffer p = ByteBuffer.allocate(44).order(ByteOrder.LITTLE_ENDIAN);
+        p.putInt(123).putShort((short) 7).put((byte) 0).put((byte) -1);
+        p.putInt(0).putLong(0).put((byte) 0).putInt(0);
+        p.putShort((short) 40).putShort((short) -18);
+        p.put((byte) 1).put((byte) 0);
+        p.putShort((short) 120).putShort((short) -18).putInt(0);
+        p.putShort((short) 9).put((byte) 0).putShort((short) 100);
+        return new ByteBufInPacket(Unpooled.wrappedBuffer(p.array()));
     }
 
     private static void assertPosition(ByteBuffer p) {

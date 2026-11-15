@@ -96,7 +96,7 @@ public class Monster extends AbstractLoadedLife {
     private final AtomicInteger hp = new AtomicInteger(1);
     private final AtomicLong maxHpPlusHeal = new AtomicLong(1);
     private int mp;
-    private long hitReactionUntil;
+    private volatile long hitReactionUntil;
     private WeakReference<Character> controller = new WeakReference<>(null);
     private boolean controllerHasAggro, controllerKnowsAboutAggro, controllerHasPuppet;
     private final Collection<MonsterListener> listeners = new LinkedList<>();
@@ -479,11 +479,15 @@ public class Monster extends AbstractLoadedLife {
                 }
                 int hit = Randomizer.nextInt(stats.getHitAnimationCount());
                 int duration = stats.getHitAnimationTime(hit);
-                hitReactionUntil = now + duration;
+                long until = now + duration;
+                hitReactionUntil = until;
+                // Stop local physics before installing the remote hit path, keeping server-side
+                // ownership intact so the timer can resume whichever controller still owns it.
+                controller.sendPacket(PacketCreator.stopControllingMonster(getObjectId()));
+                // v83 movement stances use stand=2/fly=6 before the facing bit, not raw actions.
+                setStance((stats.getMovetype() == 1 ? 12 : 4) | (facingLeft ? 1 : 0));
                 broadcastMonsterStatusMessage(PacketCreator.monsterHit(this, 6 + hit, facingLeft, duration));
-                // OnMove temporarily makes even its controller passive. SetLocalMob/SetActive
-                // restores that same controller without reinitializing or cancelling the hit pose.
-                aggroMonsterControl(controller.getClient(), this, isControllerHasAggro());
+                TimerManager.getInstance().schedule(() -> finishHitReaction(hitMap, until), duration);
             } finally {
                 aggroUpdateLock.unlock();
                 unlockMonster();
@@ -493,6 +497,30 @@ public class Monster extends AbstractLoadedLife {
             TimerManager.getInstance().schedule(reaction, delay);
         } else {
             reaction.run();
+        }
+    }
+
+    public boolean isHitReactionActive() {
+        long until = hitReactionUntil;
+        return until != 0 && Server.getInstance().getCurrentTime() < until;
+    }
+
+    private void finishHitReaction(MapleMap hitMap, long until) {
+        lockMonster();
+        aggroUpdateLock.lock();
+        try {
+            if (hitReactionUntil != until) {
+                return; // an older timer must not resume a newer hit
+            }
+            hitReactionUntil = 0;
+            Character controller = getActiveController();
+            if (isAlive() && map == hitMap && hitMap.getMonsterByOid(getObjectId()) == this
+                    && controller != null) {
+                aggroMonsterControl(controller.getClient(), this, isControllerHasAggro());
+            }
+        } finally {
+            aggroUpdateLock.unlock();
+            unlockMonster();
         }
     }
 
@@ -2276,7 +2304,14 @@ public class Monster extends AbstractLoadedLife {
     }
 
     private static void aggroMonsterControl(Client c, Monster mob, boolean immediateAggro) {
-        c.sendPacket(PacketCreator.controlMonster(mob, false, immediateAggro));
+        mob.aggroUpdateLock.lock();
+        try {
+            if (!mob.isHitReactionActive()) {
+                c.sendPacket(PacketCreator.controlMonster(mob, false, immediateAggro));
+            }
+        } finally {
+            mob.aggroUpdateLock.unlock();
+        }
     }
 
     private void aggroRefreshPuppetVisibility(Character chrController, Summon puppet) {

@@ -512,7 +512,11 @@ public class LifeFactory {
                     break;
                 }
                 for (Data frame : hit) {
-                    hitTimes[hitCount] += Math.abs(DataTool.getIntConvert("delay", resolveUol(frame), 0));
+                    Data image = resolveVisualFrame(frame);
+                    if (image != null) {
+                        // CActionMan::LoadMobAction defaults a canvas frame's delay to 120ms.
+                        hitTimes[hitCount] += Math.abs(DataTool.getIntConvert("delay", image, 120));
+                    }
                 }
                 hitCount++;
             }
