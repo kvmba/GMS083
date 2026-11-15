@@ -34,6 +34,7 @@ import org.gms.util.Pair;
 import org.gms.util.StringUtil;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -384,6 +385,7 @@ public class LifeFactory {
         }
 
         stats.setHp(DataTool.getIntConvert("maxHP", monsterInfoData));
+        stats.setPushedDamage(DataTool.getIntConvert("pushed", monsterInfoData, 0));
         stats.setFriendly(DataTool.getIntConvert("damagedByMob", monsterInfoData, stats.isFriendly() ? 1 : 0) == 1);
         stats.setPADamage(DataTool.getIntConvert("PADamage", monsterInfoData));
         stats.setPDDamage(DataTool.getIntConvert("PDDamage", monsterInfoData));
@@ -501,6 +503,21 @@ public class LifeFactory {
         }
 
         Data visualMonsterData = resolveMonsterVisualData(mid, monsterData);
+        if (visualMonsterData.getChildByPath("move") != null || visualMonsterData.getChildByPath("fly") != null) {
+            int[] hitTimes = new int[3];
+            int hitCount = 0;
+            while (hitCount < hitTimes.length) {
+                Data hit = resolveUol(visualMonsterData.getChildByPath("hit" + (hitCount + 1)));
+                if (hit == null) {
+                    break;
+                }
+                for (Data frame : hit) {
+                    hitTimes[hitCount] += Math.abs(DataTool.getIntConvert("delay", resolveUol(frame), 0));
+                }
+                hitCount++;
+            }
+            stats.setHitAnimationTimes(Arrays.copyOf(hitTimes, hitCount));
+        }
         int noFlip = DataTool.getInt("noFlip", monsterInfoData, 0);
         if (noFlip > 0) {
             Data fixedStanceFrame = resolveVisualFrame(visualMonsterData.getChildByPath("stand/0"));

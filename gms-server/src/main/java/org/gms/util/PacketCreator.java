@@ -2305,6 +2305,30 @@ public class PacketCreator {
         return p;
     }
 
+    /**
+     * v83 CMob::OnMove (0x66BE61): hit1..hit3 are raw actions 6..8, not movement stances.
+     * nextAttackPossible must be set or the current controller ignores a relayed hit action.
+     */
+    public static Packet monsterHit(Monster mob, int hitAction, boolean facingLeft, int duration) {
+        OutPacket p = OutPacket.create(SendOpcode.MOVE_MONSTER);
+        p.writeInt(mob.getObjectId());
+        p.writeByte(0);
+        p.writeBool(true);
+        p.writeByte((hitAction << 1) | (facingLeft ? 1 : 0));
+        p.writeInt(0);
+        Point position = mob.getPosition();
+        p.writePos(position);
+        p.writeByte(1); // one stationary absolute movement; do not invent knockback geometry
+        p.writeByte(0);
+        p.writePos(position);
+        p.writeShort(0);
+        p.writeShort(0);
+        p.writeShort(mob.getFh());
+        p.writeByte((mob.getStance() & ~1) | (facingLeft ? 1 : 0));
+        p.writeShort(duration);
+        return p;
+    }
+
     public static Packet summonAttack(int cid, int summonOid, byte direction, List<SummonAttackEntry> allDamage) {
         OutPacket p = OutPacket.create(SendOpcode.SUMMON_ATTACK);
         //b2 00 29 f7 00 00 9a a3 04 00 c8 04 01 94 a3 04 00 06 ff 2b 00

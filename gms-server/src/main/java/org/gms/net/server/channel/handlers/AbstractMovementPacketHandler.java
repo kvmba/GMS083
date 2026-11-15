@@ -27,6 +27,7 @@ import org.gms.net.packet.InPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gms.server.maps.AnimatedMapObject;
+import org.gms.server.life.Monster;
 import org.gms.server.movement.AbsoluteLifeMovement;
 import org.gms.server.movement.ChangeEquip;
 import org.gms.server.movement.JumpDownMovement;
@@ -174,7 +175,11 @@ public abstract class AbstractMovementPacketHandler extends AbstractPacketHandle
                     short ypos = p.readShort();
                     Point afterPos = new Point(xpos, ypos + yOffset);
                     target.setPosition(afterPos);
-                    p.skip(6); //xwobble = lea.readShort(); ywobble = lea.readShort(); fh = lea.readShort();
+                    p.skip(4); // x/y velocity
+                    short foothold = p.readShort();
+                    if (target instanceof Monster monster) {
+                        monster.setFh(foothold);
+                    }
                     byte newstate = p.readByte();
                     target.setStance(newstate);
                     p.readShort(); //duration
@@ -314,7 +319,12 @@ public abstract class AbstractMovementPacketHandler extends AbstractPacketHandle
         Point beforePos = snapshotPosition(target);
         Point afterPos = readPositionWithOffset(p, yOffset);
         target.setPosition(afterPos);
-        p.skip(8); // xwobble / ywobble / fh / ofh
+        p.skip(4); // x/y velocity
+        short foothold = p.readShort();
+        if (target instanceof Monster monster) {
+            monster.setFh(foothold);
+        }
+        p.skip(2); // origin foothold
         byte newstate = p.readByte();
         target.setStance(newstate);
         p.readShort(); // duration

@@ -39,6 +39,9 @@ import java.util.Set;
  * @author Frz
  */
 public class MonsterStats {
+    private int pushedDamage;
+    private int[] hitAnimationTimes = new int[0];
+
     public boolean changeable;
     public int exp, hp, mp, level, PADamage, PDDamage, MADamage, MDDamage, dropPeriod, cp, buffToGive = -1, removeAfter, acc, eva;
     public boolean boss, undead, ffaLoot, isExplosiveReward, firstAttack, removeOnMiss;
@@ -137,6 +140,26 @@ public class MonsterStats {
 
     public void setAnimationTime(String name, int delay) {
         animationTimes.put(name, delay);
+    }
+
+    public int getPushedDamage() {
+        return pushedDamage;
+    }
+
+    public void setPushedDamage(int pushedDamage) {
+        this.pushedDamage = pushedDamage;
+    }
+
+    public int getHitAnimationCount() {
+        return hitAnimationTimes.length;
+    }
+
+    public int getHitAnimationTime(int index) {
+        return hitAnimationTimes[index];
+    }
+
+    public void setHitAnimationTimes(int[] hitAnimationTimes) {
+        this.hitAnimationTimes = hitAnimationTimes;
     }
 
     public int getAnimationTime(String name) {

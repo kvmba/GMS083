@@ -96,6 +96,7 @@ public class Monster extends AbstractLoadedLife {
     private final AtomicInteger hp = new AtomicInteger(1);
     private final AtomicLong maxHpPlusHeal = new AtomicLong(1);
     private int mp;
+    private long hitReactionUntil;
     private WeakReference<Character> controller = new WeakReference<>(null);
     private boolean controllerHasAggro, controllerKnowsAboutAggro, controllerHasPuppet;
     private final Collection<MonsterListener> listeners = new LinkedList<>();
@@ -449,6 +450,50 @@ public class Monster extends AbstractLoadedLife {
         }
 
         return lastHit;
+    }
+
+    /**
+     * Supplies the hit movement a headless attacker cannot generate in CMob::OnHit.
+     * Damage numbers and HP are already handled by the attack; this only relays the mob action.
+     */
+    public void showHitReaction(Character attacker, int damage, int delay) {
+        if (damage <= 0 || damage < stats.getPushedDamage() || stats.getHitAnimationCount() == 0
+                || getActiveController() == null) {
+            return;
+        }
+        MapleMap hitMap = map;
+        boolean facingLeft = stats.getFixedStance() != 0
+                ? (stats.getFixedStance() & 1) != 0 : !attacker.isFacingLeft();
+        Runnable reaction = () -> {
+            lockMonster();
+            aggroUpdateLock.lock();
+            try {
+                Character controller = getActiveController();
+                if (!isAlive() || map != hitMap || attacker.getMap() != hitMap
+                        || hitMap.getMonsterByOid(getObjectId()) != this || controller == null) {
+                    return;
+                }
+                long now = Server.getInstance().getCurrentTime();
+                if (now < hitReactionUntil) {
+                    return;
+                }
+                int hit = Randomizer.nextInt(stats.getHitAnimationCount());
+                int duration = stats.getHitAnimationTime(hit);
+                hitReactionUntil = now + duration;
+                broadcastMonsterStatusMessage(PacketCreator.monsterHit(this, 6 + hit, facingLeft, duration));
+                // OnMove temporarily makes even its controller passive. SetLocalMob/SetActive
+                // restores that same controller without reinitializing or cancelling the hit pose.
+                aggroMonsterControl(controller.getClient(), this, isControllerHasAggro());
+            } finally {
+                aggroUpdateLock.unlock();
+                unlockMonster();
+            }
+        };
+        if (delay > 0) {
+            TimerManager.getInstance().schedule(reaction, delay);
+        } else {
+            reaction.run();
+        }
     }
 
     /**
