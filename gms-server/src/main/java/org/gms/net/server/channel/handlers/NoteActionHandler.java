@@ -48,6 +48,7 @@ public final class NoteActionHandler extends AbstractPacketHandler {
             String charname = p.readString();
             String message = p.readString();
             if (c.getPlayer().getCashShop().isOpened()) {
+                c.sendPacket(PacketCreator.storageSlotLimit());
                 c.sendPacket(PacketCreator.showCashInventory(c));
             }
             try {

@@ -85,6 +85,7 @@ public class EnterCashShopHandler extends AbstractPacketHandler {
             mc.forfeitExpirableQuests();
             mc.cancelQuestExpirationTask();
 
+            c.sendPacket(PacketCreator.storageSlotLimit());
             c.sendPacket(PacketCreator.openCashShop(c, false));
             c.sendPacket(PacketCreator.showCashInventory(c));
             c.sendPacket(PacketCreator.showGifts(mc.getCashShop().loadGifts()));

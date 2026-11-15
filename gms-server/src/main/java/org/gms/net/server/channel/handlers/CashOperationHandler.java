@@ -246,8 +246,8 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                             c.enableCSActions();
                             return;
                         }
-                        cs.gainCash(cash, -4000);
                         if (chr.getStorage().gainSlots(qty)) {
+                            cs.gainCash(cash, -4000);
                             log.debug("Chr {} bought {} slots to their account storage.", c.getPlayer().getName(), qty);
                             chr.setUsedStorage();
 
@@ -255,6 +255,7 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                             c.sendPacket(PacketCreator.showCash(chr));
                         } else {
                             log.warn("Could not add {} slots to {}'s account.", qty, Character.makeMapleReadable(chr.getName()));
+                            c.enableCSActions();
                         }
                     } else {
                         ModifiedCashItemDO cItem = CashItemFactory.getItem(p.readInt());
@@ -268,8 +269,8 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                             c.enableCSActions();
                             return;
                         }
-                        cs.gainCash(cash, cItem, chr.getWorld());
                         if (chr.getStorage().gainSlots(qty)) {    // thanks ABaldParrot & Thora for detecting storage issues here
+                            cs.gainCash(cash, cItem, chr.getWorld());
                             log.debug("Chr {} bought {} slots to their account storage", c.getPlayer().getName(), qty);
                             chr.setUsedStorage();
 
@@ -277,6 +278,7 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                             c.sendPacket(PacketCreator.showCash(chr));
                         } else {
                             log.warn("Could not add {} slots to {}'s account", qty, Character.makeMapleReadable(chr.getName()));
+                            c.enableCSActions();
                         }
                     }
                 } else if (action == 0x08) { // Increase Character Slots

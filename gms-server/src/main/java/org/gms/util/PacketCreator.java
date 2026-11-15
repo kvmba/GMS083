@@ -7156,6 +7156,12 @@ public class PacketCreator {
         return p;
     }
 
+    public static Packet storageSlotLimit() {
+        OutPacket p = OutPacket.create(SendOpcode.UPDATE_STORAGE_SLOT_LIMIT);
+        p.writeByte(Storage.getSlotLimit());
+        return p;
+    }
+
     public static Packet showCashInventory(Client c) {
         final OutPacket p = OutPacket.create(SendOpcode.CASHSHOP_OPERATION);
         List<Item> inventory = c.getPlayer().getCashShop().getInventory();

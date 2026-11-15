@@ -16,6 +16,7 @@ import org.gms.model.dto.ConfigTypeDTO;
 import org.gms.model.dto.GameConfigReqDTO;
 import org.gms.net.server.Server;
 import org.gms.property.ServiceProperty;
+import org.gms.server.Storage;
 import org.gms.util.DatabaseConnection;
 import org.gms.util.I18nUtil;
 import org.gms.util.RequireUtil;
@@ -93,6 +94,7 @@ public class ConfigService {
         RequireUtil.requireNotEmpty(condition.getConfigCode(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_EMPTY", "configCode"));
         RequireUtil.requireNotEmpty(condition.getConfigValue(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_EMPTY", "configValue"));
         validateCharacterSaveConcurrency(condition);
+        validateStorageSlotLimit(condition);
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .where(GAME_CONFIG_D_O.CONFIG_TYPE.eq(condition.getConfigType()))
                 .and(GAME_CONFIG_D_O.CONFIG_CODE.eq(condition.getConfigCode()));
@@ -122,6 +124,7 @@ public class ConfigService {
         GameConfigDO validation = GameConfigDO.builder().configType(gameConfigDO.getConfigType())
                 .configCode(gameConfigDO.getConfigCode()).configValue(condition.getConfigValue()).build();
         validateCharacterSaveConcurrency(validation);
+        validateStorageSlotLimit(validation);
         langResourceService.insertOrUpdateI18n(LangResourcesDO.builder()
                 .langBase("game_config")
                 .langCode(gameConfigDO.getConfigCode())
@@ -135,6 +138,16 @@ public class ConfigService {
                 .build());
         gameConfigDO.setConfigValue(condition.getConfigValue());
         GameConfig.update(gameConfigDO);
+    }
+
+    private static void validateStorageSlotLimit(GameConfigDO config) {
+        if (!"server".equals(config.getConfigType()) || !Storage.SLOT_LIMIT_CONFIG.equals(config.getConfigCode())) return;
+        try {
+            int value = Integer.parseInt(config.getConfigValue());
+            if (value < Storage.MIN_SLOTS || value > Storage.MAX_SLOTS) throw new NumberFormatException();
+        } catch (NumberFormatException invalid) {
+            throw BizException.illegalArgument(I18nUtil.getExceptionMessage("STORAGE_SLOT_LIMIT_RANGE"));
+        }
     }
 
     private static void validateCharacterSaveConcurrency(GameConfigDO config) {

@@ -25,6 +25,7 @@ import org.gms.client.Client;
 import org.gms.client.inventory.InventoryType;
 import org.gms.client.inventory.Item;
 import org.gms.client.inventory.ItemFactory;
+import org.gms.config.GameConfig;
 import org.gms.constants.game.GameConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Storage {
     private static final Logger log = LoggerFactory.getLogger(Storage.class);
+    public static final String SLOT_LIMIT_CONFIG = "storage_slot_limit";
+    public static final int MIN_SLOTS = 4;
+    public static final int MAX_SLOTS = 124;
+    private static final int DEFAULT_SLOT_LIMIT = 48;
     // Shared across every player's Storage, and written from the packet-handling threads
     // (NioEventLoopGroup) whenever an npcId is seen for the first time. A plain HashMap under
     // concurrent put can corrupt its bins or lose the fee, so use a concurrent map.
@@ -116,9 +121,13 @@ public class Storage {
         return slots;
     }
 
+    public static int getSlotLimit() {
+        int limit = GameConfig.get("server", SLOT_LIMIT_CONFIG, DEFAULT_SLOT_LIMIT);
+        return Math.max(MIN_SLOTS, Math.min(MAX_SLOTS, limit));
+    }
+
     public boolean canGainSlots(int slots) {
-        slots += this.slots;
-        return slots <= 48;
+        return slots + this.slots <= getSlotLimit();
     }
 
     public boolean gainSlots(int slots) {

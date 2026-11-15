@@ -357,6 +357,7 @@ public enum SendOpcode implements Opcode {
     VEGA_SCROLL(0x166), // VEGA卷轴
 
     UPDATE_HPMPAALERT(0x1000), // 更新HP/MP/EXP警报
+    UPDATE_STORAGE_SLOT_LIMIT(0x1001), // 仓库可购买扩容上限（1字节，最大124）
     ;
     private int code = -2;
 
