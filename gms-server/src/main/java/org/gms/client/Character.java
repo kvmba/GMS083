@@ -472,6 +472,7 @@ public class Character extends AbstractCharacterObject {
     @Getter
     private boolean useCS;  //chaos scroll upon crafting item.
     private long npcCd;
+    private final Lock mapWarpLock = new ReentrantLock();
     private int newWarpMap = -1;
     private boolean canWarpMap = true;  //only one "warp" must be used per call, and this will define the right one.
     private int canWarpCounter = 0;     //counts how many times "inner warps" have been called.
@@ -1439,74 +1440,98 @@ public class Character extends AbstractCharacterObject {
         changeMap(to, to.getPortal(portal));
     }
 
-    public synchronized void changeMap(final MapleMap target, Portal pto) {
-        canWarpCounter++;
-
-        eventChangedMap(target.getId());    // player can be dropped from an event here, hence the new warping target.  //玩家可以从这里的事件中退出，因此成为新的扭曲目标。
-        MapleMap to = getWarpMap(target.getId());
-        if (pto == null) {
-            pto = to.getPortal(0);
+    public void changeMap(final MapleMap target, Portal pto) {
+        // 不等待其他线程的换图，避免与事件脚本锁反序；同线程的嵌套换图可重入。
+        if (!mapWarpLock.tryLock()) {
+            return;
         }
-        changeMapInternal(to, pto.getPosition(), PacketCreator.getWarpToMap(to, pto.getId(), this));
-        canWarpMap = false;
+        try {
+            canWarpCounter++;
 
-        canWarpCounter--;
-        if (canWarpCounter == 0) {
-            canWarpMap = true;
-        }
+            eventChangedMap(target.getId());    // player can be dropped from an event here, hence the new warping target.  //玩家可以从这里的事件中退出，因此成为新的扭曲目标。
+            MapleMap to = getWarpMap(target.getId());
+            if (pto == null) {
+                pto = to.getPortal(0);
+            }
+            changeMapInternal(to, pto.getPosition(), pto.getId(), false);
+            canWarpMap = false;
 
-        eventAfterChangedMap(this.getMapId());
-    }
-
-    public synchronized void changeMap(final MapleMap target, final Point pos) {
-        canWarpCounter++;
-
-        eventChangedMap(target.getId());
-        MapleMap to = getWarpMap(target.getId());
-        changeMapInternal(to, pos, PacketCreator.getWarpToMap(to, 0x80, pos, this));
-        canWarpMap = false;
-
-        canWarpCounter--;
-        if (canWarpCounter == 0) {
-            canWarpMap = true;
-        }
-
-        eventAfterChangedMap(this.getMapId());
-    }
-
-    public synchronized void forceChangeMap(final MapleMap target, Portal pto) {
-        // will actually enter the map given as parameter, regardless of being an eventmap or whatnot       //将实际输入作为参数给出的映射，无论是事件映射还是其他什么
-
-        canWarpCounter++;
-        eventChangedMap(MapId.NONE);
-
-        EventInstanceManager mapEim = target.getEventInstance();
-        if (mapEim != null) {
-            EventInstanceManager playerEim = this.getEventInstance();
-            if (playerEim != null) {
-                playerEim.exitPlayer(this);
-                if (playerEim.getPlayerCount() == 0) {
-                    playerEim.dispose();
-                }
+            canWarpCounter--;
+            if (canWarpCounter == 0) {
+                canWarpMap = true;
             }
 
-            // thanks Thora for finding an issue with players not being actually warped into the target event map (rather sent to the event starting map)
-            //感谢Thora发现玩家实际上没有被扭曲到目标事件地图中（而是被发送到事件开始地图）的问题
-            mapEim.registerPlayer(this, false);
+            eventAfterChangedMap(this.getMapId());
+        } finally {
+            mapWarpLock.unlock();
         }
+    }
 
-        if (pto == null) {
-            pto = target.getPortal(0);
+    public void changeMap(final MapleMap target, final Point pos) {
+        // 不等待其他线程的换图，避免与事件脚本锁反序；同线程的嵌套换图可重入。
+        if (!mapWarpLock.tryLock()) {
+            return;
         }
-        changeMapInternal(target, pto.getPosition(), PacketCreator.getWarpToMap(target, pto.getId(), this));
-        canWarpMap = false;
+        try {
+            canWarpCounter++;
 
-        canWarpCounter--;
-        if (canWarpCounter == 0) {
-            canWarpMap = true;
+            eventChangedMap(target.getId());
+            MapleMap to = getWarpMap(target.getId());
+            changeMapInternal(to, pos, 0x80, true);
+            canWarpMap = false;
+
+            canWarpCounter--;
+            if (canWarpCounter == 0) {
+                canWarpMap = true;
+            }
+
+            eventAfterChangedMap(this.getMapId());
+        } finally {
+            mapWarpLock.unlock();
         }
+    }
 
-        eventAfterChangedMap(this.getMapId());
+    public void forceChangeMap(final MapleMap target, Portal pto) {
+        // 不等待其他线程的换图，避免与事件脚本锁反序；同线程的嵌套换图可重入。
+        if (!mapWarpLock.tryLock()) {
+            return;
+        }
+        try {
+            // will actually enter the map given as parameter, regardless of being an eventmap or whatnot       //将实际输入作为参数给出的映射，无论是事件映射还是其他什么
+
+            canWarpCounter++;
+            eventChangedMap(MapId.NONE);
+
+            EventInstanceManager mapEim = target.getEventInstance();
+            if (mapEim != null) {
+                EventInstanceManager playerEim = this.getEventInstance();
+                if (playerEim != null) {
+                    playerEim.exitPlayer(this);
+                    if (playerEim.getPlayerCount() == 0) {
+                        playerEim.dispose();
+                    }
+                }
+
+                // thanks Thora for finding an issue with players not being actually warped into the target event map (rather sent to the event starting map)
+                //感谢Thora发现玩家实际上没有被扭曲到目标事件地图中（而是被发送到事件开始地图）的问题
+                mapEim.registerPlayer(this, false);
+            }
+
+            if (pto == null) {
+                pto = target.getPortal(0);
+            }
+            changeMapInternal(target, pto.getPosition(), pto.getId(), false);
+            canWarpMap = false;
+
+            canWarpCounter--;
+            if (canWarpCounter == 0) {
+                canWarpMap = true;
+            }
+
+            eventAfterChangedMap(this.getMapId());
+        } finally {
+            mapWarpLock.unlock();
+        }
     }
 
     private boolean buffMapProtection() {
@@ -1754,9 +1779,10 @@ public class Character extends AbstractCharacterObject {
      * 玩家更改地图 内部方法
      * @param to
      * @param pos
-     * @param warpPacket
+     * @param spawnPortal 出生传送点编号
+     * @param explicitPosition 是否在换图包中指定坐标
      */
-    private synchronized void changeMapInternal(final MapleMap to, final Point pos, Packet warpPacket) {
+    private void changeMapInternal(final MapleMap to, final Point pos, int spawnPortal, boolean explicitPosition) {
         if (!canWarpMap) {
             return;
         }
@@ -1777,12 +1803,19 @@ public class Character extends AbstractCharacterObject {
         }
         final Party k = e;
 
-        sendPacket(warpPacket);
+        Client warpClient = client;
+        int movementGeneration = warpClient.beginFieldMovementTransition();
+        int fieldKey = movementGeneration & 0xFF;
+        Packet warpPacket = explicitPosition
+                ? PacketCreator.getWarpToMap(to, spawnPortal, pos, this, fieldKey)
+                : PacketCreator.getWarpToMap(to, spawnPortal, this, fieldKey);
+        warpClient.sendPacket(warpPacket);
         map.removePlayer(this);
         if (client.getChannelServer().getPlayerStorage().getCharacterById(getId()) != null) {
             map = to;
             setPosition(pos);
             map.addPlayer(this);
+            warpClient.finishFieldMovementTransition(movementGeneration);
             visitMap(map);
 
             prtLock.lock();
