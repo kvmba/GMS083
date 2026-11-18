@@ -134,7 +134,7 @@
       } catch (err) {
         errorMessage.value = (err as Error).message;
         if ((err as Error).name === 'TypeError')
-          errorMessage.value = '错误的请求';
+          errorMessage.value = t('message.invalidRequest');
       } finally {
         setLoading(false);
       }
