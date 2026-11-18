@@ -644,7 +644,7 @@ public class Trade {
 
             log.info(message.toString());
         } catch (Exception e) {
-            log.error("交易结果出现异常：",e);
+            log.error(I18nUtil.getLogMessage("Trade.logTrade.error1"), e);
         }
     }
 
