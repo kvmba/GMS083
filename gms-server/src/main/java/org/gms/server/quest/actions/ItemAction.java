@@ -23,11 +23,13 @@ package org.gms.server.quest.actions;
 
 import org.gms.client.Character;
 import org.gms.client.Client;
+import org.gms.client.inventory.Inventory;
 import org.gms.client.inventory.InventoryType;
 import org.gms.client.inventory.Item;
 import org.gms.client.inventory.manipulator.InventoryManipulator;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.util.I18nUtil;
+import org.gms.util.InventoryOperationBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gms.provider.Data;
@@ -91,8 +93,8 @@ public class ItemAction extends AbstractQuestAction {
 
     @Override
     public void run(Character chr, Integer extSelection) {
-        List<ItemData> takeItem = new LinkedList<>();
-        List<ItemData> giveItem = new LinkedList<>();
+        List<ItemData> takeItem = new ArrayList<>();
+        List<ItemData> giveItem = new ArrayList<>();
 
         int props = 0, rndProps = 0, accProps = 0;
         for (ItemData item : items) {
@@ -133,33 +135,80 @@ public class ItemAction extends AbstractQuestAction {
             }
         }
 
-        // must take all needed items before giving others
+        // 扣除和发放各自结算，避免在同一个包内吞掉道具数量净变化。
+        applyItems(chr, takeItem);
+        applyItems(chr, giveItem);
+    }
 
-        for (ItemData iEntry : takeItem) {
-            int itemid = iEntry.getId(), count = iEntry.getCount();
-
-            InventoryType type = ItemConstants.getInventoryType(itemid);
-            int quantity = count * -1; // Invert
-            if (type.equals(InventoryType.EQUIP)) {
-                if (chr.getInventory(type).countById(itemid) < quantity) {
-                    // Not enough in the equip inventoty, so check Equipped...
-                    if (chr.getInventory(InventoryType.EQUIPPED).countById(itemid) >= quantity) {
-                        // Found it equipped, so change the type to equipped.
-                        type = InventoryType.EQUIPPED;
-                    }
+    private static void applyItems(Character chr, List<ItemData> items) {
+        Client c = chr.getClient();
+        List<ItemData> notices = new ArrayList<>();
+        int next = 0;
+        while (next < items.size()) {
+            ItemData item = items.get(next);
+            InventoryType type = ItemConstants.getInventoryType(item.getId());
+            if (!canBatch(type, item)) {
+                if (applySingleItem(chr, c, type, item)) {
+                    announceItem(chr, item);
                 }
+                next++;
+                continue;
             }
 
-            InventoryManipulator.removeById(chr.getClient(), type, itemid, quantity, true, false);
-            chr.sendPacket(PacketCreator.getShowItemGain(itemid, (short) count, true));
+            Inventory inventory = chr.getInventory(type);
+            inventory.lockInventory();
+            try (var changes = new InventoryOperationBatch(c, true)) {
+                do {
+                    int count = item.getCount();
+                    if (count < 0) {
+                        InventoryManipulator.removeById(c, inventory, item.getId(), -count, changes);
+                        notices.add(item);
+                    } else if (InventoryManipulator.addById(c, inventory, item.getId(), (short) count, grantExpiration(item), changes)) {
+                        notices.add(item);
+                    }
+                    if (++next == items.size()) {
+                        break;
+                    }
+                    item = items.get(next);
+                } while (ItemConstants.getInventoryType(item.getId()) == type && canBatch(type, item));
+            } finally {
+                inventory.unlockInventory();
+                // 只通知已处理的条目，且同步包先于提示；后续条目失败时也不丢前面的通知。
+                for (ItemData notice : notices) {
+                    announceItem(chr, notice);
+                }
+                notices.clear();
+            }
         }
+    }
 
-        for (ItemData iEntry : giveItem) {
-            int itemid = iEntry.getId(), count = iEntry.getCount(), period = iEntry.getPeriod();    // thanks Vcoc for noticing quest milestone item not getting removed from inventory after a while
+    private static boolean canBatch(InventoryType type, ItemData item) {
+        // 装备扣除可能回退到负槽；现金栏可能涉及宠物，保留原流程。
+        return type.isStandardInventory() && (type != InventoryType.EQUIP || item.getCount() >= 0);
+    }
 
-            InventoryManipulator.addById(chr.getClient(), itemid, (short) count, "", -1, period > 0 ? (System.currentTimeMillis() + MINUTES.toMillis(period)) : -1);
-            chr.sendPacket(PacketCreator.getShowItemGain(itemid, (short) count, true));
+    private static boolean applySingleItem(Character chr, Client c, InventoryType type, ItemData item) {
+        int itemId = item.getId();
+        int count = item.getCount();
+        if (count < 0) {
+            int quantity = -count;
+            if (type == InventoryType.EQUIP && chr.getInventory(type).countById(itemId) < quantity
+                    && chr.getInventory(InventoryType.EQUIPPED).countById(itemId) >= quantity) {
+                type = InventoryType.EQUIPPED;
+            }
+            InventoryManipulator.removeById(c, type, itemId, quantity, true, false);
+            return true;
         }
+        return InventoryManipulator.addById(c, itemId, (short) count, "", -1, grantExpiration(item));
+    }
+
+    private static long grantExpiration(ItemData item) {
+        int period = item.getPeriod();
+        return period > 0 ? System.currentTimeMillis() + MINUTES.toMillis(period) : -1;
+    }
+
+    private static void announceItem(Character chr, ItemData item) {
+        chr.sendPacket(PacketCreator.getShowItemGain(item.getId(), (short) item.getCount(), true));
     }
 
     @Override

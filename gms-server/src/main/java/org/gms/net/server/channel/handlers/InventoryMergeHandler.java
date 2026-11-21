@@ -32,6 +32,7 @@ import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.gms.net.server.Server;
 import org.gms.server.ItemInformationProvider;
+import org.gms.util.InventoryOperationBatch;
 import org.gms.util.PacketCreator;
 
 public final class InventoryMergeHandler extends AbstractPacketHandler {
@@ -54,9 +55,9 @@ public final class InventoryMergeHandler extends AbstractPacketHandler {
         }
 
         InventoryType inventoryType = InventoryType.getByType(invType);
-        Inventory inventory = c.getPlayer().getInventory(inventoryType);
+        Inventory inventory = chr.getInventory(inventoryType);
         inventory.lockInventory();
-        try {
+        try (var changes = new InventoryOperationBatch(c, true)) {
             //------------------- RonanLana's SLOT MERGER -----------------
 
             ItemInformationProvider ii = ItemInformationProvider.getInstance();
@@ -81,13 +82,12 @@ public final class InventoryMergeHandler extends AbstractPacketHandler {
                         break;
                     }
 
-                    InventoryManipulator.move(c, inventoryType, src, dst);
+                    InventoryManipulator.move(c, inventory, src, dst, changes);
                 }
             }
 
             //------------------------------------------------------------
 
-            inventory = c.getPlayer().getInventory(inventoryType);
             boolean sorted = false;
 
             while (!sorted) {
@@ -102,7 +102,7 @@ public final class InventoryMergeHandler extends AbstractPacketHandler {
                         }
                     }
                     if (itemSlot > 0) {
-                        InventoryManipulator.move(c, inventoryType, itemSlot, freeSlot);
+                        InventoryManipulator.move(c, inventory, itemSlot, freeSlot, changes);
                     } else {
                         sorted = true;
                     }

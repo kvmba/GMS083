@@ -282,34 +282,39 @@ public class InventoryService {
     private void updateOnline(InventorySearchRtnDTO data, Character character) {
         InventoryType type = InventoryType.getByType(data.getInventoryType());
         Inventory inventory = character.getInventory(type);
-        Item item = getModifyItemOnline(data, inventory);
+        inventory.lockInventory();
+        try {
+            Item item = getModifyItemOnline(data, inventory);
 
-        // 仅以下值可修改
-        if (data.getQuantity() != null && !type.isEquip()) item.setQuantity(data.getQuantity());
-        if (data.getExpiration() != null) item.setExpiration(data.getExpiration());
-        InventoryEquipRtnDTO equipment = data.getInventoryEquipment();
-        if (type.isEquip() && equipment != null) {
-            Equip equip = (Equip) item;
-            if (equipment.getUpgradeSlots() != null) equip.setUpgradeSlots(equipment.getUpgradeSlots());
-            if (equipment.getLevel() != null) equip.setLevel(equipment.getLevel());
-            if (equipment.getAttStr() != null) equip.setStr(equipment.getAttStr());
-            if (equipment.getAttDex() != null) equip.setDex(equipment.getAttDex());
-            if (equipment.getAttInt() != null) equip.setInt(equipment.getAttInt());
-            if (equipment.getAttLuk() != null) equip.setLuk(equipment.getAttLuk());
-            if (equipment.getHp() != null) equip.setHp(equipment.getHp());
-            if (equipment.getMp() != null) equip.setMp(equipment.getMp());
-            if (equipment.getPAtk() != null) equip.setWatk(equipment.getPAtk());
-            if (equipment.getMAtk() != null) equip.setMatk(equipment.getMAtk());
-            if (equipment.getPDef() != null) equip.setWdef(equipment.getPDef());
-            if (equipment.getMDef() != null) equip.setMdef(equipment.getMDef());
-            if (equipment.getAcc() != null) equip.setAcc(equipment.getAcc());
-            if (equipment.getAvoid() != null) equip.setAvoid(equipment.getAvoid());
-            if (equipment.getHands() != null) equip.setHands(equipment.getHands());
-            if (equipment.getSpeed() != null) equip.setSpeed(equipment.getSpeed());
-            if (equipment.getJump() != null) equip.setJump(equipment.getJump());
-            if (equipment.getVicious() != null) equip.setVicious(equipment.getVicious());
+            // 仅以下值可修改
+            if (data.getQuantity() != null && !type.isEquip()) item.setQuantity(data.getQuantity());
+            if (data.getExpiration() != null) item.setExpiration(data.getExpiration());
+            InventoryEquipRtnDTO equipment = data.getInventoryEquipment();
+            if (type.isEquip() && equipment != null) {
+                Equip equip = (Equip) item;
+                if (equipment.getUpgradeSlots() != null) equip.setUpgradeSlots(equipment.getUpgradeSlots());
+                if (equipment.getLevel() != null) equip.setLevel(equipment.getLevel());
+                if (equipment.getAttStr() != null) equip.setStr(equipment.getAttStr());
+                if (equipment.getAttDex() != null) equip.setDex(equipment.getAttDex());
+                if (equipment.getAttInt() != null) equip.setInt(equipment.getAttInt());
+                if (equipment.getAttLuk() != null) equip.setLuk(equipment.getAttLuk());
+                if (equipment.getHp() != null) equip.setHp(equipment.getHp());
+                if (equipment.getMp() != null) equip.setMp(equipment.getMp());
+                if (equipment.getPAtk() != null) equip.setWatk(equipment.getPAtk());
+                if (equipment.getMAtk() != null) equip.setMatk(equipment.getMAtk());
+                if (equipment.getPDef() != null) equip.setWdef(equipment.getPDef());
+                if (equipment.getMDef() != null) equip.setMdef(equipment.getMDef());
+                if (equipment.getAcc() != null) equip.setAcc(equipment.getAcc());
+                if (equipment.getAvoid() != null) equip.setAvoid(equipment.getAvoid());
+                if (equipment.getHands() != null) equip.setHands(equipment.getHands());
+                if (equipment.getSpeed() != null) equip.setSpeed(equipment.getSpeed());
+                if (equipment.getJump() != null) equip.setJump(equipment.getJump());
+                if (equipment.getVicious() != null) equip.setVicious(equipment.getVicious());
+            }
+            character.sendPacket(PacketCreator.modifyInventory(false, Arrays.asList(new ModifyInventory(3, item), new ModifyInventory(0, item))));
+        } finally {
+            inventory.unlockInventory();
         }
-        character.sendPacket(PacketCreator.modifyInventory(true, Arrays.asList(new ModifyInventory(3, item), new ModifyInventory(0, item))));
     }
 
     private void updateDb(InventorySearchRtnDTO data) {
@@ -367,11 +372,14 @@ public class InventoryService {
         if (isOnlineNow) {
             InventoryType type = InventoryType.getByType(data.getInventoryType());
             Inventory inventory = character.getInventory(type);
-            Item item = getModifyItemOnline(data, inventory);
-
-            //删除相对应的物品
-            inventory.removeSlot(item.getPosition());
-            character.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(3, item))));
+            inventory.lockInventory();
+            try {
+                Item item = getModifyItemOnline(data, inventory);
+                inventory.removeSlot(item.getPosition());
+                character.sendPacket(PacketCreator.modifyInventory(false, Collections.singletonList(new ModifyInventory(3, item))));
+            } finally {
+                inventory.unlockInventory();
+            }
         } else {
             InventoryitemsDO inventoryitemsDO = getModifyItemOffline(data);
             if (inventoryitemsDO.getPetid() != null) {

@@ -333,11 +333,11 @@ public final class InventorySortHandler extends AbstractPacketHandler {
                 mods.add(new ModifyInventory(0, item.copy()));//to prevent crashes
             }
             itemarray.clear();
+            c.sendPacket(PacketCreator.modifyInventory(true, mods));
         } finally {
             inventory.unlockInventory();
         }
 
-        c.sendPacket(PacketCreator.modifyInventory(true, mods));
         c.sendPacket(PacketCreator.finishedSort2(invType));
         c.sendPacket(PacketCreator.enableActions());
     }

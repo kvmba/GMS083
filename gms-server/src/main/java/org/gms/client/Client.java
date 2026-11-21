@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -96,6 +97,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -176,6 +178,8 @@ public class Client extends ChannelInboundHandlerAdapter {
     private final Lock lock = new ReentrantLock(true);
     private final Lock encoderLock = new ReentrantLock(true);
     private final Lock announcerLock = new ReentrantLock(true);
+    private ArrayDeque<Packet> queuedPackets; // 受 announcerLock 保护，首次跨线程发包时分配。
+    private boolean packetDrainScheduled;
     // thanks Masterrulax & try2hack for pointing out a bottleneck issue with shared locks, shavit for noticing an opportunity for improvement
     private Calendar tempBanCalendar;
     private int votePoints;
@@ -1801,9 +1805,48 @@ public class Client extends ChannelInboundHandlerAdapter {
     public void sendPacket(Packet packet) {
         announcerLock.lock();
         try {
-            ioChannel.writeAndFlush(packet);
+            var eventLoop = ioChannel.eventLoop();
+            if (eventLoop.inEventLoop()) {
+                // Netty 在 EventLoop 内直写，先发完其他线程已入队的包，避免越过旧的背包变更。
+                writeQueuedPackets();
+                ioChannel.writeAndFlush(packet);
+                return;
+            }
+            if (!packetDrainScheduled) {
+                try {
+                    eventLoop.execute(this::drainQueuedPackets);
+                } catch (RejectedExecutionException rejected) {
+                    if (!eventLoop.isShuttingDown()) {
+                        throw rejected;
+                    }
+                    return;
+                }
+                packetDrainScheduled = true;
+            }
+            if (queuedPackets == null) {
+                queuedPackets = new ArrayDeque<>();
+            }
+            queuedPackets.addLast(packet);
         } finally {
             announcerLock.unlock();
+        }
+    }
+
+    private void drainQueuedPackets() {
+        announcerLock.lock();
+        try {
+            packetDrainScheduled = false;
+            writeQueuedPackets();
+        } finally {
+            announcerLock.unlock();
+        }
+    }
+
+    private void writeQueuedPackets() {
+        if (queuedPackets != null) {
+            for (Packet packet; (packet = queuedPackets.pollFirst()) != null; ) {
+                ioChannel.writeAndFlush(packet);
+            }
         }
     }
 

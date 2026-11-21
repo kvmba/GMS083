@@ -75,6 +75,10 @@ public enum InventoryType {
         return this == USE || this == ETC;
     }
 
+    public boolean isStandardInventory() {
+        return type >= EQUIP.type && type <= ETC.type;
+    }
+
     public boolean isEquip() {
         return this == EQUIP || this == EQUIPPED;
     }

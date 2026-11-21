@@ -2499,45 +2499,55 @@ public class PacketCreator {
         return p;
     }
 
+    static final int MAX_INVENTORY_OPERATIONS = 0xFF;
+    // 083 客户端用 unsigned short 记录已接收长度，包含 4 字节传输包头。
+    static final int MAX_INVENTORY_PACKET_LENGTH = 0xFFFF - Integer.BYTES;
+
     public static Packet modifyInventory(boolean updateTick, final List<ModifyInventory> mods) {
-        OutPacket p = OutPacket.create(SendOpcode.INVENTORY_OPERATION);
+        if (mods.size() > MAX_INVENTORY_OPERATIONS) {
+            throw new IllegalArgumentException("Too many inventory operations: " + mods.size());
+        }
+        ByteBufOutPacket p = new ByteBufOutPacket(SendOpcode.INVENTORY_OPERATION);
         p.writeBool(updateTick);
         p.writeByte(mods.size());
-        //p.writeByte(0); v104 :)
         int addMovement = -1;
         for (ModifyInventory mod : mods) {
-            p.writeByte(mod.getMode());
-            p.writeByte(mod.getInventoryType());
-            p.writeShort(mod.getMode() == 2 ? mod.getOldPosition() : mod.getPosition());
-            switch (mod.getMode()) {
-                case 0: {//add item
-                    addItemInfo(p, mod.getItem(), true);
-                    break;
-                }
-                case 1: {//update quantity
-                    p.writeShort(mod.getQuantity());
-                    break;
-                }
-                case 2: {//move
-                    p.writeShort(mod.getPosition());
-                    if (mod.getPosition() < 0 || mod.getOldPosition() < 0) {
-                        addMovement = mod.getOldPosition() < 0 ? 1 : 2;
-                    }
-                    break;
-                }
-                case 3: {//remove
-                    if (mod.getPosition() < 0) {
-                        addMovement = 2;
-                    }
-                    break;
-                }
+            int movement = writeInventoryOperation(p, mod.getMode(), mod.getItem(), mod.getOldPosition());
+            if (movement >= 0) {
+                addMovement = movement;
             }
             mod.clear();
         }
-        if (addMovement > -1) {
+        if (addMovement >= 0) {
             p.writeByte(addMovement);
         }
+        if (p.size() > MAX_INVENTORY_PACKET_LENGTH) {
+            throw new IllegalArgumentException("Inventory operation packet is too large: " + p.size());
+        }
         return p;
+    }
+
+    static int writeInventoryOperation(OutPacket p, int mode, Item item, short oldPosition) {
+        short position = item.getPosition();
+        p.writeByte(mode);
+        p.writeByte(item.getInventoryType().getType());
+        p.writeShort(mode == 2 ? oldPosition : position);
+        switch (mode) {
+            case 0 -> addItemInfo(p, item, true);
+            case 1 -> p.writeShort(item.getQuantity());
+            case 2 -> {
+                p.writeShort(position);
+                if (position < 0 || oldPosition < 0) {
+                    return oldPosition < 0 ? 1 : 2;
+                }
+            }
+            case 3 -> {
+                if (position < 0) {
+                    return 2;
+                }
+            }
+        }
+        return -1;
     }
 
     public static Packet getScrollEffect(int chr, ScrollResult scrollSuccess, boolean legendarySpirit, boolean whiteScroll) {   // thanks to Rien dev team

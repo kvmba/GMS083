@@ -36,6 +36,18 @@ public class ByteBufOutPacket implements OutPacket {
         return ByteBufUtil.getBytes(byteBuf);
     }
 
+    public int size() {
+        return byteBuf.writerIndex();
+    }
+
+    public void setByte(int index, int value) {
+        byteBuf.setByte(index, value);
+    }
+
+    public void truncate(int size) {
+        byteBuf.writerIndex(size);
+    }
+
     @Override
     public void writeByte(byte value) {
         byteBuf.writeByte(value);

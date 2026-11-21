@@ -2949,86 +2949,106 @@ public class Character extends AbstractCharacterObject {
 
     public void expirationTask() {
         if (itemExpireTask == null) {
-            itemExpireTask = TimerManager.getInstance().register(() -> {
-                boolean deletedCoupon = false;
+            itemExpireTask = TimerManager.getInstance().register(() -> expireTimedState(System.currentTimeMillis()), 60000);
+        }
+    }
 
-                long expiration, currenttime = System.currentTimeMillis();
-                Set<Skill> keys = getSkills().keySet();
-                for (Iterator<Skill> i = keys.iterator(); i.hasNext(); ) {
-                    Skill key = i.next();
-                    SkillEntry skill = getSkills().get(key);
-                    if (skill.expiration != -1 && skill.expiration < currenttime) {
-                        changeSkillLevel(key, (byte) -1, 0, -1);
+    private void expireTimedState(long now) {
+        Map<Skill, SkillEntry> currentSkills = getSkills();
+        List<Skill> expiredSkills = new ArrayList<>();
+        for (var skill : currentSkills.entrySet()) {
+            long expiration = skill.getValue().expiration;
+            if (expiration != -1 && expiration < now) {
+                expiredSkills.add(skill.getKey());
+            }
+        }
+        for (Skill skill : expiredSkills) {
+            SkillEntry entry = currentSkills.get(skill);
+            if (entry != null && entry.expiration != -1 && entry.expiration < now) {
+                changeSkillLevel(skill, (byte) -1, 0, -1);
+            }
+        }
+        expireInventoryItems(now);
+    }
+
+    private void expireInventoryItems(long now) {
+        Client c = client;
+        if (c == null) {
+            return;
+        }
+        List<Item> expired = new ArrayList<>();
+        for (Inventory inv : inventory) {
+            InventoryType type = inv.getType();
+            boolean deletedCoupon = false;
+            if (type.isStandardInventory()) {
+                inv.lockInventory();
+                try (var changes = new InventoryOperationBatch(c, false)) {
+                    collectExpiredItems(inv, now, expired);
+                    for (Item item : expired) {
+                        inv.removeItem(item.getPosition(), item.getQuantity(), false);
+                        changes.add(3, item);
+                    }
+                } finally {
+                    inv.unlockInventory();
+                }
+            } else {
+                collectExpiredItems(inv, now, expired);
+                for (Item item : expired) {
+                    InventoryManipulator.removeFromSlot(c, type, item.getPosition(), item.getQuantity(), true);
+                    deletedCoupon |= ItemConstants.isRateCoupon(item.getItemId());
+                }
+            }
+
+            if (!expired.isEmpty()) {
+                // 替换品可能落在其他背包，释放当前栏锁后再发放。
+                ItemInformationProvider ii = ItemInformationProvider.getInstance();
+                for (Item item : expired) {
+                    Pair<Integer, String> replacement = ii.getReplaceOnExpire(item.getItemId());
+                    if (replacement.left > 0) {
+                        if (!replacement.right.isEmpty()) {
+                            dropMessage(replacement.right);
+                        }
+                        InventoryManipulator.addById(c, replacement.left, (short) 1);
                     }
                 }
+                expired.clear();
+            }
+            if (deletedCoupon) {
+                updateCouponRates();
+            }
+        }
+    }
 
-                List<Item> toberemove = new ArrayList<>();
-                for (Inventory inv : inventory) {
-                    for (Item item : inv.list()) {
-                        expiration = item.getExpiration();
-
-                        if (expiration != -1 && (expiration < currenttime) && ((item.getFlag() & ItemConstants.LOCK) == ItemConstants.LOCK)) {
-                            short lock = item.getFlag();
-                            lock &= ~(ItemConstants.LOCK);
-                            item.setFlag(lock); //Probably need a check, else people can make expiring items into permanent items...
-                            item.setExpiration(-1);
-                            forceUpdateItem(item);   //TEST :3
-                        } else if (expiration != -1 && expiration < currenttime) {
-                            if (!ItemConstants.isPet(item.getItemId())) {
-                                sendPacket(PacketCreator.itemExpired(item.getItemId()));
-                                toberemove.add(item);
-                                if (ItemConstants.isRateCoupon(item.getItemId())) {
-                                    deletedCoupon = true;
-                                }
-                            } else {
-                                Pet pet = item.getPet();   // thanks Lame for noticing pets not getting despawned after expiration time
-                                if (pet != null) {
-                                    unEquipPet(pet, true);
-                                }
-
-                                if (ItemConstants.isExpirablePet(item.getItemId())) {
-                                    if (item.getPetId() > -1) {
-                                        // 宠物道具真正过期销毁时，同时清理 pets/petignores，避免数据库残留孤儿数据。
-                                        Pet.deleteFromDb(this, item.getPetId());
-                                    }
-                                    sendPacket(PacketCreator.itemExpired(item.getItemId()));
-                                    toberemove.add(item);
-                                } else {
-                                    item.setExpiration(-1);
-                                    forceUpdateItem(item);
-                                }
-                            }
-                        }
-                    }
-
-                    if (!toberemove.isEmpty()) {
-                        for (Item item : toberemove) {
-                            InventoryManipulator.removeFromSlot(client, inv.getType(), item.getPosition(), item.getQuantity(), true);
-                        }
-
-                        ItemInformationProvider ii = ItemInformationProvider.getInstance();
-                        for (Item item : toberemove) {
-                            List<Integer> toadd = new ArrayList<>();
-                            Pair<Integer, String> replace = ii.getReplaceOnExpire(item.getItemId());
-                            if (replace.left > 0) {
-                                toadd.add(replace.left);
-                                if (!replace.right.isEmpty()) {
-                                    dropMessage(replace.right);
-                                }
-                            }
-                            for (Integer itemid : toadd) {
-                                InventoryManipulator.addById(client, itemid, (short) 1);
-                            }
-                        }
-
-                        toberemove.clear();
-                    }
-
-                    if (deletedCoupon) {
-                        updateCouponRates();
-                    }
+    private void collectExpiredItems(Inventory inv, long now, List<Item> expired) {
+        for (Item item : inv.list()) {
+            long expiration = item.getExpiration();
+            if (expiration == -1 || expiration >= now) {
+                continue;
+            }
+            short flag = item.getFlag();
+            if ((flag & ItemConstants.LOCK) != 0) {
+                item.setFlag((short) (flag & ~ItemConstants.LOCK));
+                item.setExpiration(-1);
+                forceUpdateItem(item);
+                continue;
+            }
+            int itemId = item.getItemId();
+            if (ItemConstants.isPet(itemId)) {
+                Pet pet = item.getPet();
+                if (pet != null) {
+                    unEquipPet(pet, true);
                 }
-            }, 60000);
+                if (!ItemConstants.isExpirablePet(itemId)) {
+                    item.setExpiration(-1);
+                    forceUpdateItem(item);
+                    continue;
+                }
+                if (item.getPetId() > -1) {
+                    Pet.deleteFromDb(this, item.getPetId());
+                }
+            }
+            sendPacket(PacketCreator.itemExpired(itemId));
+            expired.add(item);
         }
     }
 

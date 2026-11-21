@@ -36,6 +36,7 @@ import org.gms.config.GameConfig;
 import org.gms.constants.id.ItemId;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.util.I18nUtil;
+import org.gms.util.InventoryOperationBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gms.server.ItemInformationProvider;
@@ -45,7 +46,6 @@ import org.gms.util.PacketCreator;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -77,97 +77,88 @@ public class InventoryManipulator {
 
         Inventory inv = chr.getInventory(type);
         inv.lockInventory();
-        try {
-            return addByIdInternal(c, chr, type, inv, itemId, quantity, owner, petid, flag, expiration);
+        try (var changes = new InventoryOperationBatch(c, true)) {
+            return addByIdInternal(c, chr, inv, itemId, quantity, owner, petid, flag, expiration, changes);
         } finally {
             inv.unlockInventory();
         }
     }
 
-    private static boolean addByIdInternal(Client c, Character chr, InventoryType type, Inventory inv, int itemId, short quantity, String owner, int petid, short flag, long expiration) {
+    /** 调用方持有所属背包锁，直到批量变更入队。 */
+    public static boolean addById(Client c, Inventory inv, int itemId, short quantity, long expiration, InventoryOperationBatch changes) {
+        return addByIdInternal(c, c.getPlayer(), inv, itemId, quantity, "", -1, (short) 0, expiration, changes);
+    }
+
+    private static boolean addByIdInternal(Client c, Character chr, Inventory inv, int itemId, short quantity,
+                                           String owner, int petid, short flag, long expiration, InventoryOperationBatch changes) {
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
-        if (!type.equals(InventoryType.EQUIP)) {
+        if (inv.getType() != InventoryType.EQUIP) {
+            if (ItemConstants.isRechargeable(itemId) || petid != -1) {
+                Item item = new Item(itemId, (short) 0, quantity, petid);
+                item.setFlag(flag);
+                item.setExpiration(expiration);
+                return addNewItem(c, chr, inv, item, changes);
+            }
+
             short slotMax = ii.getSlotMax(c, itemId);
-            List<Item> existing = inv.listById(itemId);
-            if (!ItemConstants.isRechargeable(itemId) && petid == -1) {
-                if (existing.size() > 0) { // first update all existing slots to slotMax
-                    Iterator<Item> i = existing.iterator();
-                    while (quantity > 0) {
-                        if (i.hasNext()) {
-                            Item eItem = i.next();
-                            short oldQ = eItem.getQuantity();
-                            if (oldQ < slotMax && ((eItem.getOwner().equals(owner) || owner == null) && eItem.getFlag() == flag)) {
-                                short newQ = (short) Math.min(oldQ + quantity, slotMax);
-                                quantity -= (newQ - oldQ);
-                                eItem.setQuantity(newQ);
-                                eItem.setExpiration(expiration);
-                                c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(1, eItem))));
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                boolean sandboxItem = (flag & ItemConstants.SANDBOX) == ItemConstants.SANDBOX;
-                while (quantity > 0) {
-                    short newQ = (short) Math.min(quantity, slotMax);
-                    if (newQ != 0) {
-                        quantity -= newQ;
-                        Item nItem = new Item(itemId, (short) 0, newQ, petid);
-                        nItem.setFlag(flag);
-                        nItem.setExpiration(expiration);
-                        short newSlot = inv.addItem(nItem);
-                        if (newSlot == -1) {
-                            c.sendPacket(PacketCreator.getInventoryFull());
-                            c.sendPacket(PacketCreator.getShowInventoryFull());
-                            return false;
-                        }
-                        if (owner != null) {
-                            nItem.setOwner(owner);
-                        }
-                        c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                        if (sandboxItem) {
-                            chr.setHasSandboxItem();
-                        }
-                    } else {
-                        c.sendPacket(PacketCreator.enableActions());
-                        return false;
-                    }
-                }
-            } else {
-                Item nItem = new Item(itemId, (short) 0, quantity, petid);
-                nItem.setFlag(flag);
-                nItem.setExpiration(expiration);
-                short newSlot = inv.addItem(nItem);
-                if (newSlot == -1) {
-                    c.sendPacket(PacketCreator.getInventoryFull());
-                    c.sendPacket(PacketCreator.getShowInventoryFull());
-                    return false;
-                }
-                c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                if (InventoryManipulator.isSandboxItem(nItem)) {
-                    chr.setHasSandboxItem();
-                }
-            }
-        } else if (quantity == 1) {
-            Item nEquip = ii.getEquipById(itemId);
-            nEquip.setFlag(flag);
-            nEquip.setExpiration(expiration);
-            if (owner != null) {
-                nEquip.setOwner(owner);
-            }
-            short newSlot = inv.addItem(nEquip);
-            if (newSlot == -1) {
-                c.sendPacket(PacketCreator.getInventoryFull());
-                c.sendPacket(PacketCreator.getShowInventoryFull());
+            if (quantity > 0 && slotMax <= 0) {
+                changes.flush();
+                c.sendPacket(PacketCreator.enableActions());
                 return false;
             }
-            c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nEquip))));
-            if (InventoryManipulator.isSandboxItem(nEquip)) {
-                chr.setHasSandboxItem();
+            for (Item stack : inv.listById(itemId)) {
+                if (quantity <= 0) {
+                    break;
+                }
+                short oldQuantity = stack.getQuantity();
+                if (oldQuantity < slotMax && (owner == null || stack.getOwner().equals(owner)) && stack.getFlag() == flag) {
+                    short newQuantity = (short) Math.min(oldQuantity + quantity, slotMax);
+                    quantity -= newQuantity - oldQuantity;
+                    long oldExpiration = stack.getExpiration();
+                    stack.setQuantity(newQuantity);
+                    stack.setExpiration(expiration);
+                    // 083 的数量操作不带有效期；变化时用 mode 0 覆盖原槽。
+                    changes.add(stack.getExpiration() == oldExpiration ? 1 : 0, stack);
+                }
             }
-        } else {
+            while (quantity > 0) {
+                short newQuantity = (short) Math.min(quantity, slotMax);
+                Item item = new Item(itemId, (short) 0, newQuantity);
+                item.setFlag(flag);
+                item.setExpiration(expiration);
+                if (owner != null) {
+                    item.setOwner(owner);
+                }
+                if (!addNewItem(c, chr, inv, item, changes)) {
+                    return false;
+                }
+                quantity -= newQuantity;
+            }
+            return true;
+        }
+
+        if (quantity != 1) {
             throw new RuntimeException("Trying to create equip with non-one quantity");
+        }
+        Item equip = ii.getEquipById(itemId);
+        equip.setFlag(flag);
+        equip.setExpiration(expiration);
+        if (owner != null) {
+            equip.setOwner(owner);
+        }
+        return addNewItem(c, chr, inv, equip, changes);
+    }
+
+    private static boolean addNewItem(Client c, Character chr, Inventory inv, Item item, InventoryOperationBatch changes) {
+        if (inv.addItem(item) == -1) {
+            changes.flush();
+            c.sendPacket(PacketCreator.getInventoryFull());
+            c.sendPacket(PacketCreator.getShowInventoryFull());
+            return false;
+        }
+        changes.add(0, item);
+        if (isSandboxItem(item)) {
+            chr.setHasSandboxItem();
         }
         return true;
     }
@@ -204,46 +195,46 @@ public class InventoryManipulator {
         short quantity = item.getQuantity();
 
         if (!type.equals(InventoryType.EQUIP)) {
-            short slotMax = ii.getSlotMax(c, itemid);
-            List<Item> existing = inv.listById(itemid);
             if (!ItemConstants.isRechargeable(itemid) && petId == -1) {
-                if (existing.size() > 0) { // first update all existing slots to slotMax
-                    Iterator<Item> i = existing.iterator();
-                    while (quantity > 0) {
-                        if (i.hasNext()) {
-                            Item eItem = i.next();
-                            short oldQ = eItem.getQuantity();
-                            if (oldQ < slotMax && item.getFlag() == eItem.getFlag() && item.getOwner().equals(eItem.getOwner())) {
-                                short newQ = (short) Math.min(oldQ + quantity, slotMax);
-                                quantity -= (newQ - oldQ);
-                                eItem.setQuantity(newQ);
-                                item.setPosition(eItem.getPosition());
-                                c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(1, eItem))));
-                            }
-                        } else {
+                short slotMax = ii.getSlotMax(c, itemid);
+                if (quantity > 0 && slotMax <= 0) {
+                    c.sendPacket(PacketCreator.enableActions());
+                    return false;
+                }
+                try (var changes = new InventoryOperationBatch(c, true)) {
+                    for (Item eItem : inv.listById(itemid)) {
+                        if (quantity <= 0) {
                             break;
                         }
+                        short oldQ = eItem.getQuantity();
+                        if (oldQ < slotMax && item.getFlag() == eItem.getFlag() && item.getOwner().equals(eItem.getOwner())) {
+                            short newQ = (short) Math.min(oldQ + quantity, slotMax);
+                            quantity -= (newQ - oldQ);
+                            eItem.setQuantity(newQ);
+                            item.setPosition(eItem.getPosition());
+                            changes.add(1, eItem);
+                        }
                     }
-                }
-                while (quantity > 0) {
-                    short newQ = (short) Math.min(quantity, slotMax);
-                    quantity -= newQ;
-                    Item nItem = new Item(itemid, (short) 0, newQ, petId);
-                    nItem.setExpiration(item.getExpiration());
-                    nItem.setOwner(item.getOwner());
-                    nItem.setFlag(item.getFlag());
-                    short newSlot = inv.addItem(nItem);
-                    if (newSlot == -1) {
-                        c.sendPacket(PacketCreator.getInventoryFull());
-                        c.sendPacket(PacketCreator.getShowInventoryFull());
-                        item.setQuantity((short) (quantity + newQ));
-                        return false;
-                    }
-                    nItem.setPosition(newSlot);
-                    item.setPosition(newSlot);
-                    c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                    if (InventoryManipulator.isSandboxItem(nItem)) {
-                        chr.setHasSandboxItem();
+                    while (quantity > 0) {
+                        short newQ = (short) Math.min(quantity, slotMax);
+                        quantity -= newQ;
+                        Item nItem = new Item(itemid, (short) 0, newQ, petId);
+                        nItem.setExpiration(item.getExpiration());
+                        nItem.setOwner(item.getOwner());
+                        nItem.setFlag(item.getFlag());
+                        short newSlot = inv.addItem(nItem);
+                        if (newSlot == -1) {
+                            changes.flush();
+                            c.sendPacket(PacketCreator.getInventoryFull());
+                            c.sendPacket(PacketCreator.getShowInventoryFull());
+                            item.setQuantity((short) (quantity + newQ));
+                            return false;
+                        }
+                        item.setPosition(newSlot);
+                        changes.add(0, nItem);
+                        if (InventoryManipulator.isSandboxItem(nItem)) {
+                            chr.setHasSandboxItem();
+                        }
                     }
                 }
             } else {
@@ -411,6 +402,21 @@ public class InventoryManipulator {
     public static void removeFromSlot(Client c, InventoryType type, short slot, short quantity, boolean fromDrop, boolean consume) {
         Character chr = c.getPlayer();
         Inventory inv = chr.getInventory(type);
+        if (!type.isStandardInventory()) {
+            removeFromSlot(c, chr, inv, slot, quantity, fromDrop, consume, null);
+            return;
+        }
+        inv.lockInventory();
+        try {
+            removeFromSlot(c, chr, inv, slot, quantity, fromDrop, consume, null);
+        } finally {
+            inv.unlockInventory();
+        }
+    }
+
+    private static void removeFromSlot(Client c, Character chr, Inventory inv, short slot, short quantity,
+                                       boolean fromDrop, boolean consume, InventoryOperationBatch changes) {
+        InventoryType type = inv.getType();
         Item item = inv.getItem(slot);
         boolean allowZero = consume && ItemConstants.isRechargeable(item.getItemId());
 
@@ -422,58 +428,64 @@ public class InventoryManipulator {
             } finally {
                 inv.unlockInventory();
             }
-
-            announceModifyInventory(c, item, fromDrop, allowZero);
         } else {
             int petid = item.getPetId();
-            if (petid > -1) { // thanks Vcoc for finding a d/c issue with equipped pets and pets remaining on DB here
+            if (petid > -1) {
                 int petIdx = chr.getPetIndex(petid);
                 if (petIdx > -1) {
                     Pet pet = chr.getPet(petIdx);
                     chr.unEquipPet(pet, true);
                 }
+            }
+            inv.removeItem(slot, quantity, allowZero);
+        }
 
-                inv.removeItem(slot, quantity, allowZero);
-                if (type != InventoryType.CANHOLD) {
-                    announceModifyInventory(c, item, fromDrop, allowZero);
-                }
-
-                // thanks Robin Schulz for noticing pet issues when moving pets out of inventory
+        if (type != InventoryType.CANHOLD) {
+            int mode = item.getQuantity() == 0 && !allowZero ? 3 : 1;
+            if (changes != null) {
+                changes.add(mode, item);
             } else {
-                inv.removeItem(slot, quantity, allowZero);
-                if (type != InventoryType.CANHOLD) {
-                    announceModifyInventory(c, item, fromDrop, allowZero);
-                }
+                c.sendPacket(PacketCreator.modifyInventory(fromDrop, Collections.singletonList(new ModifyInventory(mode, item))));
             }
         }
     }
 
-    private static void announceModifyInventory(Client c, Item item, boolean fromDrop, boolean allowZero) {
-        if (item.getQuantity() == 0 && !allowZero) {
-            c.sendPacket(PacketCreator.modifyInventory(fromDrop, Collections.singletonList(new ModifyInventory(3, item))));
-        } else {
-            c.sendPacket(PacketCreator.modifyInventory(fromDrop, Collections.singletonList(new ModifyInventory(1, item))));
+    public static void removeById(Client c, InventoryType type, int itemId, int quantity, boolean fromDrop, boolean consume) {
+        Character chr = c.getPlayer();
+        Inventory inv = chr.getInventory(type);
+        if (!type.isStandardInventory()) {
+            removeById(c, chr, inv, itemId, quantity, fromDrop, consume, null);
+            return;
+        }
+        inv.lockInventory();
+        try (var changes = new InventoryOperationBatch(c, fromDrop)) {
+            removeById(c, chr, inv, itemId, quantity, fromDrop, consume, changes);
+        } finally {
+            inv.unlockInventory();
         }
     }
 
-    public static void removeById(Client c, InventoryType type, int itemId, int quantity, boolean fromDrop, boolean consume) {
+    /** 调用方持有普通背包锁，直到批量变更入队。 */
+    public static void removeById(Client c, Inventory inv, int itemId, int quantity, InventoryOperationBatch changes) {
+        removeById(c, c.getPlayer(), inv, itemId, quantity, true, false, changes);
+    }
+
+    private static void removeById(Client c, Character chr, Inventory inv, int itemId, int quantity,
+                                   boolean fromDrop, boolean consume, InventoryOperationBatch changes) {
         int removeQuantity = quantity;
-        Inventory inv = c.getPlayer().getInventory(type);
+        InventoryType type = inv.getType();
         int slotLimit = type == InventoryType.EQUIPPED ? 128 : inv.getSlotLimit();
 
         for (short i = 0; i <= slotLimit; i++) {
             Item item = inv.getItem((short) (type == InventoryType.EQUIPPED ? -i : i));
-            if (item != null) {
-                if (item.getItemId() == itemId || item.getCashId() == itemId) {
-                    if (removeQuantity <= item.getQuantity()) {
-                        removeFromSlot(c, type, item.getPosition(), (short) removeQuantity, fromDrop, consume);
-                        removeQuantity = 0;
-                        break;
-                    } else {
-                        removeQuantity -= item.getQuantity();
-                        removeFromSlot(c, type, item.getPosition(), item.getQuantity(), fromDrop, consume);
-                    }
+            if (item != null && (item.getItemId() == itemId || item.getCashId() == itemId)) {
+                short available = item.getQuantity();
+                if (removeQuantity <= available) {
+                    removeFromSlot(c, chr, inv, item.getPosition(), (short) removeQuantity, fromDrop, consume, changes);
+                    return;
                 }
+                removeQuantity -= available;
+                removeFromSlot(c, chr, inv, item.getPosition(), available, fromDrop, consume, changes);
             }
         }
         if (removeQuantity > 0 && type != InventoryType.CANHOLD) {
@@ -487,11 +499,21 @@ public class InventoryManipulator {
 
     public static void move(Client c, InventoryType type, short src, short dst) {
         Inventory inv = c.getPlayer().getInventory(type);
+        inv.lockInventory();
+        try (var changes = new InventoryOperationBatch(c, true)) {
+            move(c, inv, src, dst, changes);
+        } finally {
+            inv.unlockInventory();
+        }
+    }
 
-        if (src < 0 || dst < 0) {
+    /** 调用方持有背包锁，直到变更按顺序入发送队列。 */
+    public static void move(Client c, Inventory inv, short src, short dst, InventoryOperationBatch changes) {
+        if (src < 0 || dst < 0 || dst > inv.getSlotLimit()) {
             return;
         }
-        if (dst > inv.getSlotLimit()) {
+        if (src == dst) {
+            c.sendPacket(PacketCreator.enableActions());
             return;
         }
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
@@ -500,28 +522,25 @@ public class InventoryManipulator {
         if (source == null) {
             return;
         }
-        short olddstQ = -1;
-        if (initialTarget != null) {
-            olddstQ = initialTarget.getQuantity();
-        }
+        short olddstQ = initialTarget == null ? -1 : initialTarget.getQuantity();
         short oldsrcQ = source.getQuantity();
         short slotMax = ii.getSlotMax(c, source.getItemId());
         inv.move(src, dst, slotMax);
-        final List<ModifyInventory> mods = new ArrayList<>();
-        if (!(type.equals(InventoryType.EQUIP) || type.equals(InventoryType.CASH)) && initialTarget != null && initialTarget.getItemId() == source.getItemId() && !ItemConstants.isRechargeable(source.getItemId()) && isSameOwner(source, initialTarget)) {
-            if ((olddstQ + oldsrcQ) > slotMax) {
-                mods.add(new ModifyInventory(1, source));
-                mods.add(new ModifyInventory(1, initialTarget));
-            } else {
-                mods.add(new ModifyInventory(3, source));
-                mods.add(new ModifyInventory(1, initialTarget));
-            }
+        InventoryType type = inv.getType();
+        if (type != InventoryType.EQUIP && type != InventoryType.CASH && initialTarget != null && initialTarget.getItemId() == source.getItemId() && !ItemConstants.isRechargeable(source.getItemId()) && isSameOwner(source, initialTarget)) {
+            int sourceMode = olddstQ + oldsrcQ > slotMax ? 1 : 3;
+            changes.addPair(sourceMode, source, 1, initialTarget);
+        } else if (initialTarget == null) {
+            changes.move(source, src);
         } else {
-            mods.add(new ModifyInventory(2, source, src));
+            // 083 在包尾才更新最近获得槽位；互换完成后才能继续收拢。
+            changes.flush();
+            changes.move(source, src);
+            changes.flush();
         }
-        c.sendPacket(PacketCreator.modifyInventory(true, mods));
         // 添加物品代码提示
         if (GameConfig.getServerBoolean("use_debug") && c.getPlayer().isGM()) { // 假设isGM()是检查玩家是否是管理员的方法
+            changes.flush();
             int itemID = source.getItemId();
             c.getPlayer().dropMessage(5, I18nUtil.getMessage("InventoryManipulator.handlePacket.message1")  + itemID);
         }
@@ -769,9 +788,9 @@ public class InventoryManipulator {
             return;
         }
         int itemId = source.getItemId();
-
+        boolean rechargeable = ItemConstants.isRechargeable(itemId);
         MapleMap map = chr.getMap();
-        if ((!ItemConstants.isRechargeable(itemId) && source.getQuantity() < quantity) || quantity < 0) {
+        if ((!rechargeable && source.getQuantity() < quantity) || quantity < 0) {
             return;
         }
 
@@ -785,58 +804,43 @@ public class InventoryManipulator {
         }
 
         Point dropPos = new Point(chr.getPosition());
-        if (quantity < source.getQuantity() && !ItemConstants.isRechargeable(itemId)) {
-            Item target = source.copy();
-            target.setQuantity(quantity);
-            source.setQuantity((short) (source.getQuantity() - quantity));
-            c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(1, source))));
-
-            if (ItemConstants.isNewYearCardEtc(itemId)) {
-                if (itemId == ItemId.NEW_YEARS_CARD_SEND) {
-                    NewYearCardRecord.removeAllNewYearCard(true, chr);
-                    c.getAbstractPlayerInteraction().removeAll(ItemId.NEW_YEARS_CARD_SEND);
-                } else {
-                    NewYearCardRecord.removeAllNewYearCard(false, chr);
-                    c.getAbstractPlayerInteraction().removeAll(ItemId.NEW_YEARS_CARD_RECEIVED);
-                }
+        Item dropped;
+        boolean partial;
+        inv.lockInventory();
+        try {
+            if (inv.getItem(src) != source || (!rechargeable && source.getQuantity() < quantity)) {
+                c.sendPacket(PacketCreator.enableActions());
+                return;
             }
-
-            if (isDisappearingItemDrop(target)) {
-                map.disappearingItemDrop(chr, chr, target, dropPos);
+            partial = !rechargeable && quantity < source.getQuantity();
+            if (partial) {
+                dropped = source.copy();
+                dropped.setQuantity(quantity);
+                source.setQuantity((short) (source.getQuantity() - quantity));
+                c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(1, source))));
             } else {
-                map.spawnItemDrop(chr, chr, target, dropPos, true, true);
-            }
-        } else {
-            if (type == InventoryType.EQUIPPED) {
-                inv.lockInventory();
-                try {
+                if (type == InventoryType.EQUIPPED) {
                     chr.unequippedItem((Equip) source);
-                    inv.removeSlot(src);
-                } finally {
-                    inv.unlockInventory();
                 }
-            } else {
                 inv.removeSlot(src);
+                dropped = source;
+                c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(3, source))));
             }
+        } finally {
+            inv.unlockInventory();
+        }
 
-            c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(3, source))));
-            if (src < 0) {
-                chr.equipChanged();
-            } else if (ItemConstants.isNewYearCardEtc(itemId)) {
-                if (itemId == ItemId.NEW_YEARS_CARD_SEND) {
-                    NewYearCardRecord.removeAllNewYearCard(true, chr);
-                    c.getAbstractPlayerInteraction().removeAll(ItemId.NEW_YEARS_CARD_SEND);
-                } else {
-                    NewYearCardRecord.removeAllNewYearCard(false, chr);
-                    c.getAbstractPlayerInteraction().removeAll(ItemId.NEW_YEARS_CARD_RECEIVED);
-                }
-            }
-
-            if (isDisappearingItemDrop(source)) {
-                map.disappearingItemDrop(chr, chr, source, dropPos);
-            } else {
-                map.spawnItemDrop(chr, chr, source, dropPos, true, true);
-            }
+        if (!partial && src < 0) {
+            chr.equipChanged();
+        } else if (ItemConstants.isNewYearCardEtc(itemId)) {
+            boolean sentCard = itemId == ItemId.NEW_YEARS_CARD_SEND;
+            NewYearCardRecord.removeAllNewYearCard(sentCard, chr);
+            c.getAbstractPlayerInteraction().removeAll(sentCard ? ItemId.NEW_YEARS_CARD_SEND : ItemId.NEW_YEARS_CARD_RECEIVED);
+        }
+        if (isDisappearingItemDrop(dropped)) {
+            map.disappearingItemDrop(chr, chr, dropped, dropPos);
+        } else {
+            map.spawnItemDrop(chr, chr, dropped, dropPos, true, true);
         }
 
         int quantityNow = chr.getItemQuantity(itemId, false);
