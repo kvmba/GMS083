@@ -3,6 +3,8 @@ package org.gms.server.life;
 import io.netty.buffer.Unpooled;
 import org.gms.client.Character;
 import org.gms.client.Client;
+import org.gms.client.status.MonsterStatusEffect;
+import org.gms.extension.runtime.HostHooks;
 import org.gms.manager.ServerManager;
 import org.gms.net.opcodes.SendOpcode;
 import org.gms.net.packet.Packet;
@@ -106,6 +108,17 @@ class MonsterHitReactionTest {
     void closeMocks() {
         timers.close();
         serverClock.close();
+    }
+
+    @Test
+    void aPeriodicBotSpellCannotApplyPoisonToAFriendlyEscort() {
+        mob.getStats().setFriendly(true);
+        MonsterStatusEffect poison = mock(MonsterStatusEffect.class);
+        try (var host = mockStatic(HostHooks.class)) {
+            host.when(() -> HostHooks.isArtificial(attacker)).thenReturn(true);
+            assertFalse(mob.applyStatus(attacker, poison, true, 5_000));
+            verifyNoInteractions(poison);
+        }
     }
 
     @ParameterizedTest

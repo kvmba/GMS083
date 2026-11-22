@@ -1353,6 +1353,10 @@ public class Monster extends AbstractLoadedLife {
     }
 
     public boolean applyStatus(Character from, final MonsterStatusEffect status, boolean poison, long duration, boolean venom) {
+        // Periodic effects (for example Poison Mist) resolve targets again after the cast.
+        if (stats.isFriendly() && HostHooks.isArtificial(from)) {
+            return false;
+        }
         switch (getMonsterEffectiveness(status.getSkill().getElement())) {
             case IMMUNE:
             case STRONG:
