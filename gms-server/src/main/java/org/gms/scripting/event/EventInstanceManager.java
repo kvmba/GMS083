@@ -27,6 +27,7 @@ import org.gms.client.SkillFactory;
 import org.gms.config.GameConfig;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.extension.event.PartyQuestStageClearedEvent;
+import org.gms.extension.event.PartyQuestStageWrongEvent;
 import org.gms.extension.runtime.HostHooks;
 import org.gms.net.server.coordinator.world.EventRecallCoordinator;
 import org.gms.net.server.world.Party;
@@ -1340,6 +1341,7 @@ public class EventInstanceManager {
         MapleMap map = getMapInstance(mapId);
         map.broadcastMessage(PacketCreator.showEffect("quest/party/wrong_kor"));
         map.broadcastMessage(PacketCreator.playSound("Party1/Failed"));
+        HostHooks.publish(new PartyQuestStageWrongEvent(this, map));
     }
 
     public final void showClearEffect() {
